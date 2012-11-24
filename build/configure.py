@@ -60,6 +60,81 @@ def GetChromiumBaseFileList(base_dir):
   files = get_file_list()
   return filter_file_list(files, ('win', 'lib'))
 
+def GetGwenFileList():
+  files = [
+    'gwen/src/Anim',
+    'gwen/src/BaseRender',
+    'gwen/src/ControlList',
+    'gwen/src/DragAndDrop',
+    'gwen/src/events',
+    'gwen/src/Gwen',
+    'gwen/src/Hook',
+    'gwen/src/inputhandler',
+    'gwen/src/Skin',
+    'gwen/src/ToolTip',
+    'gwen/src/Utility',
+    'gwen/src/Controls/Base',
+    'gwen/src/Controls/Button',
+    'gwen/src/Controls/Canvas',
+    'gwen/src/Controls/CheckBox',
+    'gwen/src/Controls/CollapsibleCategory',
+    'gwen/src/Controls/ColorControls',
+    'gwen/src/Controls/ColorPicker',
+    'gwen/src/Controls/ComboBox',
+    'gwen/src/Controls/CrossSplitter',
+    'gwen/src/Controls/DockBase',
+    'gwen/src/Controls/DockedTabControl',
+    'gwen/src/Controls/Dragger',
+    'gwen/src/Controls/GroupBox',
+    'gwen/src/Controls/HorizontalScrollBar',
+    'gwen/src/Controls/HorizontalSlider',
+    'gwen/src/Controls/HSVColorPicker',
+    'gwen/src/Controls/ImagePanel',
+    'gwen/src/Controls/Label',
+    'gwen/src/Controls/LabelClickable',
+    'gwen/src/Controls/ListBox',
+    'gwen/src/Controls/Menu',
+    'gwen/src/Controls/MenuItem',
+    'gwen/src/Controls/MenuStrip',
+    'gwen/src/Controls/NumericUpDown',
+    'gwen/src/Controls/PageControl',
+    'gwen/src/Controls/ProgressBar',
+    'gwen/src/Controls/Properties',
+    'gwen/src/Controls/PropertyTree',
+    'gwen/src/Controls/RadioButton',
+    'gwen/src/Controls/RadioButtonController',
+    'gwen/src/Controls/Rectangle',
+    'gwen/src/Controls/ResizableControl',
+    'gwen/src/Controls/Resizer',
+    'gwen/src/Controls/RichLabel',
+    'gwen/src/Controls/ScrollBar',
+    'gwen/src/Controls/ScrollBarBar',
+    'gwen/src/Controls/ScrollBarButton',
+    'gwen/src/Controls/ScrollControl',
+    'gwen/src/Controls/Slider',
+    'gwen/src/Controls/SplitterBar',
+    'gwen/src/Controls/TabButton',
+    'gwen/src/Controls/TabControl',
+    'gwen/src/Controls/TabStrip',
+    'gwen/src/Controls/Text',
+    'gwen/src/Controls/TextBox',
+    'gwen/src/Controls/TextBoxNumeric',
+    'gwen/src/Controls/TreeControl',
+    'gwen/src/Controls/TreeNode',
+    'gwen/src/Controls/VerticalScrollBar',
+    'gwen/src/Controls/VerticalSlider',
+    'gwen/src/Controls/WindowCanvas',
+    'gwen/src/Controls/WindowControl',
+    'gwen/src/Controls/Dialog/FileOpen',
+    'gwen/src/Controls/Dialog/FileSave',
+    'gwen/src/Controls/Dialog/FolderOpen',
+    'gwen/src/Controls/Dialog/Query',
+    'gwen/src/Platforms/Null',
+    'gwen/src/Platforms/Windows',
+    ]
+  return [os.path.normpath(p) for p in files]
+
+
 def main():
   if not os.path.exists(os.path.join(ninja_dir, 'ninja.exe')):
     print "ninja binary doesn't exist, trying to build it..."
@@ -92,12 +167,16 @@ def main():
     return os.path.join('src', filename)
   def base_src(filename):
     return os.path.join('third_party', 'base', filename)
+  def gwen_src(filename):
+    return os.path.join('third_party', 'gwen', filename)
   def built(filename):
     return os.path.join('$builddir', 'obj', filename)
   def cc(name, src=src, **kwargs):
     return n.build(built(name + objext), 'cxx', src(name + '.c'), **kwargs)
   def cxx(name, src=src, **kwargs):
     return n.build(built(name + objext), 'cxx', src(name + '.cc'), **kwargs)
+  def cpp(name, src=src, **kwargs):
+    return n.build(built(name + objext), 'cxx', src(name + '.cpp'), **kwargs)
   def binary(name):
     exe = os.path.join('$builddir', name + '.exe')
     n.build(name, 'phony', exe)
@@ -121,7 +200,7 @@ def main():
             '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
             '/DUNICODE', '/D_UNICODE',
             '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
-            '-I.', '-Ithird_party']
+            '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include']
   if options.debug:
     cflags += ['/D_DEBUG', '/MTd']
   else:
@@ -164,8 +243,11 @@ def main():
   sg_lib = n.build(built('sg.lib'), 'ar', objs)
   n.newline() 
 
+  objs = []
   n.comment('Gwen UI lib.')
-  n.comment('TODO')
+  for base in GetGwenFileList():
+    objs += cpp(base, src=gwen_src)
+  gwen_lib = n.build(built('gwen.lib'), 'ar', objs)
   n.newline()
 
   n.comment('Chromium base lib.')
@@ -180,7 +262,7 @@ def main():
   base_lib = n.build(built('base.lib'), 'ar', objs)
   n.newline()
 
-  libs.extend(['sg.lib', 'base.lib',
+  libs.extend(['sg.lib', 'base.lib', 'gwen.lib',
                'user32.lib', 'advapi32.lib', 'dbghelp.lib', 'shell32.lib'])
 
   all_targets = []
