@@ -2,3 +2,4 @@ out/
 *.pdb
 *.ilk
 build.ninja
+tags

@@ -241,7 +241,8 @@ def main():
   objs = []
 
   n.comment('Core source files all build into sg library.')
-  for name in ['backend',
+  for name in ['main_frame',
+               'top_level_frame',
               ]:
     objs += cxx(name)
   sg_lib = n.build(built('sg.lib'), 'ar', objs)

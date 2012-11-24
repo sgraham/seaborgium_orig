@@ -2,10 +2,10 @@
 #include <windows.h>
 
 #include "Gwen/Gwen.h"
+#include "Gwen/Input/Windows.h"
 #include "Gwen/Skins/Simple.h"
 #include "Gwen/Skins/TexturedBase.h"
-#include "Gwen/UnitTest/UnitTest.h"
-#include "Gwen/Input/Windows.h"
+#include "top_level_frame.h"
 
 #include "Gwen/Renderers/OpenGL_DebugFont.h"
 #include "gl/glew.h"
@@ -76,10 +76,10 @@ HWND CreateGameWindow(void) {
 
 HGLRC CreateOpenGLDeviceContext() {
   PIXELFORMATDESCRIPTOR pfd = { 0 };
-  pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);    // just its size
+  pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
   pfd.nVersion = 1;
 
-  pfd.dwFlags = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
+  pfd.dwFlags = PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW;
 
   pfd.iPixelType = PFD_TYPE_RGBA;
   pfd.cColorBits = 24;
@@ -130,8 +130,8 @@ int main() {
   //
   // Create our unittest control (which is a Window with controls in it)
   //
-  //UnitTest* pUnit = new UnitTest(canvas);
-  //pUnit->SetPos(10, 10);
+  TopLevelFrame* top_level = new TopLevelFrame(canvas);
+  top_level->SetPos(0, 0);
 
   //
   // Create a Windows Control helper 
