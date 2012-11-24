@@ -10,7 +10,6 @@
 #include "Gwen/Renderers/OpenGL_DebugFont.h"
 #include "gl/glew.h"
 
-
 HWND g_pHWND = NULL;
 Gwen::Controls::Canvas* main_canvas = NULL;
 
@@ -105,59 +104,34 @@ int main() {
   g_pHWND = CreateGameWindow();
   HGLRC opengl_context = CreateOpenGLDeviceContext();
 
-  //
-  // Create a GWEN OpenGL Renderer
-  //
   Gwen::Renderer::OpenGL *renderer = new Gwen::Renderer::OpenGL_DebugFont();
 
   renderer->Init();
 
-  //
-  // Create a GWEN skin
-  //
   Gwen::Skin::TexturedBase* skin = new Gwen::Skin::TexturedBase(renderer);
   skin->Init("DefaultSkin.png");
 
-  //
-  // Create a Canvas (it's root, on which all other GWEN panels are created)
-  //
   Gwen::Controls::Canvas* canvas = new Gwen::Controls::Canvas(skin);
   main_canvas = canvas;
   OnSizeChanged();
   canvas->SetDrawBackground(true);
   canvas->SetBackgroundColor(Gwen::Color(150, 170, 170, 255));
 
-  //
-  // Create our unittest control (which is a Window with controls in it)
-  //
   TopLevelFrame* top_level = new TopLevelFrame(canvas);
   top_level->SetPos(0, 0);
 
-  //
-  // Create a Windows Control helper 
-  // (Processes Windows MSG's and fires input at GWEN)
-  //
   Gwen::Input::Windows gwen_input;
   gwen_input.Initialize(canvas);
 
-  //
-  // Begin the main game loop
-  //
   MSG msg;
   while(true) {
-    // Skip out if the window is closed
     if (!IsWindowVisible(g_pHWND))
       break;
 
-    // If we have a message from windows..
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
       gwen_input.ProcessMessage(msg);
-
-      // if it's QUIT then quit..
       if (msg.message == WM_QUIT)
         break;
-
-      // Handle the regular window stuff..
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
@@ -165,7 +139,6 @@ int main() {
     Render();
   }
 
-  // Clean up OpenGL
   wglMakeCurrent(NULL, NULL);
   wglDeleteContext(opengl_context);
   delete canvas;
