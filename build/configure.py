@@ -131,6 +131,10 @@ def GetGwenFileList():
     'gwen/src/Controls/Dialog/Query',
     'gwen/src/Platforms/Null',
     'gwen/src/Platforms/Windows',
+
+    # These are fairly temporary; using Gwen sample GL renderer.
+    'gwen/Renderers/OpenGL/DebugFont/OpenGL_DebugFont',
+    'gwen/Renderers/OpenGL/OpenGL',
     ]
   return [os.path.normpath(p) for p in files]
 
@@ -263,12 +267,21 @@ def main():
   n.newline()
 
   libs.extend(['sg.lib', 'base.lib', 'gwen.lib',
-               'user32.lib', 'advapi32.lib', 'dbghelp.lib', 'shell32.lib'])
+               'advapi32.lib',
+               'comdlg32.lib',
+               'dbghelp.lib',
+               'gdi32.lib',
+               'ole32.lib',
+               'opengl32.lib',
+               'user32.lib',
+               # Temp with sample Gwen renderer.
+               'third_party/gwen/gwen/lib/FreeImage.lib',
+               ])
 
   all_targets = []
 
   n.comment('Main executable is library plus main() function.')
-  objs = cxx('sg')
+  objs = cxx('basic_rendering_win')
   sg = n.build(binary('sg'), 'link', objs,
                        implicit=sg_lib + base_lib,
                        variables=[('libs', libs)])
