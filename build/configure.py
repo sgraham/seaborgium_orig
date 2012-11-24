@@ -266,7 +266,7 @@ def main():
   base_lib = n.build(built('base.lib'), 'ar', objs)
   n.newline()
 
-  libs.extend(['sg.lib', 'base.lib', 'gwen.lib',
+  libs.extend([built('sg.lib'), built('base.lib'), built('gwen.lib'),
                'advapi32.lib',
                'comdlg32.lib',
                'dbghelp.lib',
