@@ -204,7 +204,8 @@ def main():
             '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
             '/DUNICODE', '/D_UNICODE',
             '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
-            '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include']
+            '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
+            '-FIsrc/global.h']
   if options.debug:
     cflags += ['/D_DEBUG', '/MTd']
   else:

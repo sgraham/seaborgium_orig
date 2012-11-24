@@ -1,4 +1,5 @@
 #define WIN32_LEAN_AND_MEAN
+#include <crtdbg.h>
 #include <windows.h>
 
 #include "Gwen/Gwen.h"
@@ -101,6 +102,8 @@ HGLRC CreateOpenGLDeviceContext() {
 
 
 int main() {
+  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
   g_pHWND = CreateGameWindow();
   HGLRC opengl_context = CreateOpenGLDeviceContext();
 
@@ -145,4 +148,3 @@ int main() {
   delete skin;
   delete renderer;
 }
-
