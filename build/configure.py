@@ -190,7 +190,6 @@ def main():
     os.makedirs('out')
   n.variable('builddir', 'out')
   n.variable('cxx', CXX)
-  n.variable('ar', 'link')
 
   cflags = ['/nologo',  # Don't print startup banner.
             '/Zi',  # Create pdb with debug info.
@@ -210,7 +209,7 @@ def main():
     cflags += ['/D_DEBUG', '/MTd']
   else:
     cflags += ['/DNDEBUG', '/MT']
-  ldflags = ['/DEBUG', '/libpath:$builddir\\obj']
+  ldflags = ['/DEBUG']
   if not options.debug:
     cflags += ['/Ox', '/DNDEBUG', '/GL']
     ldflags += ['/LTCG', '/OPT:REF', '/OPT:ICF']
@@ -230,7 +229,7 @@ def main():
   n.newline()
 
   n.rule('ar',
-        command='lib /nologo /ltcg /out:$out $in',
+        command='lib /nologo /ltcg $libflags /out:$out $in',
         description='LIB $out')
   n.newline()
 
@@ -246,14 +245,14 @@ def main():
                'top_level_frame',
               ]:
     objs += cxx(name)
-  sg_lib = n.build(built('sg.lib'), 'ar', objs)
+  sg_lib = n.build(built('sg.lib'), 'ar', inputs=objs)
   n.newline() 
 
   objs = []
   n.comment('Gwen UI lib.')
   for base in GetGwenFileList():
     objs += cpp(base, src=gwen_src)
-  gwen_lib = n.build(built('gwen.lib'), 'ar', objs)
+  gwen_lib = n.build(built('gwen.lib'), 'ar', inputs=objs)
   n.newline()
 
   n.comment('Chromium base lib.')
@@ -265,11 +264,10 @@ def main():
       objs += cc(base, src=base_src)
     else:
       objs += cxx(base, src=base_src)
-  base_lib = n.build(built('base.lib'), 'ar', objs)
+  base_lib = n.build(built('base.lib'), 'ar', inputs=objs)
   n.newline()
 
-  libs.extend([built('sg.lib'), built('base.lib'), built('gwen.lib'),
-               'advapi32.lib',
+  libs.extend(['advapi32.lib',
                'comdlg32.lib',
                'dbghelp.lib',
                'gdi32.lib',
@@ -279,14 +277,17 @@ def main():
                # Temp with sample Gwen renderer.
                'third_party/gwen/gwen/lib/FreeImage.lib',
                ])
+  libs.extend(sg_lib)
+  libs.extend(gwen_lib)
+  libs.extend(base_lib)
 
   all_targets = []
 
   n.comment('Main executable is library plus main() function.')
   objs = cxx('basic_rendering_win')
-  sg = n.build(binary('sg'), 'link', objs,
-                       implicit=sg_lib + base_lib,
-                       variables=[('libs', libs)])
+  sg = n.build(binary('sg'), 'link', inputs=objs,
+               implicit=sg_lib + base_lib + gwen_lib,
+               variables=[('libs', libs)])
   n.newline()
   all_targets += sg
 
@@ -302,10 +303,10 @@ def main():
   gtest_all_incs = ['-I%s' % path,  '-I%s' % os.path.join(path, 'include')]
   gtest_cflags = cflags + ['/nologo', '/EHsc', '/Zi'] + gtest_all_incs
   objs += n.build(built('gtest-all' + objext), 'cxx',
-                  os.path.join(path, 'src', 'gtest-all.cc'),
+                  inputs=os.path.join(path, 'src', 'gtest-all.cc'),
                   variables=[('cflags', gtest_cflags)])
   objs += n.build(built('gtest_main' + objext), 'cxx',
-                  os.path.join(path, 'src', 'gtest_main.cc'),
+                  inputs=os.path.join(path, 'src', 'gtest_main.cc'),
                   variables=[('cflags', gtest_cflags)])
 
   test_cflags = cflags + ['-DGTEST_HAS_RTTI=0',
@@ -314,9 +315,10 @@ def main():
   for name in []:
     objs += cxx(name, variables=[('cflags', test_cflags)])
 
-  sg_test = n.build(binary('sg_test'), 'link', objs, implicit=sg_lib,
+  sg_test = n.build(binary('sg_test'), 'link', inputs=objs,
+                    implicit=sg_lib + base_lib + gwen_lib,
                     variables=[('ldflags', test_ldflags),
-                                ('libs', test_libs)])
+                               ('libs', test_libs)])
   n.newline()
   all_targets += sg_test
 
