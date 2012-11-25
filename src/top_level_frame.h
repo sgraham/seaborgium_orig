@@ -20,7 +20,8 @@ class TopLevelFrame : public Gwen::Controls::Base {
   MainFrame* main_frame_;
   Gwen::Controls::StatusBar* status_bar_;
   unsigned int frames_;
-  float last_second_;
+  double frame_sum_in_seconds_;
+  double last_time_;
 };
 
 #endif  // TOP_LEVEL_FRAME_H_

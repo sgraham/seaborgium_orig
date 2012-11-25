@@ -19,17 +19,21 @@ GWEN_CONTROL_CONSTRUCTOR(TopLevelFrame) {
   main_frame_->Dock(Pos::Fill);
   status_bar_->SendToBack();
 
-  last_second_ = Gwen::Platform::GetTimeInSeconds();
+  frame_sum_in_seconds_ = 0.0;
+  last_time_ = Gwen::Platform::GetTimeInSeconds();
   frames_ = 0;
 }
 
 void TopLevelFrame::Render(Gwen::Skin::Base* skin) {
   frames_++;
-
-  if (last_second_ < Gwen::Platform::GetTimeInSeconds()) {
-    status_bar_->SetText(Gwen::Utility::Format(L"%i fps", frames_ * 2));
-    last_second_ = Gwen::Platform::GetTimeInSeconds() + 0.5f;
+  double time = Gwen::Platform::GetTimeInSeconds();
+  frame_sum_in_seconds_ += time - last_time_;
+  last_time_ = time;
+  if (frames_ == 10) {
+    status_bar_->SetText(Gwen::Utility::Format(L"%.1f ms",
+        (frame_sum_in_seconds_ * 1000.0) / frames_));
     frames_ = 0;
+    frame_sum_in_seconds_ = 0;
   }
 
   BaseClass::Render(skin);
