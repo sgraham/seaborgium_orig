@@ -6,6 +6,7 @@
 #include "Gwen/Controls/TabControl.h"
 #include "Gwen/Controls/WindowControl.h"
 #include "Gwen/Platform.h"
+#include "source_view.h"
 
 using namespace Gwen;
 
@@ -18,6 +19,8 @@ GWEN_CONTROL_CONSTRUCTOR(MainFrame) {
 
   Controls::Layout::Center* center = new Controls::Layout::Center(this);
   center->Dock(Pos::Fill);
+
+  new SourceView(center);
 
   PrintText(L"Ready.\n");
 }

@@ -242,6 +242,7 @@ def main():
 
   n.comment('Core source files all build into sg library.')
   for name in ['main_frame',
+               'source_view',
                'top_level_frame',
               ]:
     objs += cxx(name)
@@ -273,6 +274,7 @@ def main():
                'gdi32.lib',
                'ole32.lib',
                'opengl32.lib',
+               'shell32.lib',
                'user32.lib',
                # Temp with sample Gwen renderer.
                'third_party/gwen/gwen/lib/FreeImage.lib',

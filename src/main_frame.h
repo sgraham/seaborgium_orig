@@ -6,6 +6,7 @@
 #include "Gwen/Utility.h"
 #include "Gwen/Controls/DockBase.h"
 
+class SourceView;
 namespace Gwen { namespace Controls { class ListBox; } }
 
 class MainFrame : public Gwen::Controls::DockBase {
@@ -15,6 +16,7 @@ class MainFrame : public Gwen::Controls::DockBase {
 
  private:
   Gwen::Controls::ListBox* text_output_;
+  SourceView* source_view_;
 };
 
 #endif  // MAIN_FRAME_H_
