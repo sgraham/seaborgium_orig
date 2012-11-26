@@ -3,11 +3,13 @@
 #include <windows.h>
 
 #include "Gwen/Gwen.h"
+#include "Gwen/Controls/WindowCanvas.h"
 #include "Gwen/Input/Windows.h"
 #include "Gwen/Skins/Simple.h"
 #include "Gwen/Skins/TexturedBase.h"
 #include "top_level_frame.h"
 
+#include "Gwen/Renderers/OpenGL.h"
 #include "Gwen/Renderers/OpenGL_DebugFont.h"
 #include "gl/glew.h"
 
@@ -100,7 +102,6 @@ HGLRC CreateOpenGLDeviceContext() {
   return opengl_context;
 }
 
-
 int main() {
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
   _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
@@ -150,3 +151,25 @@ int main() {
   delete skin;
   delete renderer;
 }
+
+/*
+int main() {
+  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+  _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+  Gwen::Renderer::OpenGL_DebugFont renderer;
+  Gwen::Skin::TexturedBase skin(&renderer);
+
+  Gwen::Controls::WindowCanvas window_canvas(
+      -1, -1, 1280, 1024, &skin, "Seaborgium");
+  skin.Init("DefaultSkin.png");
+
+  TopLevelFrame* top_level = new TopLevelFrame(&window_canvas);
+  top_level->SetPos(0, 0);
+
+  while (!window_canvas.WantsQuit()) {
+    window_canvas.DoThink();
+  }
+}
+*/
