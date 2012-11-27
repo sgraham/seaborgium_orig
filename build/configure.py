@@ -139,6 +139,38 @@ def GetGwenFileList():
   return [os.path.normpath(p) for p in files]
 
 
+def GetRe2FileList():
+  files = [
+    're2/bitstate',
+    're2/compile',
+    're2/dfa',
+    're2/filtered_re2',
+    're2/mimics_pcre',
+    're2/nfa',
+    're2/onepass',
+    're2/parse',
+    're2/perl_groups',
+    're2/prefilter',
+    're2/prefilter_tree',
+    're2/prog',
+    're2/re2',
+    're2/regexp',
+    're2/set',
+    're2/simplify',
+    're2/tostring',
+    're2/unicode_casefold',
+    're2/unicode_groups',
+    'util/arena',
+    'util/hash',
+    'util/rune',
+    'util/stringpiece',
+    'util/stringprintf',
+    'util/strutil',
+    ]
+  return [os.path.normpath(p) for p in files]
+
+
+
 def main():
   if not os.path.exists(os.path.join(ninja_dir, 'ninja.exe')):
     print "ninja binary doesn't exist, trying to build it..."
@@ -173,6 +205,8 @@ def main():
     return os.path.join('third_party', 'base', filename)
   def gwen_src(filename):
     return os.path.join('third_party', 'gwen', filename)
+  def re2_src(filename):
+    return os.path.join('third_party', 're2', filename)
   def built(filename):
     return os.path.join('$builddir', 'obj', filename)
   def cc(name, src=src, **kwargs):
@@ -198,12 +232,13 @@ def main():
             '/wd4530', '/wd4100', '/wd4706', '/wd4245', '/wd4018',
             '/wd4512', '/wd4800', '/wd4702', '/wd4819', '/wd4355',
             '/wd4996', '/wd4481', '/wd4127', '/wd4310', '/wd4244',
-            '/wd4701',
+            '/wd4701', '/wd4201', '/wd4389',
             '/GR-',  # Disable RTTI.
             '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
             '/DUNICODE', '/D_UNICODE',
             '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
             '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
+            '-Ithird_party/re2',
             '-FIsrc/global.h']
   if options.debug:
     cflags += ['/D_DEBUG', '/MTd']
@@ -256,6 +291,13 @@ def main():
   gwen_lib = n.build(built('gwen.lib'), 'ar', inputs=objs)
   n.newline()
 
+  objs = []
+  n.comment('RE2 lib.')
+  for base in GetRe2FileList():
+    objs += cxx(base, src=re2_src)
+  re2_lib = n.build(built('re2.lib'), 'ar', inputs=objs)
+  n.newline()
+
   n.comment('Chromium base lib.')
   crfiles = GetChromiumBaseFileList('third_party/base')
   objs = []
@@ -282,13 +324,14 @@ def main():
   libs.extend(sg_lib)
   libs.extend(gwen_lib)
   libs.extend(base_lib)
+  libs.extend(re2_lib)
 
   all_targets = []
 
   n.comment('Main executable is library plus main() function.')
   objs = cxx('basic_rendering_win')
   sg = n.build(binary('sg'), 'link', inputs=objs,
-               implicit=sg_lib + base_lib + gwen_lib,
+               implicit=sg_lib + base_lib + gwen_lib + re2_lib,
                variables=[('libs', libs)])
   n.newline()
   all_targets += sg
@@ -318,7 +361,7 @@ def main():
     objs += cxx(name, variables=[('cflags', test_cflags)])
 
   sg_test = n.build(binary('sg_test'), 'link', inputs=objs,
-                    implicit=sg_lib + base_lib + gwen_lib,
+                    implicit=sg_lib + base_lib + gwen_lib + re2_lib,
                     variables=[('ldflags', test_ldflags),
                                ('libs', test_libs)])
   n.newline()
