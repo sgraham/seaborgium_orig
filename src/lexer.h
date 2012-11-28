@@ -1,18 +1,19 @@
 #ifndef LEXER_H_
 #define LEXER_H_
 
+#include "base/basictypes.h"
+
 #include <string>
 #include <map>
-using namespace std;
 
 class LexerState;
 
 class Lexer {
  public:
-  explicit Lexer(const string& name);
-  LexerState* AddState(const string& name);
+  explicit Lexer(const std::string& name);
+  LexerState* AddState(const std::string& name);
 
-  enum TokenTypes {
+  enum TokenType {
     Comment,
     CommentMultiline,
     CommentPreproc,
@@ -37,10 +38,18 @@ class Lexer {
     Operator,
     Punctuation,
     Text,
+
+    Invalid,
   };
 
+  static LexerState* Push;
+  static LexerState* Pop;
+
  private:
-  map<string, LexerState*> states_;
+  std::string name_;
+  std::map<std::string, LexerState*> states_;
+
+  DISALLOW_COPY_AND_ASSIGN(Lexer);
 };
 
-#endif
+#endif  // LEXER_H_

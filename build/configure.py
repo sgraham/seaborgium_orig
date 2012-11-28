@@ -276,7 +276,10 @@ def main():
   objs = []
 
   n.comment('Core source files all build into sg library.')
-  for name in ['main_frame',
+  for name in [
+               'lexer',
+               'lexer_state',
+               'main_frame',
                'source_view',
                'top_level_frame',
               ]:
