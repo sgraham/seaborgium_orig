@@ -360,7 +360,9 @@ def main():
   test_cflags = cflags + ['-DGTEST_HAS_RTTI=0',
                           '-I%s' % os.path.join(path, 'include')]
 
-  for name in []:
+  for name in [
+               'lexer_test'
+              ]:
     objs += cxx(name, variables=[('cflags', test_cflags)])
 
   sg_test = n.build(binary('sg_test'), 'link', inputs=objs,

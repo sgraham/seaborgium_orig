@@ -1,5 +1,8 @@
 #include "lexer_state.h"
 
+LexerState::LexerState(const std::string& name) : name_(name) {
+}
+
 void LexerState::Add(const std::string& regex, Lexer::TokenType token_type) {
   items.push_back(ItemData(regex, token_type, NULL));
 }

@@ -17,3 +17,8 @@ LexerState* Lexer::AddState(const std::string& name) {
   states_[name] = lexer_state;
   return lexer_state;
 }
+
+void Lexer::GetTokensUnprocessed(const std::string& input,
+                                 std::vector<Token>* output_tokens) {
+  output_tokens->push_back(Token(0, Lexer::Invalid, ""));
+}

@@ -5,13 +5,17 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 class LexerState;
+class Token;
 
 class Lexer {
  public:
   explicit Lexer(const std::string& name);
   LexerState* AddState(const std::string& name);
+  void GetTokensUnprocessed(const std::string& input,
+                            std::vector<Token>* output_tokens);
 
   enum TokenType {
     Comment,
@@ -51,5 +55,22 @@ class Lexer {
 
   DISALLOW_COPY_AND_ASSIGN(Lexer);
 };
+
+class Token {
+ public:
+  Token() : index(-1), token(Lexer::Invalid) {
+  }
+
+  Token(int index, Lexer::TokenType token, const std::string& value) :
+      index(index),
+      token(token),
+      value(value) {
+  }
+
+  int index;
+  Lexer::TokenType token;
+  std::string value;
+};
+
 
 #endif  // LEXER_H_
