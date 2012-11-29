@@ -37,7 +37,9 @@ void SourceView::Render(Skin::Base* skin) {
   size_t start_line =
       std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
   for (size_t i = start_line; i < lines_.size(); ++i) {
-    if ((i - start_line) * g_line_height > Height())
+    // Extra |g_line_height| added to height so that a full line is drawn at
+    // the bottom when partial-line pixel scrolled.
+    if ((i - start_line) * g_line_height > Height() + g_line_height)
       break;
     size_t x = 0;
     for (size_t j = 0; j < lines_[i].size(); ++j) {
