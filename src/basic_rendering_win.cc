@@ -62,13 +62,18 @@ HWND CreateGameWindow(void) {
 
   RegisterClassW(&wc);
 
+  int width = 1280;
+  int height = 1024;
+  RECT rect;
+  SystemParametersInfo(SPI_GETWORKAREA, 0, &rect, 0);
   HWND hWindow = CreateWindowExW(
       (WS_EX_APPWINDOW | WS_EX_WINDOWEDGE),
       wc.lpszClassName,
       L"Seaborgium",
       WS_OVERLAPPEDWINDOW,
-      0, 0,
-      1280, 1024,
+      (rect.right - rect.left - width) / 2 + rect.left,
+      (rect.bottom - rect.top - height) / 2 + rect.top,
+      width, height,
       NULL, NULL, GetModuleHandle(NULL), NULL);
 
   ShowWindow(hWindow, SW_SHOW);
