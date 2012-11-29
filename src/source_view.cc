@@ -28,6 +28,8 @@ GWEN_CONTROL_CONSTRUCTOR(SourceView) {
     SyntaxHighlight(utf8_text, &lines_);
   }
   SetKeyboardInputEnabled(true);
+  GetCanvas()->SetDrawBackground(true);
+  GetCanvas()->SetBackgroundColor(Colors::White);
   Focus();
 }
 

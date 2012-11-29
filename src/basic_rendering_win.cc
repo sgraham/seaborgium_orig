@@ -59,6 +59,7 @@ HWND CreateGameWindow(void) {
   wc.hInstance = GetModuleHandle(NULL);
   wc.lpszClassName = L"GWENWindow";
   wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+  wc.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
 
   RegisterClassW(&wc);
 
@@ -93,6 +94,7 @@ HGLRC CreateOpenGLDeviceContext() {
   pfd.iPixelType = PFD_TYPE_RGBA;
   pfd.cColorBits = 24;
   pfd.cDepthBits = 32;
+  pfd.iLayerType = PFD_MAIN_PLANE;
 
   int pixelFormat = ChoosePixelFormat(GetDC(g_pHWND), &pfd);
 
@@ -128,8 +130,7 @@ int main() {
   Gwen::Controls::Canvas* canvas = new Gwen::Controls::Canvas(skin);
   main_canvas = canvas;
   OnSizeChanged();
-  canvas->SetDrawBackground(true);
-  canvas->SetBackgroundColor(Gwen::Color(150, 170, 170, 255));
+  canvas->SetDrawBackground(false);
 
   TopLevelFrame* top_level = new TopLevelFrame(canvas);
   top_level->SetPos(0, 0);
