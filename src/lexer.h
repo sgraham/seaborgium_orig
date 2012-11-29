@@ -12,6 +12,10 @@ class Token;
 
 // This module (regex, input, parsed tokens) works entirely in utf8, even on
 // Windows, because that's what RE2 processes.
+//
+// Probably this whole thing should be something more like re2c, but this is
+// OK for now. re2c doesn't have syntax for the more complex syntax, so it'd
+// be a fair amount of reworking.
 
 class Lexer {
  public:

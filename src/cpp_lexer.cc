@@ -39,7 +39,7 @@ Lexer* MakeCppLexer() {
 
   // Transitions for root
   TokenDefinitions root_defs;
-  root_defs.AddWithTransition("^#if\\s+0", Lexer::CommentPreproc, if0);
+  root_defs.AddWithTransition("^#if\\s+0\\s*", Lexer::CommentPreproc, if0);
   root_defs.AddWithTransition("^#", Lexer::CommentPreproc, macro);
   // TODO(<type 'function'>)   root_defs.AddWithTransition("^((?:\\s|//.*?\\n|/[*].*?[*]/)+)(#if\\s+0)", <function callback at 0x000000000237AD68>, if0);
   // TODO(<type 'function'>)   root_defs.AddWithTransition("^((?:\\s|//.*?\\n|/[*].*?[*]/)+)(#)", <function callback at 0x000000000237AE48>, macro);

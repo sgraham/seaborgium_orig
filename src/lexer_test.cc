@@ -59,8 +59,8 @@ TEST(Lexer, IniFile) {
   // TODO
 }
 
-TEST(Lexer, Cpp) {
-  Lexer* lexer = MakeCppLexer();
+TEST(Lexer, BasicCpp) {
+  scoped_ptr<Lexer> lexer(MakeCppLexer());
 
   std::vector<Token> tokens;
   lexer->GetTokensUnprocessed("int foo;", &tokens);
@@ -77,4 +77,35 @@ TEST(Lexer, Cpp) {
 
   EXPECT_EQ(Lexer::Punctuation, tokens[3].token);
   EXPECT_EQ(7, tokens[3].index);
+}
+
+TEST(Lexer, CppIf0) {
+  scoped_ptr<Lexer> lexer(MakeCppLexer());
+
+  std::vector<Token> tokens;
+  lexer->GetTokensUnprocessed("#if 0\nthis is some stuff\n#endif\n", &tokens);
+
+  EXPECT_EQ(3, tokens.size());
+  EXPECT_EQ(Lexer::CommentPreproc, tokens[0].token);
+  EXPECT_EQ(Lexer::Comment, tokens[1].token);
+  EXPECT_EQ(Lexer::CommentPreproc, tokens[2].token);
+}
+
+TEST(Lexer, CppNumbers) {
+  scoped_ptr<Lexer> lexer(MakeCppLexer());
+
+  std::vector<Token> tokens;
+  lexer->GetTokensUnprocessed(
+      "42 23.42 23. .42 023 0xdeadbeef 23e+42 42e-23",
+      &tokens);
+
+  EXPECT_EQ(15, tokens.size());
+  EXPECT_EQ(Lexer::LiteralNumberInteger, tokens[0].token);
+  EXPECT_EQ(Lexer::LiteralNumberFloat, tokens[2].token);
+  EXPECT_EQ(Lexer::LiteralNumberFloat, tokens[4].token);
+  EXPECT_EQ(Lexer::LiteralNumberFloat, tokens[6].token);
+  EXPECT_EQ(Lexer::LiteralNumberOct, tokens[8].token);
+  EXPECT_EQ(Lexer::LiteralNumberHex, tokens[10].token);
+  EXPECT_EQ(Lexer::LiteralNumberFloat, tokens[12].token);
+  EXPECT_EQ(Lexer::LiteralNumberFloat, tokens[14].token);
 }
