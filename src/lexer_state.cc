@@ -26,8 +26,9 @@ void LexerState::SetTokenDefinitions(
     const TokenDefinitions& tokens) {
   token_defs_count_ = tokens.token_data_.size();
   token_defs_ = new TokenDef[token_defs_count_];
+  re2::RE2::Options options;
   for (size_t i = 0; i < token_defs_count_; ++i) {
-    token_defs_[i].regex = new re2::RE2(tokens.token_data_[i].regex);
+    token_defs_[i].regex = new re2::RE2(tokens.token_data_[i].regex, options);
     token_defs_[i].action = tokens.token_data_[i].action;
     token_defs_[i].new_state = tokens.token_data_[i].new_state;
   }

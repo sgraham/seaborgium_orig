@@ -1,4 +1,6 @@
 #include "lexer.h"
+
+#include "cpp_lexer.h"
 #include "lexer_state.h"
 
 #include <gtest/gtest.h>
@@ -55,4 +57,11 @@ TEST(Lexer, IniFile) {
 
   EXPECT_EQ(6, tokens.size());
   // TODO
+}
+
+TEST(Lexer, Cpp) {
+  Lexer* lexer = MakeCppLexer();
+
+  std::vector<Token> tokens;
+  lexer->GetTokensUnprocessed("int a;", &tokens);
 }

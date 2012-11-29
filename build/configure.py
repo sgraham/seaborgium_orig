@@ -277,6 +277,7 @@ def main():
 
   n.comment('Core source files all build into sg library.')
   for name in [
+               'cpp_lexer',
                'lexer',
                'lexer_state',
                'main_frame',
