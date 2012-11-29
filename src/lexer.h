@@ -10,11 +10,14 @@
 class LexerState;
 class Token;
 
+// This module (regex, input, parsed tokens) works entirely in utf8, even on
+// Windows, because that's what RE2 processes.
+
 class Lexer {
  public:
   explicit Lexer(const std::string& name);
   LexerState* AddState(const std::string& name);
-  void GetTokensUnprocessed(const std::string& input,
+  void GetTokensUnprocessed(const std::string& text,
                             std::vector<Token>* output_tokens);
 
   enum TokenType {
@@ -61,13 +64,13 @@ class Token {
   Token() : index(-1), token(Lexer::Invalid) {
   }
 
-  Token(int index, Lexer::TokenType token, const std::string& value) :
+  Token(size_t index, Lexer::TokenType token, const std::string& value) :
       index(index),
       token(token),
       value(value) {
   }
 
-  int index;
+  size_t index;
   Lexer::TokenType token;
   std::string value;
 };
