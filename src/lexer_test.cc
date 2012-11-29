@@ -63,5 +63,18 @@ TEST(Lexer, Cpp) {
   Lexer* lexer = MakeCppLexer();
 
   std::vector<Token> tokens;
-  lexer->GetTokensUnprocessed("int a;", &tokens);
+  lexer->GetTokensUnprocessed("int foo;", &tokens);
+  EXPECT_EQ(4, tokens.size());
+
+  EXPECT_EQ(Lexer::KeywordType, tokens[0].token);
+  EXPECT_EQ(0, tokens[0].index);
+
+  EXPECT_EQ(Lexer::Text, tokens[1].token);
+  EXPECT_EQ(3, tokens[1].index);
+
+  EXPECT_EQ(Lexer::Name, tokens[2].token);
+  EXPECT_EQ(4, tokens[2].index);
+
+  EXPECT_EQ(Lexer::Punctuation, tokens[3].token);
+  EXPECT_EQ(7, tokens[3].index);
 }
