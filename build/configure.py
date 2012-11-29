@@ -7,9 +7,8 @@ import sys
 ninja_dir = os.path.join(os.path.split(__file__)[0],
                          '..', 'third_party', 'ninja')
 ninja_misc_dir = os.path.join(ninja_dir, 'misc')
-if not os.path.exists(ninja_misc_dir):
-  if os.system('git submodule update --init') != 0:
-    raise SystemExit("Couldn't update git submodules")
+if os.system('git submodule update --init') != 0:
+  raise SystemExit("Couldn't update git submodules")
 
 sys.path.append(ninja_misc_dir)
 import ninja_syntax
@@ -132,9 +131,8 @@ def GetGwenFileList():
     'gwen/src/Platforms/Null',
     'gwen/src/Platforms/Windows',
 
-    # These are fairly temporary; using Gwen sample GL renderer.
-    'gwen/Renderers/OpenGL/DebugFont/OpenGL_DebugFont',
-    'gwen/Renderers/OpenGL/OpenGL',
+    # These are fairly temporary; using Gwen sample renderer.
+    'gwen/Renderers/DirectX9/DirectX9',
     ]
   return [os.path.normpath(p) for p in files]
 
@@ -322,8 +320,6 @@ def main():
                'opengl32.lib',
                'shell32.lib',
                'user32.lib',
-               # Temp with sample Gwen renderer.
-               'third_party/gwen/gwen/lib/FreeImage.lib',
                ])
   libs.extend(sg_lib)
   libs.extend(gwen_lib)
