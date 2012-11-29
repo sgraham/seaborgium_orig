@@ -2,6 +2,7 @@
 
 #include "base/file_util.h"
 #include "base/string_piece.h"
+#include "base/string_number_conversions.h"
 #include "base/utf_string_conversions.h"
 #include "cpp_lexer.h"
 #include "lexer.h"
@@ -36,12 +37,28 @@ void SourceView::Render(Skin::Base* skin) {
   Gwen::Renderer::Base* render = skin->GetRender();
   size_t start_line =
       std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
+  // Not quite right, but probably close enough.
+  int largest_numbers_width = render->MeasureText(
+      skin->GetDefaultFont(),
+      base::IntToString16(lines_.size()).c_str()).x;
   for (size_t i = start_line; i < lines_.size(); ++i) {
     // Extra |g_line_height| added to height so that a full line is drawn at
     // the bottom when partial-line pixel scrolled.
     if ((i - start_line) * g_line_height > Height() + g_line_height)
       break;
-    size_t x = 0;
+
+    static const int left_margin = 5;
+    static const int right_margin = 15;
+
+    // Line numbers.
+    render->SetDrawColor(Gwen::Colors::Grey);
+    render->RenderText(
+          skin->GetDefaultFont(),
+          Gwen::Point(left_margin, i * g_line_height - y_pixel_scroll_),
+          base::IntToString16(i + 1).c_str());
+    size_t x = left_margin + largest_numbers_width + right_margin;
+
+    // Source.
     for (size_t j = 0; j < lines_[i].size(); ++j) {
       render->SetDrawColor(ColorForTokenType(lines_[i][j].type));
       render->RenderText(
