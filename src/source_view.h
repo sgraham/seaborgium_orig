@@ -23,6 +23,7 @@ class SourceView : public Gwen::Controls::Base {
   virtual bool OnKeyDown(bool down);
   virtual bool OnKeyPageUp(bool down);
   virtual bool OnKeyPageDown(bool down);
+  virtual bool OnKeySpace(bool down);
 
  private:
   struct ColoredText {

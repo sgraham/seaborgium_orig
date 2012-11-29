@@ -125,6 +125,16 @@ bool SourceView::OnKeyPageDown(bool down) {
   return true;
 }
 
+bool SourceView::OnKeySpace(bool down) {
+  if (down) {
+    if (Gwen::Input::IsShiftDown())
+      OnKeyPageUp(true);
+    else
+      OnKeyPageDown(true);
+  }
+  return true;
+}
+
 bool SourceView::OnKeyHome(bool down) {
   y_pixel_scroll_target_ = 0.f;
   return true;
