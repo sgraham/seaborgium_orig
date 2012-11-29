@@ -13,7 +13,7 @@ using namespace Gwen::Controls;
 
 namespace {
 
-const size_t g_line_height = 13;
+const int g_line_height = 13;
 
 }  // namespace
 
@@ -27,12 +27,17 @@ GWEN_CONTROL_CONSTRUCTOR(SourceView) {
       FilePath(FILE_PATH_LITERAL("sample_source_code_file.cc")), &utf8_text)) {
     SyntaxHighlight(utf8_text, &lines_);
   }
+  SetKeyboardInputEnabled(true);
+  Focus();
 }
 
 // TODO: Brutal efficiency.
 void SourceView::Render(Skin::Base* skin) {
-  y_pixel_scroll_ = y_pixel_scroll_ +
-      (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.2f;
+  // Ease to target.
+  y_pixel_scroll_ += (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.15f;
+  if (fabsf(y_pixel_scroll_target_ - y_pixel_scroll_) < 1.f)
+    y_pixel_scroll_ = y_pixel_scroll_target_;
+
   GetCanvas()->SetBackgroundColor(Colors::White);
   Gwen::Renderer::Base* render = skin->GetRender();
   size_t start_line =
@@ -72,12 +77,61 @@ void SourceView::Render(Skin::Base* skin) {
   }
 }
 
-bool SourceView::OnMouseWheeled(int delta) {
-  y_pixel_scroll_target_ -= delta * .5f; // TODO: Random scale.
+float SourceView::GetLargestScrollLocation() {
+  return static_cast<float>((lines_.size() - 1) * g_line_height);
+}
+
+void SourceView::ClampScrollTarget() {
   y_pixel_scroll_target_ = std::max(0.f, y_pixel_scroll_target_);
   y_pixel_scroll_target_ = std::min(
-      static_cast<float>((lines_.size() - 1) * g_line_height),
-      y_pixel_scroll_target_);
+      GetLargestScrollLocation(), y_pixel_scroll_target_);
+}
+
+bool SourceView::OnMouseWheeled(int delta) {
+  y_pixel_scroll_target_ -= delta * .5f; // TODO: Random scale.
+  ClampScrollTarget();
+  return true;
+}
+
+void SourceView::ScrollView(int number_of_lines) {
+  y_pixel_scroll_target_ =
+    static_cast<int>(y_pixel_scroll_target_ / g_line_height) * g_line_height;
+  y_pixel_scroll_target_ += g_line_height * number_of_lines;
+  ClampScrollTarget();
+}
+
+// Note: These are the Up arrow and Down arrow keys, not press/release.
+bool SourceView::OnKeyUp(bool down) {
+  if (down)
+    ScrollView(-1);
+  return true;
+}
+
+bool SourceView::OnKeyDown(bool down) {
+  if (down)
+    ScrollView(1);
+  return true;
+}
+
+bool SourceView::OnKeyPageUp(bool down) {
+  if (down)
+    ScrollView(-(Height() / g_line_height - 1));
+  return true;
+}
+
+bool SourceView::OnKeyPageDown(bool down) {
+  if (down)
+    ScrollView(Height() / g_line_height - 1);
+  return true;
+}
+
+bool SourceView::OnKeyHome(bool down) {
+  y_pixel_scroll_target_ = 0.f;
+  return true;
+}
+
+bool SourceView::OnKeyEnd(bool down) {
+  y_pixel_scroll_target_ = GetLargestScrollLocation();
   return true;
 }
 

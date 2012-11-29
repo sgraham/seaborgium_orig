@@ -17,6 +17,12 @@ class SourceView : public Gwen::Controls::Base {
   virtual void Render(Gwen::Skin::Base* skin);
 
   virtual bool OnMouseWheeled(int delta);
+  virtual bool OnKeyHome(bool down);
+  virtual bool OnKeyEnd(bool down);
+  virtual bool OnKeyUp(bool down);
+  virtual bool OnKeyDown(bool down);
+  virtual bool OnKeyPageUp(bool down);
+  virtual bool OnKeyPageDown(bool down);
 
  private:
   struct ColoredText {
@@ -27,6 +33,9 @@ class SourceView : public Gwen::Controls::Base {
 
   void SyntaxHighlight(const std::string& input, std::vector<Line>* lines);
   Gwen::Color ColorForTokenType(Lexer::TokenType type);
+  float GetLargestScrollLocation();
+  void ClampScrollTarget();
+  void ScrollView(int number_of_lines);
 
   float y_pixel_scroll_;
   float y_pixel_scroll_target_;
