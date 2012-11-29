@@ -13,7 +13,7 @@ using namespace Gwen::Controls;
 
 namespace {
 
-const int g_line_height = 13;
+const int g_line_height = 14;
 
 }  // namespace
 
