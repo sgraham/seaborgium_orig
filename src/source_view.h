@@ -16,6 +16,8 @@ class SourceView : public Gwen::Controls::Base {
 
   virtual void Render(Gwen::Skin::Base* skin);
 
+  virtual bool OnMouseWheeled(int delta);
+
  private:
   struct ColoredText {
     Lexer::TokenType type;
@@ -26,7 +28,8 @@ class SourceView : public Gwen::Controls::Base {
   void SyntaxHighlight(const std::string& input, std::vector<Line>* lines);
   Gwen::Color ColorForTokenType(Lexer::TokenType type);
 
-  Gwen::Color color_;
+  float y_pixel_scroll_;
+  float y_pixel_scroll_target_;
 
   std::vector<Line> lines_;
 };

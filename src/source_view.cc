@@ -10,9 +10,16 @@
 using namespace Gwen;
 using namespace Gwen::Controls;
 
+namespace {
+
+const size_t g_line_height = 13;
+
+}  // namespace
+
 GWEN_CONTROL_CONSTRUCTOR(SourceView) {
+  y_pixel_scroll_ = 0.f;
+  y_pixel_scroll_target_ = 0.f;
   Dock(Pos::Fill);
-  color_ = Colors::Black;
   string16 text = L"File\nload\nfailed!";
   std::string utf8_text;
   if (file_util::ReadFileToString(
@@ -23,24 +30,36 @@ GWEN_CONTROL_CONSTRUCTOR(SourceView) {
 
 // TODO: Brutal efficiency.
 void SourceView::Render(Skin::Base* skin) {
+  y_pixel_scroll_ = y_pixel_scroll_ +
+      (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.2f;
   GetCanvas()->SetBackgroundColor(Colors::White);
   Gwen::Renderer::Base* render = skin->GetRender();
-  const size_t line_height = 13;
-  for (size_t i = 0; i < lines_.size(); ++i) {
-    if (i * line_height > Height())
+  size_t start_line =
+      std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
+  for (size_t i = start_line; i < lines_.size(); ++i) {
+    if ((i - start_line) * g_line_height > Height())
       break;
     size_t x = 0;
     for (size_t j = 0; j < lines_[i].size(); ++j) {
       render->SetDrawColor(ColorForTokenType(lines_[i][j].type));
       render->RenderText(
           skin->GetDefaultFont(),
-          Gwen::Point(x, i * line_height),
+          Gwen::Point(x, i * g_line_height - y_pixel_scroll_),
           lines_[i][j].text.c_str());
       x += render->MeasureText(
           skin->GetDefaultFont(),
           lines_[i][j].text.c_str()).x;
     }
   }
+}
+
+bool SourceView::OnMouseWheeled(int delta) {
+  y_pixel_scroll_target_ -= delta * .5f; // TODO: Random scale.
+  y_pixel_scroll_target_ = std::max(0.f, y_pixel_scroll_target_);
+  y_pixel_scroll_target_ = std::min(
+      static_cast<float>((lines_.size() - 1) * g_line_height),
+      y_pixel_scroll_target_);
+  return true;
 }
 
 void SourceView::SyntaxHighlight(
