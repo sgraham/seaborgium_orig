@@ -836,6 +836,10 @@ MAKE_INTEGER_PARSER(unsigned long long, ulonglong);
 
 #undef MAKE_INTEGER_PARSER
 
+#ifdef _DEBUG
+void TidyUpGlobals();
+#endif
+
 }  // namespace re2
 
 using re2::RE2;

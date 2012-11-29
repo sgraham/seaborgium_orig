@@ -7,6 +7,8 @@
 #include "Gwen/Input/Windows.h"
 #include "Gwen/Skins/Simple.h"
 #include "Gwen/Skins/TexturedBase.h"
+#include "lexer.h"
+#include "re2/re2.h"
 #include "top_level_frame.h"
 
 #include "Gwen/Renderers/OpenGL.h"
@@ -106,6 +108,7 @@ int main() {
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
   _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+  //_CrtSetBreakAlloc(1110);
 
   g_pHWND = CreateGameWindow();
   HGLRC opengl_context = CreateOpenGLDeviceContext();
@@ -147,9 +150,13 @@ int main() {
 
   wglMakeCurrent(NULL, NULL);
   wglDeleteContext(opengl_context);
+#ifdef _DEBUG
   delete canvas;
   delete skin;
   delete renderer;
+  re2::TidyUpGlobals();
+  Lexer::TidyUpGlobals();
+#endif
 }
 
 /*

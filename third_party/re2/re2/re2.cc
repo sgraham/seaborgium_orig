@@ -88,6 +88,16 @@ static void InitEmpty() {
   GLOBAL_MUTEX_UNLOCK(empty_mutex);
 }
 
+#ifdef _DEBUG
+void TidyUpGlobals() {
+  GLOBAL_MUTEX_LOCK(empty_mutex);
+  delete empty_string;
+  delete empty_named_groups;
+  delete empty_group_names;
+  GLOBAL_MUTEX_UNLOCK(empty_mutex);
+}
+#endif
+
 // Converts from Regexp error code to RE2 error code.
 // Maybe some day they will diverge.  In any event, this
 // hides the existence of Regexp from RE2 users.

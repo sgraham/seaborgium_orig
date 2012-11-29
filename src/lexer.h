@@ -20,6 +20,7 @@ class Token;
 class Lexer {
  public:
   explicit Lexer(const std::string& name);
+  ~Lexer();
   LexerState* AddState(const std::string& name);
   void GetTokensUnprocessed(const std::string& text,
                             std::vector<Token>* output_tokens);
@@ -55,6 +56,9 @@ class Lexer {
 
   static LexerState* Push;
   static LexerState* Pop;
+#ifdef _DEBUG
+  static void TidyUpGlobals();
+#endif
 
  private:
   std::string name_;

@@ -4,6 +4,7 @@
 #include "base/string16.h"
 #include "Gwen/Controls/Base.h"
 #include "Gwen/Structures.h"
+#include "lexer.h"
 
 #include <vector>
 
@@ -16,8 +17,18 @@ class SourceView : public Gwen::Controls::Base {
   virtual void Render(Gwen::Skin::Base* skin);
 
  private:
+  struct ColoredText {
+    Lexer::TokenType type;
+    string16 text;
+  };
+  typedef std::vector<ColoredText> Line;
+
+  void SyntaxHighlight(const std::string& input, std::vector<Line>* lines);
+  Gwen::Color ColorForTokenType(Lexer::TokenType type);
+
   Gwen::Color color_;
-  std::vector<string16> lines_;
+
+  std::vector<Line> lines_;
 };
 
 #endif  // SOURCE_VIEW_H_

@@ -23,10 +23,27 @@ size_t GetOffset(const re2::StringPiece& before, const std::string& base) {
 LexerState* Lexer::Push;
 LexerState* Lexer::Pop;
 
+#ifdef _DEBUG
+// static
+void Lexer::TidyUpGlobals() {
+  delete Lexer::Push;
+  delete Lexer::Pop;
+  Lexer::Push = NULL;
+  Lexer::Pop = NULL;
+}
+#endif
+
 Lexer::Lexer(const std::string& name) : name_(name) {
   if (!Push) {
     Push = new LexerState("!<push>");
     Pop = new LexerState("!<pop>");
+  }
+}
+
+Lexer::~Lexer() {
+  for (std::map<std::string, LexerState*>::iterator i(states_.begin());
+       i != states_.end(); ++i) {
+    delete i->second;
   }
 }
 
