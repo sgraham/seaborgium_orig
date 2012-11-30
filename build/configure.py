@@ -132,7 +132,7 @@ def GetGwenFileList():
     'gwen/src/Platforms/Windows',
 
     # These are fairly temporary; using Gwen sample renderer.
-    'gwen/Renderers/DirectX9/DirectX9',
+    'gwen/Renderers/Direct2D/Direct2D',
     ]
   return [os.path.normpath(p) for p in files]
 
@@ -329,7 +329,7 @@ def main():
   all_targets = []
 
   n.comment('Main executable is library plus main() function.')
-  objs = cxx('basic_rendering_win')
+  objs = cxx('window_setup_win')
   sg = n.build(binary('sg'), 'link', inputs=objs,
                implicit=sg_lib + base_lib + gwen_lib + re2_lib,
                variables=[('libs', libs)])

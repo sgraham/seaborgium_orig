@@ -13,7 +13,7 @@ using namespace Gwen::Controls;
 
 namespace {
 
-const int g_line_height = 14;
+const int g_line_height = 16;
 
 }  // namespace
 
@@ -36,7 +36,7 @@ GWEN_CONTROL_CONSTRUCTOR(SourceView) {
 // TODO: Brutal efficiency.
 void SourceView::Render(Skin::Base* skin) {
   // Ease to target.
-  y_pixel_scroll_ += (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.15f;
+  y_pixel_scroll_ += (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.2f;
   if (fabsf(y_pixel_scroll_target_ - y_pixel_scroll_) < 1.f)
     y_pixel_scroll_ = y_pixel_scroll_target_;
 
