@@ -3,6 +3,7 @@
 #include "base/logging.h"
 #include "Gwen/Font.h"
 #include "skin.h"
+#include "ui/focus.h"
 
 // TODO
 Gwen::Font kUIFont(L"Segoe UI", 12.f);
@@ -109,23 +110,33 @@ void Container::RenderBorders(const Skin& skin, Gwen::Renderer::Base* renderer) 
   Rect title_border_size(
       skin.border_size(), skin.border_size() + skin.title_bar_size(),
       skin.border_size(), skin.border_size());
-  if (children_.size() == 1 && !children_[0].contents->CanHoldChildren()) {
-    Rect rect =
-        children_[0].contents->GetScreenRect().Expand(title_border_size);
-    RenderFrame(skin, renderer, rect);
+  if (children_.size() == 1) {
+    ChildData* child = &children_[0];
+    if (!child->contents->CanHoldChildren()) {
+      Rect rect = child->contents->GetScreenRect().Expand(title_border_size);
+      RenderFrame(skin, renderer, rect);
 
-    // And title bar.
-    renderer->SetDrawColor(skin.GetColorScheme().title_bar_active());
-    renderer->DrawFilledRect(
-        Gwen::Rect(rect.x + skin.border_size(), rect.y + skin.border_size(),
-              rect.w - skin.border_size() * 2, skin.title_bar_size()));
+      // And title bar.
+      bool is_focused = GetFocusedContents() == child->contents;
+      Gwen::Color title_bar_background = is_focused ?
+          skin.GetColorScheme().title_bar_active() :
+          skin.GetColorScheme().title_bar_inactive();
+      Gwen::Color title_bar_text = is_focused ?
+          skin.GetColorScheme().title_bar_text_active() :
+          skin.GetColorScheme().title_bar_text_inactive();
+      renderer->SetDrawColor(title_bar_background);
+      renderer->DrawFilledRect(
+          Gwen::Rect(rect.x + skin.border_size(), rect.y + skin.border_size(),
+                rect.w - skin.border_size() * 2, skin.title_bar_size()));
+
       // TODO: Pass rect through to renderer.
-      renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_active());
+      renderer->SetDrawColor(title_bar_text);
       renderer->RenderText(
           &kUIFont,
           Gwen::Point(rect.x + skin.border_size() + 3,
                       rect.y + skin.border_size()),
           children_[0].title);
+    }
   }
 }
 

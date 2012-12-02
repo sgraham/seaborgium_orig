@@ -4,7 +4,7 @@
 #include "Gwen/Gwen.h"
 #include "Gwen/Align.h"
 #include "Gwen/Utility.h"
-#include "skin.h"
+#include "ui/skin.h"
 
 class Container;
 

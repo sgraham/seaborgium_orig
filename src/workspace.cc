@@ -1,10 +1,11 @@
 #include "workspace.h"
 
 #include "ui/container.h"
+#include "ui/focus.h"
 #include "ui/solid_color.h"
 #include "Gwen/Gwen.h"
 
-Contents* Placeholder(const Skin& skin, const string16& name) {
+Container* Placeholder(const Skin& skin, const string16& name) {
   Container* container = new Container;
   container->AddChild(new SolidColor(skin.GetColorScheme().background()),
                       name);
@@ -28,7 +29,7 @@ GWEN_CONTROL_CONSTRUCTOR(Workspace) {
   bottom->AddChild(log);
   bottom->SetFraction(output, .6);
 
-  Contents* source = Placeholder(skin_, L"src\\blah_blah.cc");
+  Container* source = Placeholder(skin_, L"src\\blah_blah.cc");
   Container* middle = new Container;
   middle->SetMode(Container::SplitVertical);
   Container* views = new Container;
@@ -50,6 +51,8 @@ GWEN_CONTROL_CONSTRUCTOR(Workspace) {
   views->AddChild(watch);
   views->AddChild(locals);
   views->SetFraction(watch, .6);
+
+  SetFocusedContents(source->Child(0));
 }
 
 void Workspace::Render(Gwen::Skin::Base* gwen_skin) {

@@ -27,6 +27,8 @@ class Container : public Contents {
   virtual void AddChild(Contents* contents);
   virtual void SetFraction(Contents* contents, double fraction);
   virtual bool CanHoldChildren() const { return true; }
+  virtual size_t ChildCount() const { return children_.size(); }
+  virtual Contents* Child(size_t i) { return children_[i].contents; }
 
  private:
   // Recalculate the screen rect for each of our children (assuming our |rect_|

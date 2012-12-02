@@ -22,10 +22,10 @@ ColorScheme::ColorScheme() :
     border_(0, 0, 0),
     background_(kBase03),
     text_(kBase0),
-    title_bar_active_(kBase02),
-    title_bar_text_active_(kCyan),
-    title_bar_inactive_(kBase03),
-    title_bar_text_inactive_(kBase02) {
+    title_bar_active_(kBase00),
+    title_bar_text_active_(kBase3),
+    title_bar_inactive_(kBase02),
+    title_bar_text_inactive_(kBase1) {
 }
 
 Skin::Skin() :
