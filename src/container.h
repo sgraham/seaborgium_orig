@@ -40,6 +40,8 @@ class Contents {
 
   virtual const Rect& GetScreenRect() const { return rect_; }
 
+  virtual bool CanHoldChildren() const { return false; }
+
  private:
   Contents* parent_;
   Rect rect_;
@@ -64,9 +66,9 @@ class SolidColor : public Contents {
   DISALLOW_COPY_AND_ASSIGN(SolidColor);
 };
 
-const int kTitleBarSize = 20;
+const int kTitleBarSize = 18;
 const int kBorderSize = 5;
-const Rect kInnerBorderSize(
+const Rect kTitleBorderSize(
     kBorderSize, kBorderSize + kTitleBarSize, kBorderSize, kBorderSize);
 const Rect kOuterBorderSize(
     kBorderSize, kBorderSize, kBorderSize, kBorderSize);
@@ -74,7 +76,7 @@ const Rect kOuterBorderSize(
 const Gwen::Color kBorderColor = Gwen::Colors::Red;
 const Gwen::Color kTitleColor = Gwen::Colors::Green;
 const Gwen::Color kTitleBarTextColor = Gwen::Colors::Black;
-Gwen::Font kUIFont(L"Consolas", 13.f);
+Gwen::Font kUIFont(L"Segoe UI", 12.f);
 
 class Container : public Contents {
  public:
@@ -124,6 +126,8 @@ class Container : public Contents {
     NOTREACHED() << "Child not found.";
   }
 
+  virtual bool CanHoldChildren() const { return true; }
+
  private:
   struct ChildData {
     Contents* contents;
@@ -140,7 +144,12 @@ class Container : public Contents {
     if (GetParent() == NULL)
       rect = rect.Contract(kOuterBorderSize);
     if (children_.size() == 1) {
-      children_[0].contents->SetScreenRect(rect);
+      ChildData* child = &children_[0];
+      if (!child->contents->CanHoldChildren()) {
+        rect.y += kTitleBarSize;
+        rect.h -= kTitleBarSize;
+      }
+      child->contents->SetScreenRect(rect);
       return;
     }
     DCHECK(mode_ == SplitHorizontal || mode_ == SplitVertical) << "TODO";
@@ -176,31 +185,26 @@ class Container : public Contents {
   }
 
   void RenderBorders(Gwen::Renderer::Base* renderer) {
-    /*
-    RenderChildBorders(renderer);
-    RenderFrame(renderer, GetScreenRect());
-    */
-  }
+    // This (and the resize code) is wrong. It should happen in the parent.
+    if (GetParent() == NULL)
+      RenderFrame(renderer, GetScreenRect());
+    if (children_.size() == 1 && !children_[0].contents->CanHoldChildren()) {
+      Rect rect =
+          children_[0].contents->GetScreenRect().Expand(kTitleBorderSize);
+      RenderFrame(renderer, rect);
 
-  void RenderChildBorders(Gwen::Renderer::Base* renderer) {
-    if (children_.size() != 1)
-      return;
-    Rect rect = children_[0].contents->GetScreenRect().Expand(kInnerBorderSize);
-
-    // Borders and splits. The between children will overlap.
-    RenderFrame(renderer, rect);
-
-    // Title bar.
-    renderer->SetDrawColor(kTitleColor);
-    renderer->DrawFilledRect(
-        Gwen::Rect(rect.x + kBorderSize, rect.y + kBorderSize,
-             rect.w - kBorderSize - kBorderSize, kTitleBarSize));
-      // TODO: Pass rect through.
-      renderer->SetDrawColor(kTitleBarTextColor);
-      renderer->RenderText(
-          &kUIFont,
-          Gwen::Point(rect.x + kBorderSize, rect.y + kBorderSize),
-          L"Title; TODO");
+      // And title bar.
+      renderer->SetDrawColor(kTitleColor);
+      renderer->DrawFilledRect(
+          Gwen::Rect(rect.x + kBorderSize, rect.y + kBorderSize,
+               rect.w - kBorderSize - kBorderSize, kTitleBarSize));
+        // TODO: Pass rect through.
+        renderer->SetDrawColor(kTitleBarTextColor);
+        renderer->RenderText(
+            &kUIFont,
+            Gwen::Point(rect.x + kBorderSize + 3, rect.y + kBorderSize),
+            L"Title; TODO");
+    }
   }
 
   void RenderFrame(Gwen::Renderer::Base* renderer, const Rect& rect) {
