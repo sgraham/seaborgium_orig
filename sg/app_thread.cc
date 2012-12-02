@@ -49,8 +49,7 @@ AppThread::AppThread(ID identifier)
   Initialize();
 }
 
-AppThread::AppThread(ID identifier,
-                                     MessageLoop* message_loop)
+AppThread::AppThread(ID identifier, MessageLoop* message_loop)
     : Thread(message_loop->thread_name().c_str()),
       identifier_(identifier) {
   set_message_loop(message_loop);
@@ -240,17 +239,17 @@ bool AppThread::IsMessageLoopValid(ID identifier) {
 
 // static
 bool AppThread::PostTask(ID identifier,
-                             const tracked_objects::Location& from_here,
-                             const base::Closure& task) {
+                         const tracked_objects::Location& from_here,
+                         const base::Closure& task) {
   return AppThread::PostTaskHelper(
       identifier, from_here, task, base::TimeDelta(), true);
 }
 
 // static
 bool AppThread::PostDelayedTask(ID identifier,
-                                    const tracked_objects::Location& from_here,
-                                    const base::Closure& task,
-                                    base::TimeDelta delay) {
+                                const tracked_objects::Location& from_here,
+                                const base::Closure& task,
+                                base::TimeDelta delay) {
   return AppThread::PostTaskHelper(
       identifier, from_here, task, delay, true);
 }

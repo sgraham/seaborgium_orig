@@ -243,7 +243,7 @@ def main():
     cflags += ['/D_DEBUG', '/MTd']
   else:
     cflags += ['/DNDEBUG', '/MT']
-  ldflags = ['/DEBUG'] #, '/SUBSYSTEM:WINDOWS']
+  ldflags = ['/DEBUG', '/SUBSYSTEM:WINDOWS']
   if not options.debug:
     cflags += ['/Ox', '/DNDEBUG', '/GL']
     ldflags += ['/LTCG', '/OPT:REF', '/OPT:ICF']
@@ -335,8 +335,10 @@ def main():
   n.comment('Main executable is library plus main() function.')
   objs = []
   objs += cxx('app_thread')
-  objs += cxx('main')
+  objs += cxx('application_window_win')
+  objs += cxx('gpu')
   objs += cxx('main_loop')
+  objs += cxx('main_win')
   objs += cxx('window_setup_win')
   sg = n.build(binary('sg'), 'link', inputs=objs,
                implicit=sg_lib + base_lib + gwen_lib + re2_lib,
