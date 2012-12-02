@@ -1,5 +1,6 @@
 out/
 *.pdb
+*.pyc
 *.ilk
 build.ninja
 tags

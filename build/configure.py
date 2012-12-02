@@ -198,7 +198,7 @@ def main():
   objext = '.obj'
 
   def src(filename):
-    return os.path.join('src', filename)
+    return os.path.join('sg', filename)
   def base_src(filename):
     return os.path.join('third_party', 'base', filename)
   def gwen_src(filename):
@@ -236,9 +236,9 @@ def main():
             '/DUNICODE', '/D_UNICODE',
             '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
             '/D_WIN32_WINNT=0x0601',
-            '-I.', '-Isrc', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
+            '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
             '-Ithird_party/re2',
-            '-FIglobal.h']
+            '-FIsg/global.h']
   if options.debug:
     cflags += ['/D_DEBUG', '/MTd']
   else:
