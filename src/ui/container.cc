@@ -12,6 +12,9 @@ Container::Container() : mode_(SplitHorizontal) {
 }
 
 Container::~Container() {
+  for (size_t i = 0; i < children_.size(); ++i) {
+    delete children_[i].contents;
+  }
 }
 
 void Container::Render(

@@ -11,6 +11,7 @@ class Container;
 class Workspace : public Gwen::Controls::Base {
  public:
   GWEN_CONTROL(Workspace, Gwen::Controls::Base);
+  virtual ~Workspace();
   void Render(Gwen::Skin::Base* skin);
 
  private:

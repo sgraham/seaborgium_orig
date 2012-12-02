@@ -67,6 +67,10 @@ GWEN_CONTROL_CONSTRUCTOR(Workspace) {
   SetFocusedContents(source->Child(0));
 }
 
+Workspace::~Workspace() {
+  delete root_;
+}
+
 void Workspace::Render(Gwen::Skin::Base* gwen_skin) {
   root_->SetScreenRect(Rect(0, 0, Width(), Height()));
   root_->Render(skin_, gwen_skin->GetRender());

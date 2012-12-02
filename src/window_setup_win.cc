@@ -184,6 +184,7 @@ int main(
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
   _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+  //_CrtSetBreakAlloc(85175);
 
   HRESULT hr = D2D1CreateFactory(
     D2D1_FACTORY_TYPE_SINGLE_THREADED,
