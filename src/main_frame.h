@@ -15,8 +15,10 @@ class MainFrame : public Gwen::Controls::DockBase {
   void PrintText(const Gwen::UnicodeString& str);
 
  private:
-  Gwen::Controls::ListBox* text_output_;
   SourceView* source_view_;
+  Gwen::Controls::ListBox* text_output_;
+  Gwen::Controls::ListBox* breakpoints_;
+  Gwen::Controls::ListBox* call_stack_;
 };
 
 #endif  // MAIN_FRAME_H_

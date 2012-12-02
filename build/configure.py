@@ -282,6 +282,7 @@ def main():
                'main_frame',
                'source_view',
                'top_level_frame',
+               'workspace',
               ]:
     objs += cxx(name)
   sg_lib = n.build(built('sg.lib'), 'ar', inputs=objs)

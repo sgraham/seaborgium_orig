@@ -9,6 +9,7 @@
 
 namespace Gwen { namespace Controls { class ListBox; } }
 class MainFrame;
+class Workspace;
 
 // Contains a status bar and a docking container
 class TopLevelFrame : public Gwen::Controls::Base {
@@ -22,6 +23,7 @@ class TopLevelFrame : public Gwen::Controls::Base {
   unsigned int frames_;
   double frame_sum_in_seconds_;
   double last_time_;
+  Workspace* workspace_;
 };
 
 #endif  // TOP_LEVEL_FRAME_H_

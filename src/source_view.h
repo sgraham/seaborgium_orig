@@ -3,6 +3,7 @@
 
 #include "base/string16.h"
 #include "Gwen/Controls/Base.h"
+#include "Gwen/Font.h"
 #include "Gwen/Structures.h"
 #include "lexer.h"
 
@@ -42,6 +43,7 @@ class SourceView : public Gwen::Controls::Base {
   float y_pixel_scroll_target_;
 
   std::vector<Line> lines_;
+  Gwen::Font font_;
 };
 
 #endif  // SOURCE_VIEW_H_

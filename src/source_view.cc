@@ -20,6 +20,8 @@ const int g_line_height = 16;
 GWEN_CONTROL_CONSTRUCTOR(SourceView) {
   y_pixel_scroll_ = 0.f;
   y_pixel_scroll_target_ = 0.f;
+  font_.facename = L"Consolas";
+  font_.size = 13.f;
   Dock(Pos::Fill);
   string16 text = L"File\nload\nfailed!";
   std::string utf8_text;
@@ -46,7 +48,7 @@ void SourceView::Render(Skin::Base* skin) {
       std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
   // Not quite right, but probably close enough.
   int largest_numbers_width = render->MeasureText(
-      skin->GetDefaultFont(),
+      &font_,
       base::IntToString16(lines_.size()).c_str()).x;
   for (size_t i = start_line; i < lines_.size(); ++i) {
     // Extra |g_line_height| added to height so that a full line is drawn at
@@ -60,20 +62,20 @@ void SourceView::Render(Skin::Base* skin) {
     // Line numbers.
     render->SetDrawColor(Gwen::Colors::Grey);
     render->RenderText(
-          skin->GetDefaultFont(),
-          Gwen::Point(left_margin, i * g_line_height - y_pixel_scroll_),
-          base::IntToString16(i + 1).c_str());
+        &font_,
+        Gwen::Point(left_margin, i * g_line_height - y_pixel_scroll_),
+        base::IntToString16(i + 1).c_str());
     size_t x = left_margin + largest_numbers_width + right_margin;
 
     // Source.
     for (size_t j = 0; j < lines_[i].size(); ++j) {
       render->SetDrawColor(ColorForTokenType(lines_[i][j].type));
       render->RenderText(
-          skin->GetDefaultFont(),
+          &font_,
           Gwen::Point(x, i * g_line_height - y_pixel_scroll_),
           lines_[i][j].text.c_str());
       x += render->MeasureText(
-          skin->GetDefaultFont(),
+          &font_,
           lines_[i][j].text.c_str()).x;
     }
   }

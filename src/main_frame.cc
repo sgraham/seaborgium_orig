@@ -17,6 +17,17 @@ GWEN_CONTROL_CONSTRUCTOR(MainFrame) {
   GetBottom()->GetTabControl()->AddPage("Output", text_output_);
   GetBottom()->SetHeight(200);
 
+  breakpoints_ = new Controls::ListBox(GetBottom());
+  GetRight()->GetTabControl()->AddPage("Breakpoints", breakpoints_);
+  GetRight()->SetHeight(300);
+  breakpoints_->AddItem(L"DockBase.cpp @ 13");
+
+  call_stack_ = new Controls::ListBox(GetBottom());
+  GetRight()->GetTabControl()->AddPage("Call Stack", call_stack_);
+  GetRight()->SetHeight(300);
+  call_stack_->AddItem(L"int func() a.cc, line 15");
+  call_stack_->AddItem(L"int main() main.cc, line 245");
+
   Controls::Layout::Center* center = new Controls::Layout::Center(this);
   center->Dock(Pos::Fill);
 

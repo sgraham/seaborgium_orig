@@ -6,12 +6,16 @@
 #include "Gwen/Controls/WindowControl.h"
 #include "Gwen/Platform.h"
 #include "main_frame.h"
+#include "workspace.h"
 
 using namespace Gwen;
 
 GWEN_CONTROL_CONSTRUCTOR(TopLevelFrame) {
   Dock(Pos::Fill);
 
+  workspace_ = new Workspace(this);
+
+  /*
   status_bar_ = new Controls::StatusBar(this);
   status_bar_->Dock(Pos::Bottom);
 
@@ -22,9 +26,11 @@ GWEN_CONTROL_CONSTRUCTOR(TopLevelFrame) {
   frame_sum_in_seconds_ = 0.0;
   last_time_ = Gwen::Platform::GetTimeInSeconds();
   frames_ = 0;
+  */
 }
 
 void TopLevelFrame::Render(Gwen::Skin::Base* skin) {
+  /*
   frames_++;
   double time = Gwen::Platform::GetTimeInSeconds();
   frame_sum_in_seconds_ += time - last_time_;
@@ -35,6 +41,7 @@ void TopLevelFrame::Render(Gwen::Skin::Base* skin) {
     frames_ = 0;
     frame_sum_in_seconds_ = 0;
   }
-
+*/
+  workspace_->Render(skin);
   BaseClass::Render(skin);
 }

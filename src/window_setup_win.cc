@@ -54,7 +54,7 @@ HWND CreateMainWindow() {
       width, height,
       NULL, NULL, GetModuleHandle(NULL), NULL);
 
-  ShowWindow(hWindow, SW_SHOW);
+  ShowWindow(hWindow, SW_SHOWMAXIMIZED);
   SetForegroundWindow(hWindow);
   SetFocus(hWindow);
 
@@ -98,7 +98,7 @@ void RunMain() {
 
   Gwen::Skin::TexturedBase skin(g_pRenderer);
   skin.Init("DefaultSkin.png");
-  skin.SetDefaultFont(L"Consolas", 12.f);
+  skin.SetDefaultFont(L"Segoe UI", 12.f);
 
   Gwen::Controls::Canvas* canvas = new Gwen::Controls::Canvas(&skin);
   canvas->SetSize(FrameBounds.right, FrameBounds.bottom);
