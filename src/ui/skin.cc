@@ -1,6 +1,8 @@
 #include "skin.h"
 
 // Temp manual config; Solarized Dark
+namespace {
+
 Gwen::Color kBase03(0, 43, 54);
 Gwen::Color kBase02(7, 54, 66);
 Gwen::Color kBase01(88, 110, 117);
@@ -18,6 +20,8 @@ Gwen::Color kBlue(38, 139, 210);
 Gwen::Color kCyan(42, 161, 152);
 Gwen::Color kGreen(133, 153, 0);
 
+}  // namespace
+
 ColorScheme::ColorScheme() :
     border_(0, 0, 0),
     background_(kBase03),
@@ -25,7 +29,18 @@ ColorScheme::ColorScheme() :
     title_bar_active_(kBase00),
     title_bar_text_active_(kBase3),
     title_bar_inactive_(kBase02),
-    title_bar_text_inactive_(kBase1) {
+    title_bar_text_inactive_(kBase1),
+    comment_(kBase01),
+    comment_preprocessor_(kOrange),
+    error_(kRed),
+    keyword_(kGreen),
+    keyword_type_(kYellow),
+    literal_number_(kCyan),
+    literal_string_(kViolet),
+    klass_(kBlue),
+    op_(kGreen),
+    margin_(kBase02),
+    margin_text_(kBase0) {
 }
 
 Skin::Skin() :

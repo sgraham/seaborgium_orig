@@ -37,7 +37,7 @@ class SourceView : public Gwen::Controls::Base, public Contents {
   typedef std::vector<ColoredText> Line;
 
   void SyntaxHighlight(const std::string& input, std::vector<Line>* lines);
-  Gwen::Color ColorForTokenType(Lexer::TokenType type);
+  const Gwen::Color& ColorForTokenType(const Skin& skin, Lexer::TokenType type);
   float GetLargestScrollLocation();
   void ClampScrollTarget();
   void ScrollView(int number_of_lines);

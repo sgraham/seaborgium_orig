@@ -19,6 +19,21 @@ class ColorScheme {
     return title_bar_text_inactive_;
   }
 
+  const Gwen::Color& comment() const { return comment_; }
+  const Gwen::Color& comment_preprocessor() const {
+    return comment_preprocessor_;
+  }
+  const Gwen::Color& error() const { return error_; }
+  const Gwen::Color& keyword() const { return keyword_; }
+  const Gwen::Color& keyword_type() const { return keyword_type_; }
+  const Gwen::Color& literal_number() const { return literal_number_; }
+  const Gwen::Color& literal_string() const { return literal_string_; }
+  const Gwen::Color& klass() const { return klass_; }
+  const Gwen::Color& op() const { return op_; }
+
+  const Gwen::Color& margin() const { return margin_; }
+  const Gwen::Color& margin_text() const { return margin_text_; }
+
  private:
   Gwen::Color border_;
   Gwen::Color background_;
@@ -27,6 +42,19 @@ class ColorScheme {
   Gwen::Color title_bar_text_active_;
   Gwen::Color title_bar_inactive_;
   Gwen::Color title_bar_text_inactive_;
+
+  Gwen::Color comment_;
+  Gwen::Color comment_preprocessor_;
+  Gwen::Color error_;
+  Gwen::Color keyword_;
+  Gwen::Color keyword_type_;
+  Gwen::Color literal_number_;
+  Gwen::Color literal_string_;
+  Gwen::Color klass_;
+  Gwen::Color op_;
+
+  Gwen::Color margin_;
+  Gwen::Color margin_text_;
 };
 
 class Skin {
