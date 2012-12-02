@@ -93,7 +93,7 @@ class Container : public Contents {
     RenderBorders(skin, renderer);
   }
 
-  virtual void AddChild(Contents* contents) {
+  virtual void AddChild(Contents* contents, const string16& title) {
     // Scale existing children by (N-1)/N of space (where N includes addition).
     double new_count = static_cast<double>(children_.size() + 1);
     double scale = static_cast<double>(children_.size()) / new_count;
@@ -103,8 +103,13 @@ class Container : public Contents {
     ChildData addition;
     addition.contents = contents;
     addition.fraction = 1.0;
+    addition.title = title;
     contents->SetParent(this);
     children_.push_back(addition);
+  }
+
+  virtual void AddChild(Contents* contents) {
+    AddChild(contents, L"<none>");
   }
 
   virtual void SetFraction(Contents* contents, double fraction) {
@@ -125,6 +130,7 @@ class Container : public Contents {
   struct ChildData {
     Contents* contents;
     double fraction;
+    string16 title;
   };
   std::vector<ChildData> children_;
 
@@ -204,7 +210,7 @@ class Container : public Contents {
             &kUIFont,
             Gwen::Point(rect.x + skin.border_size() + 3,
                         rect.y + skin.border_size()),
-            L"Title; TODO");
+            children_[0].title);
     }
   }
 
