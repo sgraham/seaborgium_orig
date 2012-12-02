@@ -236,9 +236,9 @@ def main():
             '/DUNICODE', '/D_UNICODE',
             '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
             '/D_WIN32_WINNT=0x0601',
-            '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
+            '-I.', '-Isrc', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
             '-Ithird_party/re2',
-            '-FIsrc/global.h']
+            '-FIglobal.h']
   if options.debug:
     cflags += ['/D_DEBUG', '/MTd']
   else:
@@ -283,6 +283,7 @@ def main():
                'source_view',
                'skin',
                'top_level_frame',
+               'ui\\container',
                'workspace',
               ]:
     objs += cxx(name)

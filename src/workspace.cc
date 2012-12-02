@@ -1,6 +1,7 @@
 #include "workspace.h"
 
-#include "container.h"
+#include "ui/container.h"
+#include "ui/solid_color.h"
 #include "Gwen/Gwen.h"
 
 Contents* Placeholder(const Skin& skin, const string16& name) {
