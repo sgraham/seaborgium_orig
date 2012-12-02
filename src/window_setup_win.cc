@@ -7,6 +7,7 @@
 #include <wincodec.h>
 
 #include "base/logging.h"
+#include "base/threading/thread_restrictions.h"
 #include "Gwen/Gwen.h"
 #include "Gwen/Input/Windows.h"
 #include "Gwen/Renderers/Direct2D.h"
@@ -210,6 +211,12 @@ int main(
   CreateDeviceResources();
   g_pRenderer = new Gwen::Renderer::Direct2D(
       g_pRT, g_pDWriteFactory, g_pWICFactory);
+
+  /* Works! SourceView is currently loading files until we have Thread
+   * and MessageLoop set up.
+  base::ThreadRestrictions::SetIOAllowed(false);
+  base::ThreadRestrictions::DisallowWaiting();
+  */
 
   RunMain();
 
