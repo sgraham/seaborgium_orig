@@ -4,6 +4,7 @@
 #include "Gwen/Gwen.h"
 #include "Gwen/Align.h"
 #include "Gwen/Utility.h"
+#include "skin.h"
 
 class Container;
 
@@ -14,6 +15,7 @@ class Workspace : public Gwen::Controls::Base {
 
  private:
   Container* root_;
+  Skin skin_;
 };
 
 #endif  // WORKSPACE_H_

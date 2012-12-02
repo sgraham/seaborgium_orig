@@ -15,19 +15,19 @@ GWEN_CONTROL_CONSTRUCTOR(Workspace) {
   Container* d = new Container;
   d->SetMode(Container::SplitVertical);
   root_->AddChild(d);
-  a->AddChild(new SolidColor(Gwen::Color(0, 0, 128)));
-  b->AddChild(new SolidColor(Gwen::Color(128, 0, 128)));
-  c->AddChild(new SolidColor(Gwen::Color(128, 128, 128)));
+  a->AddChild(new SolidColor(skin_.GetColorScheme().background()));
+  b->AddChild(new SolidColor(skin_.GetColorScheme().background()));
+  c->AddChild(new SolidColor(skin_.GetColorScheme().background()));
   Container* x = new Container;
   d->AddChild(x);
   Container* y = new Container;
   d->AddChild(y);
   d->SetFraction(x, 0.21);
-  x->AddChild(new SolidColor(Gwen::Color(128, 128, 0)));
-  y->AddChild(new SolidColor(Gwen::Color(0, 128, 128)));
+  x->AddChild(new SolidColor(skin_.GetColorScheme().background()));
+  y->AddChild(new SolidColor(skin_.GetColorScheme().background()));
 }
 
-void Workspace::Render(Gwen::Skin::Base* skin) {
+void Workspace::Render(Gwen::Skin::Base* gwen_skin) {
   root_->SetScreenRect(Rect(0, 0, Width(), Height()));
-  root_->Render(skin->GetRender());
+  root_->Render(&skin_, gwen_skin->GetRender());
 }

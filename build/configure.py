@@ -281,6 +281,7 @@ def main():
                'lexer_state',
                'main_frame',
                'source_view',
+               'skin',
                'top_level_frame',
                'workspace',
               ]:

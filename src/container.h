@@ -6,6 +6,7 @@
 #include "base/string_util.h"
 #include "base/string16.h"
 #include "Gwen/Structures.h"
+#include "skin.h"
 
 class Rect {
  public:
@@ -32,7 +33,7 @@ class Contents {
     return parent_;
   }
 
-  virtual void Render(Gwen::Renderer::Base* renderer) = 0;
+  virtual void Render(Skin* skin, Gwen::Renderer::Base* renderer) = 0;
 
   virtual void SetScreenRect(const Rect& rect) {
     rect_ = rect;
@@ -54,7 +55,7 @@ class SolidColor : public Contents {
   SolidColor(Gwen::Color color) : color_(color) {} 
   virtual ~SolidColor() {}
 
-  virtual void Render(Gwen::Renderer::Base* renderer) OVERRIDE {
+  virtual void Render(Skin* skin, Gwen::Renderer::Base* renderer) OVERRIDE {
     renderer->SetDrawColor(color_);
     const Rect& rect = GetScreenRect();
     renderer->DrawFilledRect(Gwen::Rect(rect.x, rect.y, rect.w, rect.h));
@@ -67,15 +68,12 @@ class SolidColor : public Contents {
 };
 
 const int kTitleBarSize = 18;
-const int kBorderSize = 5;
+const int kBorderSize = 3;
 const Rect kTitleBorderSize(
     kBorderSize, kBorderSize + kTitleBarSize, kBorderSize, kBorderSize);
 const Rect kOuterBorderSize(
     kBorderSize, kBorderSize, kBorderSize, kBorderSize);
 
-const Gwen::Color kBorderColor = Gwen::Colors::Red;
-const Gwen::Color kTitleColor = Gwen::Colors::Green;
-const Gwen::Color kTitleBarTextColor = Gwen::Colors::Black;
 Gwen::Font kUIFont(L"Segoe UI", 12.f);
 
 class Container : public Contents {
@@ -94,10 +92,10 @@ class Container : public Contents {
     mode_ = mode;
   }
 
-  virtual void Render(Gwen::Renderer::Base* renderer) OVERRIDE {
+  virtual void Render(Skin* skin, Gwen::Renderer::Base* renderer) OVERRIDE {
     PropagateSizeChanges();
-    RenderChildren(renderer);
-    RenderBorders(renderer);
+    RenderChildren(skin, renderer);
+    RenderBorders(skin, renderer);
   }
 
   virtual void AddChild(Contents* contents) {
@@ -178,28 +176,28 @@ class Container : public Contents {
     DCHECK(last_fraction == 1.0);
   }
 
-  void RenderChildren(Gwen::Renderer::Base* renderer) {
+  void RenderChildren(Skin* skin, Gwen::Renderer::Base* renderer) {
     for (size_t i = 0; i < children_.size(); ++i) {
-      children_[i].contents->Render(renderer);
+      children_[i].contents->Render(skin, renderer);
     }
   }
 
-  void RenderBorders(Gwen::Renderer::Base* renderer) {
-    // This (and the resize code) is wrong. It should happen in the parent.
+  void RenderBorders(Skin* skin, Gwen::Renderer::Base* renderer) {
+    // TODO: This (and the resize code) is wrong.
     if (GetParent() == NULL)
-      RenderFrame(renderer, GetScreenRect());
+      RenderFrame(skin, renderer, GetScreenRect());
     if (children_.size() == 1 && !children_[0].contents->CanHoldChildren()) {
       Rect rect =
           children_[0].contents->GetScreenRect().Expand(kTitleBorderSize);
-      RenderFrame(renderer, rect);
+      RenderFrame(skin, renderer, rect);
 
       // And title bar.
-      renderer->SetDrawColor(kTitleColor);
+      renderer->SetDrawColor(skin->GetColorScheme().title_bar_active());
       renderer->DrawFilledRect(
           Gwen::Rect(rect.x + kBorderSize, rect.y + kBorderSize,
                rect.w - kBorderSize - kBorderSize, kTitleBarSize));
-        // TODO: Pass rect through.
-        renderer->SetDrawColor(kTitleBarTextColor);
+        // TODO: Pass rect through to renderer.
+        renderer->SetDrawColor(skin->GetColorScheme().title_bar_text_active());
         renderer->RenderText(
             &kUIFont,
             Gwen::Point(rect.x + kBorderSize + 3, rect.y + kBorderSize),
@@ -207,8 +205,9 @@ class Container : public Contents {
     }
   }
 
-  void RenderFrame(Gwen::Renderer::Base* renderer, const Rect& rect) {
-    renderer->SetDrawColor(kBorderColor);
+  void RenderFrame(
+      Skin* skin, Gwen::Renderer::Base* renderer, const Rect& rect) {
+    renderer->SetDrawColor(skin->GetColorScheme().border());
     renderer->DrawFilledRect(
         Gwen::Rect(rect.x, rect.y, rect.w, kBorderSize));
     renderer->DrawFilledRect(
