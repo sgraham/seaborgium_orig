@@ -336,7 +336,7 @@ def main():
   objs = []
   objs += cxx('app_thread')
   objs += cxx('application_window_win')
-  objs += cxx('gpu')
+  objs += cxx('gpu_win')
   objs += cxx('main_loop')
   objs += cxx('main_win')
   objs += cxx('window_setup_win')

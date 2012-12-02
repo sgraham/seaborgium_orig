@@ -30,14 +30,13 @@ class ApplicationWindowWin : public ApplicationWindow {
  public:
   ApplicationWindowWin() : got_create_(false), got_valid_hwnd_(false) {
     CreateHwnd();
-    // TODO(scottmg): Move to after gpu acks initialization.
-    Show();
   }
 
   virtual ~ApplicationWindowWin() {
   }
 
-  void Show() {
+  virtual void Show() OVERRIDE {
+    DCHECK(AppThread::CurrentlyOn(AppThread::UI));
     ShowWindow(hwnd_, SW_SHOWMAXIMIZED);
     SetForegroundWindow(hwnd_);
     SetFocus(hwnd_);
@@ -49,9 +48,8 @@ class ApplicationWindowWin : public ApplicationWindow {
       case WM_ERASEBKGND:
         return 1;
       case WM_PAINT:
-        // TODO(rendering) If this has to be sync, then probably drop gpu thread
-        // and move drawing into UI thread.
-        AppThread::PostTask(AppThread::GPU, FROM_HERE, base::Bind(&Gpu::Paint));
+        AppThread::PostTask(
+            AppThread::GPU, FROM_HERE, base::Bind(&Gpu::Paint, this));
         ValidateRect(hwnd_, NULL);
         return 0;
       case WM_SIZE:
@@ -60,8 +58,15 @@ class ApplicationWindowWin : public ApplicationWindow {
         //AppThread::PostTask(
             //AppThread::GPU, FROM_HERE, base::Bind(&Gpu::Resize, client_rect));
         return 0;
+      case WM_CREATE:
+        DCHECK(got_valid_hwnd_);
+        AppThread::PostTask(
+            AppThread::GPU,
+            FROM_HERE,
+            base::Bind(&Gpu::InitializeForRenderingSurface, this, hwnd_));
+        return 0;
       case WM_CLOSE:
-        // TODO(scottmg): Probably not where we want this.
+        // TODO(scottmg): Probably not where this should be.
         MessageLoopForUI::current()->Quit();
     }
     return DefWindowProc(hwnd_, msg, w_param, l_param);

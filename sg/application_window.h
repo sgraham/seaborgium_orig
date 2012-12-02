@@ -5,10 +5,14 @@
 #ifndef SG_APPLICATION_WINDOW_H_
 #define SG_APPLICATION_WINDOW_H_
 
+#include "sg/gpu.h"
+
 class ApplicationWindow {
  public:
   ApplicationWindow() {}
   virtual ~ApplicationWindow() {}
+
+  virtual void Show() = 0;
 
   static ApplicationWindow* Create();
 };

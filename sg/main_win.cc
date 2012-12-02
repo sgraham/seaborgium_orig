@@ -14,8 +14,8 @@ int RunMain(HINSTANCE instance) {
   main_loop->CreateThreads();
   scoped_ptr<ApplicationWindow> app_window(ApplicationWindow::Create());
   main_loop->MainMessageLoopRun();
-  app_window.reset();
   main_loop->ShutdownThreadsAndCleanUp();
+  app_window.reset();
   return main_loop->GetResultCode();
 }
 

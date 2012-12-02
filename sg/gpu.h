@@ -5,9 +5,25 @@
 #ifndef SG_GPU_H_
 #define SG_GPU_H_
 
+#include "base/basictypes.h"
+
+// TODO(rendering): Maybe move this to a gpu_win.h.
+#if defined(OS_WIN)
+#include <windows.h>
+typedef HWND RenderingSurface;
+#endif
+
+class ApplicationWindow;
+
 class Gpu {
  public:
-  static void Paint();
+  static void Paint(ApplicationWindow* window);
+  static void InitializeForRenderingSurface(
+      ApplicationWindow* window,
+      RenderingSurface surface);
+
+ private:
+  static void OneTimeInitialization();
 };
 
 #endif  // SG_GPU_H_
