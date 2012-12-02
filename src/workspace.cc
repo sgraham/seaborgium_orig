@@ -22,6 +22,7 @@ GWEN_CONTROL_CONSTRUCTOR(Workspace) {
   d->AddChild(x);
   Container* y = new Container;
   d->AddChild(y);
+  d->SetFraction(x, 0.21);
   x->AddChild(new SolidColor(Gwen::Color(128, 128, 0)));
   y->AddChild(new SolidColor(Gwen::Color(0, 128, 128)));
 }

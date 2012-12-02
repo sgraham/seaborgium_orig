@@ -112,6 +112,18 @@ class Container : public Contents {
     children_.push_back(addition);
   }
 
+  virtual void SetFraction(Contents* contents, double fraction) {
+    // TODO: Verify legal, or renormalize.
+    // TODO: Maybe should be stored in child?
+    for (size_t i = 0; i < children_.size(); ++i) {
+      if (children_[i].contents == contents) {
+        children_[i].fraction = fraction;
+        return;
+      }
+    }
+    NOTREACHED() << "Child not found.";
+  }
+
  private:
   struct ChildData {
     Contents* contents;
@@ -139,19 +151,20 @@ class Container : public Contents {
     // TODO: This might have some rounding problems.
     for (size_t i = 0; i < children_.size(); ++i) {
       Rect result = rect; // For x/w or y/h that isn't changed below.
+      ChildData* child = &children_[i];
       double for_child;
       if (mode_ == SplitHorizontal) {
         result.x = (int)current;
-        for_child = (children_[i].fraction - last_fraction) * remaining;
+        for_child = (child->fraction - last_fraction) * remaining;
         result.w = for_child;
       } else {
         result.y = (int)current;
-        for_child = (children_[i].fraction - last_fraction) * remaining;
+        for_child = (child->fraction - last_fraction) * remaining;
         result.h = for_child;
       }
-      children_[i].contents->SetScreenRect(result);
+      child->contents->SetScreenRect(result);
       current += for_child + kBorderSize;
-      last_fraction = children_[i].fraction;
+      last_fraction = child->fraction;
     }
     DCHECK(last_fraction == 1.0);
   }
