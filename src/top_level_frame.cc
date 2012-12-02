@@ -5,7 +5,6 @@
 #include "Gwen/Controls/TabControl.h"
 #include "Gwen/Controls/WindowControl.h"
 #include "Gwen/Platform.h"
-#include "main_frame.h"
 #include "workspace.h"
 
 using namespace Gwen;

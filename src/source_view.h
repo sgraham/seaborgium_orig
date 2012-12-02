@@ -2,6 +2,7 @@
 #define SOURCE_VIEW_H_
 
 #include "base/string16.h"
+#include "ui/contents.h"
 #include "Gwen/Controls/Base.h"
 #include "Gwen/Font.h"
 #include "Gwen/Structures.h"
@@ -10,12 +11,14 @@
 #include <vector>
 
 namespace Gwen { namespace Skin { class Base; }}
+class Skin;
 
-class SourceView : public Gwen::Controls::Base {
+class SourceView : public Gwen::Controls::Base, public Contents {
  public:
   GWEN_CONTROL(SourceView, Gwen::Controls::Base);
 
   virtual void Render(Gwen::Skin::Base* skin);
+  virtual void Render(const Skin& skin, Gwen::Renderer::Base* renderer);
 
   virtual bool OnMouseWheeled(int delta);
   virtual bool OnKeyHome(bool down);

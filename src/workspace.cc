@@ -3,7 +3,10 @@
 #include "ui/container.h"
 #include "ui/focus.h"
 #include "ui/solid_color.h"
+#include "source_view.h"
 #include "Gwen/Gwen.h"
+
+namespace {
 
 Container* Placeholder(const Skin& skin, const string16& name) {
   Container* container = new Container;
@@ -11,6 +14,15 @@ Container* Placeholder(const Skin& skin, const string16& name) {
                       name);
   return container;
 }
+
+Container* MakeSourceView(Gwen::Controls::Base* parent, const string16& source_file) {
+  Container* container = new Container;
+  SourceView* source_view = new SourceView(parent);
+  container->AddChild(source_view, source_file);
+  return container;
+}
+
+}  // namespace
 
 GWEN_CONTROL_CONSTRUCTOR(Workspace) {
   Dock(Gwen::Pos::Fill);
@@ -29,7 +41,7 @@ GWEN_CONTROL_CONSTRUCTOR(Workspace) {
   bottom->AddChild(log);
   bottom->SetFraction(output, .6);
 
-  Container* source = Placeholder(skin_, L"src\\blah_blah.cc");
+  Container* source = MakeSourceView(this, L"sample_source_code_file.cc");
   Container* middle = new Container;
   middle->SetMode(Container::SplitVertical);
   Container* views = new Container;

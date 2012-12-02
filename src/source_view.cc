@@ -1,6 +1,7 @@
 #include "source_view.h"
 
 #include "base/file_util.h"
+#include "base/logging.h"
 #include "base/string_piece.h"
 #include "base/string_number_conversions.h"
 #include "base/utf_string_conversions.h"
@@ -30,24 +31,25 @@ GWEN_CONTROL_CONSTRUCTOR(SourceView) {
     SyntaxHighlight(utf8_text, &lines_);
   }
   SetKeyboardInputEnabled(true);
-  GetCanvas()->SetDrawBackground(true);
-  GetCanvas()->SetBackgroundColor(Colors::White);
   Focus();
 }
 
+void SourceView::Render(Gwen::Skin::Base* skin) {
+}
+
 // TODO: Brutal efficiency.
-void SourceView::Render(Skin::Base* skin) {
+void SourceView::Render(const ::Skin& skin, Gwen::Renderer::Base* renderer) {
   // Ease to target.
   y_pixel_scroll_ += (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.2f;
   if (fabsf(y_pixel_scroll_target_ - y_pixel_scroll_) < 1.f)
     y_pixel_scroll_ = y_pixel_scroll_target_;
 
-  GetCanvas()->SetBackgroundColor(Colors::White);
-  Gwen::Renderer::Base* render = skin->GetRender();
+  renderer->SetDrawColor(Gwen::Colors::White);
+  renderer->DrawFilledRect(Gwen::Rect(0, 0, Width(), Height()));
   size_t start_line =
       std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
   // Not quite right, but probably close enough.
-  int largest_numbers_width = render->MeasureText(
+  int largest_numbers_width = renderer->MeasureText(
       &font_,
       base::IntToString16(lines_.size()).c_str()).x;
   for (size_t i = start_line; i < lines_.size(); ++i) {
@@ -60,8 +62,8 @@ void SourceView::Render(Skin::Base* skin) {
     static const int right_margin = 15;
 
     // Line numbers.
-    render->SetDrawColor(Gwen::Colors::Grey);
-    render->RenderText(
+    renderer->SetDrawColor(Gwen::Colors::Grey);
+    renderer->RenderText(
         &font_,
         Gwen::Point(left_margin, i * g_line_height - y_pixel_scroll_),
         base::IntToString16(i + 1).c_str());
@@ -69,12 +71,12 @@ void SourceView::Render(Skin::Base* skin) {
 
     // Source.
     for (size_t j = 0; j < lines_[i].size(); ++j) {
-      render->SetDrawColor(ColorForTokenType(lines_[i][j].type));
-      render->RenderText(
+      renderer->SetDrawColor(ColorForTokenType(lines_[i][j].type));
+      renderer->RenderText(
           &font_,
           Gwen::Point(x, i * g_line_height - y_pixel_scroll_),
           lines_[i][j].text.c_str());
-      x += render->MeasureText(
+      x += renderer->MeasureText(
           &font_,
           lines_[i][j].text.c_str()).x;
     }

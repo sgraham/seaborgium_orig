@@ -279,7 +279,6 @@ def main():
                'cpp_lexer',
                'lexer',
                'lexer_state',
-               'main_frame',
                'source_view',
                'top_level_frame',
                'ui\\container',

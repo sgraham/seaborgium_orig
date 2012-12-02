@@ -45,8 +45,21 @@ HRESULT CreateDeviceResources() {
         D2D1::HwndRenderTargetProperties(g_pHWND, size),
         &g_pRT);
 
+    g_pRT->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
+
+    IDWriteRenderingParams *default_params;
+    IDWriteRenderingParams *custom_params;
+    hr = g_pDWriteFactory->CreateRenderingParams(&default_params);
+    hr = g_pDWriteFactory->CreateCustomRenderingParams(
+        default_params->GetGamma(),
+        default_params->GetEnhancedContrast(),
+        default_params->GetClearTypeLevel(),
+        default_params->GetPixelGeometry(),
+        DWRITE_RENDERING_MODE_GDI_NATURAL,
+        &custom_params);
+    g_pRT->SetTextRenderingParams(custom_params);
+
     if (SUCCEEDED(hr) && g_pRenderer != NULL) {
-      g_pRT->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
       g_pRenderer->DeviceAcquired(g_pRT);
     }
   }
@@ -131,7 +144,7 @@ void RunMain() {
 
   g_main_canvas = new Gwen::Controls::Canvas(&skin);
   g_main_canvas->SetSize(FrameBounds.right, FrameBounds.bottom);
-  g_main_canvas->SetDrawBackground(true);
+  g_main_canvas->SetDrawBackground(false);
 
   TopLevelFrame* top_level = new TopLevelFrame(g_main_canvas);
   top_level->SetPos(0, 0);
