@@ -25,41 +25,9 @@ ID2D1Factory* g_pD2DFactory = NULL;
 IDWriteFactory* g_pDWriteFactory = NULL;
 IWICImagingFactory* g_pWICFactory = NULL;
 ID2D1HwndRenderTarget* g_pRT = NULL; // this is device-specific
+Gwen::Controls::Canvas* g_main_canvas = NULL;
 
 Gwen::Renderer::Direct2D* g_pRenderer = NULL;
-
-HWND CreateMainWindow() {
-  WNDCLASS  wc;
-  ZeroMemory(&wc, sizeof(wc));
-
-  wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-  wc.lpfnWndProc = DefWindowProc;
-  wc.hInstance = GetModuleHandle(NULL);
-  wc.lpszClassName = L"SeaborgiumWindow";
-  wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-
-  RegisterClass(&wc);
-
-  int width = 1280;
-  int height = 1024;
-  RECT rect;
-  SystemParametersInfo(SPI_GETWORKAREA, 0, &rect, 0);
-  HWND hWindow = CreateWindowExW(
-      (WS_EX_APPWINDOW | WS_EX_WINDOWEDGE),
-      wc.lpszClassName,
-      L"Seaborgium",
-      WS_OVERLAPPEDWINDOW,
-      (rect.right - rect.left - width) / 2 + rect.left,
-      (rect.bottom - rect.top - height) / 2 + rect.top,
-      width, height,
-      NULL, NULL, GetModuleHandle(NULL), NULL);
-
-  ShowWindow(hWindow, SW_SHOWMAXIMIZED);
-  SetForegroundWindow(hWindow);
-  SetFocus(hWindow);
-
-  return hWindow;
-}
 
 HRESULT CreateDeviceResources() {
   HRESULT hr = S_OK;
@@ -85,11 +53,72 @@ HRESULT CreateDeviceResources() {
   return hr;
 }
 
-void discardDeviceResources() {
+void DiscardDeviceResources() {
   if (g_pRT != NULL) {
     g_pRT->Release();
     g_pRT = NULL;
   }
+}
+
+void Paint() {
+  if (SUCCEEDED(CreateDeviceResources())) {
+    g_pRT->BeginDraw();
+    g_pRT->SetTransform(D2D1::Matrix3x2F::Identity());
+    g_main_canvas->RenderCanvas();
+    HRESULT hr = g_pRT->EndDraw();
+    if (hr == D2DERR_RECREATE_TARGET) {
+      DiscardDeviceResources();
+      g_pRenderer->DeviceLost();
+    }
+  }
+}
+
+LRESULT WINAPI WindowProc(
+    HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) {
+  switch (msg) {
+    case WM_ERASEBKGND:
+      return 1;
+    case WM_PAINT:
+      Paint();
+    case WM_SIZE:
+      if (g_pRT) {
+        RECT rc;
+        GetClientRect(hwnd, &rc);
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
+        g_pRT->Resize(size);
+        g_main_canvas->SetSize(rc.right, rc.bottom);
+      }
+      return 0;
+  }
+  return DefWindowProc(hwnd, msg, w_param, l_param);
+}
+
+HWND CreateMainWindow() {
+  WNDCLASS  wc;
+  ZeroMemory(&wc, sizeof(wc));
+
+  wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+  wc.lpfnWndProc = WindowProc;
+  wc.hInstance = GetModuleHandle(NULL);
+  wc.lpszClassName = L"SeaborgiumWindow";
+  wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+  wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
+  RegisterClass(&wc);
+
+  int width = 1280;
+  int height = 1024;
+  RECT rect;
+  SystemParametersInfo(SPI_GETWORKAREA, 0, &rect, 0);
+  HWND hWindow = CreateWindowExW(
+      (WS_EX_APPWINDOW | WS_EX_WINDOWEDGE),
+      wc.lpszClassName,
+      L"Seaborgium",
+      WS_OVERLAPPEDWINDOW,
+      (rect.right - rect.left - width) / 2 + rect.left,
+      (rect.bottom - rect.top - height) / 2 + rect.top,
+      width, height,
+      NULL, NULL, GetModuleHandle(NULL), NULL);
+  return hWindow;
 }
 
 void RunMain() {
@@ -100,18 +129,22 @@ void RunMain() {
   skin.Init("DefaultSkin.png");
   skin.SetDefaultFont(L"Segoe UI", 12.f);
 
-  Gwen::Controls::Canvas* canvas = new Gwen::Controls::Canvas(&skin);
-  canvas->SetSize(FrameBounds.right, FrameBounds.bottom);
-  canvas->SetDrawBackground(true);
+  g_main_canvas = new Gwen::Controls::Canvas(&skin);
+  g_main_canvas->SetSize(FrameBounds.right, FrameBounds.bottom);
+  g_main_canvas->SetDrawBackground(true);
 
-  TopLevelFrame* top_level = new TopLevelFrame(canvas);
+  TopLevelFrame* top_level = new TopLevelFrame(g_main_canvas);
   top_level->SetPos(0, 0);
 
   Gwen::Input::Windows GwenInput;
-  GwenInput.Initialize(canvas);
+  GwenInput.Initialize(g_main_canvas);
+
+  ShowWindow(g_pHWND, SW_SHOWMAXIMIZED);
+  SetForegroundWindow(g_pHWND);
+  SetFocus(g_pHWND);
 
   MSG msg;
-  while(true) {
+  for (;;) {
     if (!IsWindowVisible(g_pHWND))
       break;
 
@@ -123,22 +156,10 @@ void RunMain() {
       DispatchMessage(&msg);
     }
 
-    {
-      if (SUCCEEDED(CreateDeviceResources())) {
-        g_pRT->BeginDraw();
-        g_pRT->SetTransform(D2D1::Matrix3x2F::Identity());
-        g_pRT->Clear(D2D1::ColorF(D2D1::ColorF::White));
-        canvas->RenderCanvas();
-        HRESULT hr = g_pRT->EndDraw();
-        if (hr == D2DERR_RECREATE_TARGET) {
-          discardDeviceResources();
-          g_pRenderer->DeviceLost();
-        }
-      }
-    }
+    Paint();
   }
 
-  delete canvas;
+  delete g_main_canvas;
 }
 
 int main(
