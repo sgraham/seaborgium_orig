@@ -243,7 +243,7 @@ def main():
     cflags += ['/D_DEBUG', '/MTd']
   else:
     cflags += ['/DNDEBUG', '/MT']
-  ldflags = ['/DEBUG']
+  ldflags = ['/DEBUG'] #, '/SUBSYSTEM:WINDOWS']
   if not options.debug:
     cflags += ['/Ox', '/DNDEBUG', '/GL']
     ldflags += ['/LTCG', '/OPT:REF', '/OPT:ICF']
@@ -333,7 +333,10 @@ def main():
   all_targets = []
 
   n.comment('Main executable is library plus main() function.')
-  objs = cxx('window_setup_win')
+  objs = []
+  objs += cxx('main')
+  objs += cxx('main_loop')
+  objs += cxx('window_setup_win')
   sg = n.build(binary('sg'), 'link', inputs=objs,
                implicit=sg_lib + base_lib + gwen_lib + re2_lib,
                variables=[('libs', libs)])
@@ -344,7 +347,7 @@ def main():
 
   variables = []
   test_cflags = None
-  test_ldflags = None
+  test_ldflags = ['/SUBSYSTEM:CONSOLE']
   test_libs = libs
   objs = []
   path = 'third_party/testing/gtest'
