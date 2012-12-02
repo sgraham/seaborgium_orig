@@ -334,6 +334,7 @@ def main():
 
   n.comment('Main executable is library plus main() function.')
   objs = []
+  objs += cxx('app_thread')
   objs += cxx('main')
   objs += cxx('main_loop')
   objs += cxx('window_setup_win')

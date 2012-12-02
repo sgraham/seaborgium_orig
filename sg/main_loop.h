@@ -9,6 +9,8 @@
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop.h"
 
+class AppThread;
+
 class MainLoop {
  public:
   MainLoop();
@@ -23,6 +25,7 @@ class MainLoop {
 
  private:
   scoped_ptr<MessageLoop> main_message_loop_;
+  scoped_ptr<AppThread> main_thread_;
 
   int result_code_;
 
