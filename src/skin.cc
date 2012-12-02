@@ -27,3 +27,8 @@ ColorScheme::ColorScheme() :
     title_bar_inactive_(kBase03),
     title_bar_text_inactive_(kBase02) {
 }
+
+Skin::Skin() :
+    title_bar_size_(19),
+    border_size_(3) {
+}

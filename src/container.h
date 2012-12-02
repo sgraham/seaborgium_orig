@@ -33,7 +33,7 @@ class Contents {
     return parent_;
   }
 
-  virtual void Render(Skin* skin, Gwen::Renderer::Base* renderer) = 0;
+  virtual void Render(const Skin& skin, Gwen::Renderer::Base* renderer) = 0;
 
   virtual void SetScreenRect(const Rect& rect) {
     rect_ = rect;
@@ -55,7 +55,8 @@ class SolidColor : public Contents {
   SolidColor(Gwen::Color color) : color_(color) {} 
   virtual ~SolidColor() {}
 
-  virtual void Render(Skin* skin, Gwen::Renderer::Base* renderer) OVERRIDE {
+  virtual void Render(
+      const Skin& skin, Gwen::Renderer::Base* renderer) OVERRIDE {
     renderer->SetDrawColor(color_);
     const Rect& rect = GetScreenRect();
     renderer->DrawFilledRect(Gwen::Rect(rect.x, rect.y, rect.w, rect.h));
@@ -66,13 +67,6 @@ class SolidColor : public Contents {
 
   DISALLOW_COPY_AND_ASSIGN(SolidColor);
 };
-
-const int kTitleBarSize = 18;
-const int kBorderSize = 3;
-const Rect kTitleBorderSize(
-    kBorderSize, kBorderSize + kTitleBarSize, kBorderSize, kBorderSize);
-const Rect kOuterBorderSize(
-    kBorderSize, kBorderSize, kBorderSize, kBorderSize);
 
 Gwen::Font kUIFont(L"Segoe UI", 12.f);
 
@@ -92,8 +86,9 @@ class Container : public Contents {
     mode_ = mode;
   }
 
-  virtual void Render(Skin* skin, Gwen::Renderer::Base* renderer) OVERRIDE {
-    PropagateSizeChanges();
+  virtual void Render(
+      const Skin& skin, Gwen::Renderer::Base* renderer) OVERRIDE {
+    PropagateSizeChanges(skin);
     RenderChildren(skin, renderer);
     RenderBorders(skin, renderer);
   }
@@ -135,24 +130,28 @@ class Container : public Contents {
 
   // Recalculate the screen rect for each of our children (assuming our |rect_|
   // is already up to date here).
-  void PropagateSizeChanges() {
+  void PropagateSizeChanges(const Skin& skin) {
     if (children_.size() == 0)
       return;
     Rect rect = GetScreenRect();
-    if (GetParent() == NULL)
-      rect = rect.Contract(kOuterBorderSize);
+    if (GetParent() == NULL) {
+      Rect outer_border_size(
+          skin.border_size(), skin.border_size(),
+          skin.border_size(), skin.border_size());
+      rect = rect.Contract(outer_border_size);
+    }
     if (children_.size() == 1) {
       ChildData* child = &children_[0];
       if (!child->contents->CanHoldChildren()) {
-        rect.y += kTitleBarSize;
-        rect.h -= kTitleBarSize;
+        rect.y += skin.title_bar_size();
+        rect.h -= skin.title_bar_size();
       }
       child->contents->SetScreenRect(rect);
       return;
     }
     DCHECK(mode_ == SplitHorizontal || mode_ == SplitVertical) << "TODO";
     int remaining = (mode_ == SplitHorizontal ? rect.w : rect.h) -
-        kBorderSize * (children_.size() - 1);
+        skin.border_size() * (children_.size() - 1);
     double current = mode_ == SplitHorizontal ? rect.x : rect.y;
     double last_fraction = 0.0;
     // TODO: This might have some rounding problems.
@@ -170,52 +169,58 @@ class Container : public Contents {
         result.h = for_child;
       }
       child->contents->SetScreenRect(result);
-      current += for_child + kBorderSize;
+      current += for_child + skin.border_size();
       last_fraction = child->fraction;
     }
     DCHECK(last_fraction == 1.0);
   }
 
-  void RenderChildren(Skin* skin, Gwen::Renderer::Base* renderer) {
+  void RenderChildren(const Skin& skin, Gwen::Renderer::Base* renderer) {
     for (size_t i = 0; i < children_.size(); ++i) {
       children_[i].contents->Render(skin, renderer);
     }
   }
 
-  void RenderBorders(Skin* skin, Gwen::Renderer::Base* renderer) {
+  void RenderBorders(const Skin& skin, Gwen::Renderer::Base* renderer) {
     // TODO: This (and the resize code) is wrong.
     if (GetParent() == NULL)
       RenderFrame(skin, renderer, GetScreenRect());
+    Rect title_border_size(
+        skin.border_size(), skin.border_size() + skin.title_bar_size(),
+        skin.border_size(), skin.border_size());
     if (children_.size() == 1 && !children_[0].contents->CanHoldChildren()) {
       Rect rect =
-          children_[0].contents->GetScreenRect().Expand(kTitleBorderSize);
+          children_[0].contents->GetScreenRect().Expand(title_border_size);
       RenderFrame(skin, renderer, rect);
 
       // And title bar.
-      renderer->SetDrawColor(skin->GetColorScheme().title_bar_active());
+      renderer->SetDrawColor(skin.GetColorScheme().title_bar_active());
       renderer->DrawFilledRect(
-          Gwen::Rect(rect.x + kBorderSize, rect.y + kBorderSize,
-               rect.w - kBorderSize - kBorderSize, kTitleBarSize));
+          Gwen::Rect(rect.x + skin.border_size(), rect.y + skin.border_size(),
+               rect.w - skin.border_size() * 2, skin.title_bar_size()));
         // TODO: Pass rect through to renderer.
-        renderer->SetDrawColor(skin->GetColorScheme().title_bar_text_active());
+        renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_active());
         renderer->RenderText(
             &kUIFont,
-            Gwen::Point(rect.x + kBorderSize + 3, rect.y + kBorderSize),
+            Gwen::Point(rect.x + skin.border_size() + 3,
+                        rect.y + skin.border_size()),
             L"Title; TODO");
     }
   }
 
   void RenderFrame(
-      Skin* skin, Gwen::Renderer::Base* renderer, const Rect& rect) {
-    renderer->SetDrawColor(skin->GetColorScheme().border());
+      const Skin& skin, Gwen::Renderer::Base* renderer, const Rect& rect) {
+    renderer->SetDrawColor(skin.GetColorScheme().border());
     renderer->DrawFilledRect(
-        Gwen::Rect(rect.x, rect.y, rect.w, kBorderSize));
+        Gwen::Rect(rect.x, rect.y, rect.w, skin.border_size()));
     renderer->DrawFilledRect(
-        Gwen::Rect(rect.x, rect.y, kBorderSize, rect.h));
+        Gwen::Rect(rect.x, rect.y, skin.border_size(), rect.h));
     renderer->DrawFilledRect(Gwen::Rect(
-        rect.x + rect.w - kBorderSize, rect.y, kBorderSize, rect.h));
+        rect.x + rect.w - skin.border_size(),
+        rect.y, skin.border_size(), rect.h));
     renderer->DrawFilledRect(Gwen::Rect(
-        rect.x, rect.y + rect.h - kBorderSize, rect.w, kBorderSize));
+        rect.x, rect.y + rect.h - skin.border_size(),
+        rect.w, skin.border_size()));
   }
 
   Mode mode_;

@@ -31,13 +31,18 @@ class ColorScheme {
 
 class Skin {
  public:
-  Skin() {}
-  virtual ~Skin() {}
+  Skin();
 
   const ColorScheme& GetColorScheme() const { return color_scheme_; }
 
+  int title_bar_size() const { return title_bar_size_; }
+  int border_size() const { return border_size_; }
+
  private:
   ColorScheme color_scheme_;
+
+  int title_bar_size_;
+  int border_size_;
 };
 
 #endif  // SKIN_H_

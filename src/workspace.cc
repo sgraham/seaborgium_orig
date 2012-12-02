@@ -29,5 +29,5 @@ GWEN_CONTROL_CONSTRUCTOR(Workspace) {
 
 void Workspace::Render(Gwen::Skin::Base* gwen_skin) {
   root_->SetScreenRect(Rect(0, 0, Width(), Height()));
-  root_->Render(&skin_, gwen_skin->GetRender());
+  root_->Render(skin_, gwen_skin->GetRender());
 }
