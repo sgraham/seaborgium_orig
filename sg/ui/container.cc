@@ -118,23 +118,34 @@ void Container::PropagateSizeChanges() {
 }
 
 void Container::RenderChildren(Gwen::Renderer::Base* renderer) {
+  Gwen::Point old_render_offset = renderer->GetRenderOffset();
   for (size_t i = 0; i < children_.size(); ++i) {
+    const Rect& screen_rect = children_[i].contents->GetScreenRect();
+    renderer->SetRenderOffset(Gwen::Point(screen_rect.x, screen_rect.y));
+    // TODO(rendering): Clip too.
     children_[i].contents->Render(renderer);
   }
+  renderer->SetRenderOffset(old_render_offset);
 }
 
 void Container::RenderBorders(Gwen::Renderer::Base* renderer) {
   // TODO(scottmg): This (and the resize code) is wrong.
   const Skin& skin = GetSkin();
   if (GetParent() == NULL)
-    RenderFrame(renderer, GetScreenRect());
+    RenderFrame(renderer, GetClientRect());
   Rect title_border_size(
       skin.border_size(), skin.border_size() + skin.title_bar_size(),
       skin.border_size(), skin.border_size());
   if (children_.size() == 1) {
     ChildData* child = &children_[0];
     if (child->contents->IsLeaf()) {
-      Rect rect = child->contents->GetScreenRect().Expand(title_border_size);
+      // TODO(rendering): This have a GetRectRelativeTo(this).
+      Rect self_rect = GetScreenRect();
+      Rect child_rect = child->contents->GetScreenRect();
+      Rect relative_rect = Rect(child_rect.x - self_rect.x,
+                                child_rect.y - self_rect.y,
+                                child_rect.w, child_rect.h);
+      Rect rect = relative_rect.Expand(title_border_size);
       RenderFrame(renderer, rect);
 
       // And title bar.

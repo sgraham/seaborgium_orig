@@ -49,10 +49,8 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   if (fabsf(y_pixel_scroll_target_ - y_pixel_scroll_) < 1.f)
     y_pixel_scroll_ = y_pixel_scroll_target_;
 
-  // TODO(rendering): X/Y should be unnecessary; Translate to correct
-  // offset during hierarchy traversal.
   renderer->SetDrawColor(skin.GetColorScheme().background());
-  renderer->DrawFilledRect(Gwen::Rect(X(), Y(), Width(), Height()));
+  renderer->DrawFilledRect(Gwen::Rect(0, 0, Width(), Height()));
   size_t start_line =
       std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
 
@@ -64,7 +62,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   static const int right_margin = 15;
   renderer->SetDrawColor(skin.GetColorScheme().margin());
   renderer->DrawFilledRect(Gwen::Rect(
-      X(), Y(), left_margin + largest_numbers_width + right_margin, Height()));
+      0, 0, left_margin + largest_numbers_width + right_margin, Height()));
 
   for (size_t i = start_line; i < lines_.size(); ++i) {
     // Extra |g_line_height| added to height so that a full line is drawn at

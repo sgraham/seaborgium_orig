@@ -15,8 +15,10 @@ class SolidColor : public Contents {
 
   virtual void Render(Gwen::Renderer::Base* renderer) OVERRIDE {
     renderer->SetDrawColor(color_);
-    const Rect& rect = GetScreenRect();
-    renderer->DrawFilledRect(Gwen::Rect(rect.x, rect.y, rect.w, rect.h));
+    // TODO(rendering): Conversion.
+    Rect client_rect = GetClientRect();
+    renderer->DrawFilledRect(
+        Gwen::Rect(client_rect.x, client_rect.y, client_rect.w, client_rect.h));
   }
 
  private:

@@ -31,6 +31,9 @@ class Contents {
   virtual int Height() const { return rect_.h; }
 
   virtual const Rect& GetScreenRect() const { return rect_; }
+  virtual Rect GetClientRect() const {
+    return Rect(0, 0, rect_.w, rect_.h);
+  }
 
   virtual bool IsLeaf() const { return true; }
 
