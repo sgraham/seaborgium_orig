@@ -13,7 +13,7 @@ class Skin;
 
 class Contents {
  public:
-  Contents() : parent_(NULL) {}
+  Contents(const Skin& skin) : parent_(NULL), skin_(skin) {}
   virtual ~Contents() {}
 
   virtual void SetParent(Contents* parent) {
@@ -23,18 +23,26 @@ class Contents {
     return parent_;
   }
 
-  virtual void Render(const Skin& skin, Gwen::Renderer::Base* renderer) = 0;
+  virtual void Render(Gwen::Renderer::Base* renderer) = 0;
 
   virtual void SetScreenRect(const Rect& rect) {
     rect_ = rect;
   }
 
+  virtual int X() const { return rect_.x; }
+  virtual int Y() const { return rect_.y; }
+  virtual int Width() const { return rect_.w; }
+  virtual int Height() const { return rect_.h; }
+
   virtual const Rect& GetScreenRect() const { return rect_; }
 
   virtual bool CanHoldChildren() const { return false; }
 
+  virtual const Skin& GetSkin() const { return skin_; }
+
  private:
   Contents* parent_;
+  const Skin& skin_;
   Rect rect_;
 
   DISALLOW_COPY_AND_ASSIGN(Contents);

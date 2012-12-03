@@ -17,39 +17,41 @@
 #include "sg/ui/skin.h"
 
 namespace {
-
 const int g_line_height = 16;
-
 }  // namespace
 
-GWEN_CONTROL_CONSTRUCTOR(SourceView) {
+SourceView::SourceView(const Skin& skin)
+    : Contents(skin) {
   y_pixel_scroll_ = 0.f;
   y_pixel_scroll_target_ = 0.f;
   font_.facename = L"Consolas";
   font_.size = 13.f;
-  Dock(Gwen::Pos::Fill);
-  string16 text = L"File\nload\nfailed!";
-  std::string utf8_text;
+  std::string utf8_text = "File\nload\nfailed!\n";
+  /*
   if (file_util::ReadFileToString(
       FilePath(FILE_PATH_LITERAL("sample_source_code_file.cc")), &utf8_text)) {
-    SyntaxHighlight(utf8_text, &lines_);
   }
+  */
+  SyntaxHighlight(utf8_text, &lines_);
+  /*
   SetKeyboardInputEnabled(true);
   Focus();
-}
-
-void SourceView::Render(Gwen::Skin::Base* skin) {
+  */
 }
 
 // TODO(rendering): Brutal efficiency.
-void SourceView::Render(const ::Skin& skin, Gwen::Renderer::Base* renderer) {
+void SourceView::Render(Gwen::Renderer::Base* renderer) {
+  const Skin& skin = Contents::GetSkin();
+
   // Ease to target.
   y_pixel_scroll_ += (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.2f;
   if (fabsf(y_pixel_scroll_target_ - y_pixel_scroll_) < 1.f)
     y_pixel_scroll_ = y_pixel_scroll_target_;
 
+  // TODO(rendering): X/Y should be unnecessary; Translate to correct
+  // offset during hierarchy traversal.
   renderer->SetDrawColor(skin.GetColorScheme().background());
-  renderer->DrawFilledRect(Gwen::Rect(0, 0, Width(), Height()));
+  renderer->DrawFilledRect(Gwen::Rect(X(), Y(), Width(), Height()));
   size_t start_line =
       std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
 
@@ -61,7 +63,7 @@ void SourceView::Render(const ::Skin& skin, Gwen::Renderer::Base* renderer) {
   static const int right_margin = 15;
   renderer->SetDrawColor(skin.GetColorScheme().margin());
   renderer->DrawFilledRect(Gwen::Rect(
-        0, 0, left_margin + largest_numbers_width + right_margin, Height()));
+        X(), Y(), left_margin + largest_numbers_width + right_margin, Height()));
 
   for (size_t i = start_line; i < lines_.size(); ++i) {
     // Extra |g_line_height| added to height so that a full line is drawn at
@@ -159,6 +161,7 @@ bool SourceView::OnKeyEnd(bool down) {
   return true;
 }
 
+// TODO(scottmg): Losing last line if doesn't end in \n.
 void SourceView::SyntaxHighlight(
     const std::string& input, std::vector<Line>* lines) {
   scoped_ptr<Lexer> lexer(MakeCppLexer());

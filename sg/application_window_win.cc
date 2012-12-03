@@ -8,6 +8,7 @@
 #include "base/bind.h"
 #include "sg/app_thread.h"
 #include "sg/gpu.h"
+#include "sg/ui/base_types.h"
 
 namespace {
 
@@ -48,26 +49,41 @@ class ApplicationWindowWin : public ApplicationWindow {
       case WM_ERASEBKGND:
         return 1;
       case WM_PAINT:
+        /* TODO(gputhread)
         AppThread::PostTask(
             AppThread::GPU, FROM_HERE, base::Bind(&Gpu::Paint, this));
+            */
+        Gpu::Paint(this);
         ValidateRect(hwnd_, NULL);
         return 0;
       case WM_SIZE:
-        //RECT client_rect;
-        //GetClientRect(hwnd, &client_rect);
-        //AppThread::PostTask(
-            //AppThread::GPU, FROM_HERE, base::Bind(&Gpu::Resize, client_rect));
+        RECT rc;
+        GetClientRect(hwnd_, &rc);
+        Gpu::Resize(this, Rect(rc.left, rc.top,
+                            rc.right - rc.left, rc.bottom - rc.top));
+        /* TODO(gputhread)
+        AppThread::PostTask(
+            AppThread::GPU, FROM_HERE,
+            base::Bind(&Gpu::Resize,
+                       this,
+                       Rect(rc.left, rc.top,
+                            rc.right - rc.left, rc.bottom - rc.top)));
+                            */
         return 0;
       case WM_CREATE:
         DCHECK(got_valid_hwnd_);
+        /* TODO(gputhread)
         AppThread::PostTask(
             AppThread::GPU,
             FROM_HERE,
             base::Bind(&Gpu::InitializeForRenderingSurface, this, hwnd_));
+            */
+        Gpu::InitializeForRenderingSurface(this, hwnd_);
         return 0;
       case WM_CLOSE:
         // TODO(scottmg): Probably not where this should be.
         MessageLoopForUI::current()->Quit();
+        return 0;
     }
     return DefWindowProc(hwnd_, msg, w_param, l_param);
   }
@@ -95,7 +111,7 @@ class ApplicationWindowWin : public ApplicationWindow {
     return window->OnWndProc(message, w_param, l_param);
   }
 
-  HWND CreateHwnd() {
+  void CreateHwnd() {
     WNDCLASS  wc;
     ZeroMemory(&wc, sizeof(wc));
 
@@ -111,7 +127,7 @@ class ApplicationWindowWin : public ApplicationWindow {
     int height = 1024;
     RECT rect;
     SystemParametersInfo(SPI_GETWORKAREA, 0, &rect, 0);
-    HWND hWindow = CreateWindowExW(
+    CreateWindowExW(
         (WS_EX_APPWINDOW | WS_EX_WINDOWEDGE),
         wc.lpszClassName,
         L"Seaborgium",
@@ -121,7 +137,6 @@ class ApplicationWindowWin : public ApplicationWindow {
         width, height,
         NULL, NULL, GetModuleHandle(NULL),
         reinterpret_cast<void*>(this));
-    return hWindow;
   }
 
   HWND hwnd_;

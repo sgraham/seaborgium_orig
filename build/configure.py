@@ -280,7 +280,6 @@ def main():
                'lexer',
                'lexer_state',
                'source_view',
-               'top_level_frame',
                'ui\\container',
                'ui\\focus',
                'ui\\skin',
@@ -339,7 +338,6 @@ def main():
   objs += cxx('gpu_win')
   objs += cxx('main_loop')
   objs += cxx('main_win')
-  objs += cxx('window_setup_win')
   sg = n.build(binary('sg'), 'link', inputs=objs,
                implicit=sg_lib + base_lib + gwen_lib + re2_lib,
                variables=[('libs', libs)])

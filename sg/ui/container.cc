@@ -13,7 +13,9 @@
 // TODO(rendering)
 Gwen::Font kUIFont(L"Segoe UI", 12.f);
 
-Container::Container() : mode_(SplitHorizontal) {
+Container::Container(const Skin& skin)
+    : Contents(skin),
+      mode_(SplitHorizontal) {
 }
 
 Container::~Container() {
@@ -22,11 +24,10 @@ Container::~Container() {
   }
 }
 
-void Container::Render(
-    const Skin& skin, Gwen::Renderer::Base* renderer) {
-  PropagateSizeChanges(skin);
-  RenderChildren(skin, renderer);
-  RenderBorders(skin, renderer);
+void Container::Render(Gwen::Renderer::Base* renderer) {
+  PropagateSizeChanges();
+  RenderChildren(renderer);
+  RenderBorders(renderer);
 }
 
 void Container::AddChild(Contents* contents, const string16& title) {
@@ -60,10 +61,11 @@ void Container::SetFraction(Contents* contents, double fraction) {
   NOTREACHED() << "Child not found.";
 }
 
-void Container::PropagateSizeChanges(const Skin& skin) {
+void Container::PropagateSizeChanges() {
   if (children_.size() == 0)
     return;
   Rect rect = GetScreenRect();
+  const Skin& skin = GetSkin();
   if (GetParent() == NULL) {
     Rect outer_border_size(
         skin.border_size(), skin.border_size(),
@@ -105,18 +107,17 @@ void Container::PropagateSizeChanges(const Skin& skin) {
   DCHECK(last_fraction == 1.0);
 }
 
-void Container::RenderChildren(const Skin& skin,
-                               Gwen::Renderer::Base* renderer) {
+void Container::RenderChildren(Gwen::Renderer::Base* renderer) {
   for (size_t i = 0; i < children_.size(); ++i) {
-    children_[i].contents->Render(skin, renderer);
+    children_[i].contents->Render(renderer);
   }
 }
 
-void Container::RenderBorders(const Skin& skin,
-                              Gwen::Renderer::Base* renderer) {
+void Container::RenderBorders(Gwen::Renderer::Base* renderer) {
   // TODO(scottmg): This (and the resize code) is wrong.
+  const Skin& skin = GetSkin();
   if (GetParent() == NULL)
-    RenderFrame(skin, renderer, GetScreenRect());
+    RenderFrame(renderer, GetScreenRect());
   Rect title_border_size(
       skin.border_size(), skin.border_size() + skin.title_bar_size(),
       skin.border_size(), skin.border_size());
@@ -124,7 +125,7 @@ void Container::RenderBorders(const Skin& skin,
     ChildData* child = &children_[0];
     if (!child->contents->CanHoldChildren()) {
       Rect rect = child->contents->GetScreenRect().Expand(title_border_size);
-      RenderFrame(skin, renderer, rect);
+      RenderFrame(renderer, rect);
 
       // And title bar.
       bool is_focused = GetFocusedContents() == child->contents;
@@ -150,8 +151,8 @@ void Container::RenderBorders(const Skin& skin,
   }
 }
 
-void Container::RenderFrame(
-    const Skin& skin, Gwen::Renderer::Base* renderer, const Rect& rect) {
+void Container::RenderFrame(Gwen::Renderer::Base* renderer, const Rect& rect) {
+  const Skin& skin = GetSkin();
   renderer->SetDrawColor(skin.GetColorScheme().border());
   renderer->DrawFilledRect(
       Gwen::Rect(rect.x, rect.y, rect.w, skin.border_size()));

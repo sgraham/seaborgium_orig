@@ -5,21 +5,17 @@
 #ifndef SG_WORKSPACE_H_
 #define SG_WORKSPACE_H_
 
-#include "Gwen/Gwen.h"
-#include "Gwen/Align.h"
-#include "Gwen/Utility.h"
-#include "ui/skin.h"
+#include "sg/ui/container.h"
+#include "sg/ui/skin.h"
 
 class Container;
 
-class Workspace : public Gwen::Controls::Base {
+class Workspace : public Container {
  public:
-  GWEN_CONTROL(Workspace, Gwen::Controls::Base);
+  Workspace();
   virtual ~Workspace();
-  void Render(Gwen::Skin::Base* skin);
 
  private:
-  Container* root_;
   Skin skin_;
 };
 

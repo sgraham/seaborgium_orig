@@ -8,37 +8,34 @@
 #include "ui/focus.h"
 #include "ui/solid_color.h"
 #include "sg/source_view.h"
-#include "Gwen/Gwen.h"
 
 namespace {
 
 Container* Placeholder(const Skin& skin, const string16& name) {
-  Container* container = new Container;
-  container->AddChild(new SolidColor(skin.GetColorScheme().background()),
+  Container* container = new Container(skin);
+  container->AddChild(new SolidColor(skin, skin.GetColorScheme().background()),
                       name);
   return container;
 }
 
-Container* MakeSourceView(Gwen::Controls::Base* parent,
+Container* MakeSourceView(const Skin& skin,
                           const string16& source_file) {
-  Container* container = new Container;
-  SourceView* source_view = new SourceView(parent);
+  Container* container = new Container(skin);
+  SourceView* source_view = new SourceView(skin);
   container->AddChild(source_view, source_file);
   return container;
 }
 
 }  // namespace
 
-GWEN_CONTROL_CONSTRUCTOR(Workspace) {
-  Dock(Gwen::Pos::Fill);
-  root_ = new Container;
-
-  Container* top = new Container;
-  Container* bottom = new Container;
-  root_->SetMode(Container::SplitVertical);
-  root_->AddChild(top);
-  root_->AddChild(bottom);
-  root_->SetFraction(top, .7);
+Workspace::Workspace()
+    : Container(this->skin_) {
+  Container* top = new Container(skin_);
+  Container* bottom = new Container(skin_);
+  this->SetMode(Container::SplitVertical);
+  this->Container::AddChild(top);
+  this->Container::AddChild(bottom);
+  this->SetFraction(top, .7);
 
   Contents* output = Placeholder(skin_, L"Output");
   Contents* log = Placeholder(skin_, L"Log");
@@ -46,10 +43,10 @@ GWEN_CONTROL_CONSTRUCTOR(Workspace) {
   bottom->AddChild(log);
   bottom->SetFraction(output, .6);
 
-  Container* source = MakeSourceView(this, L"sample_source_code_file.cc");
-  Container* middle = new Container;
+  Container* source = MakeSourceView(skin_, L"sample_source_code_file.cc");
+  Container* middle = new Container(skin_);
   middle->SetMode(Container::SplitVertical);
-  Container* views = new Container;
+  Container* views = new Container(skin_);
   views->SetMode(Container::SplitVertical);
   top->AddChild(source);
   top->AddChild(middle);
@@ -73,10 +70,4 @@ GWEN_CONTROL_CONSTRUCTOR(Workspace) {
 }
 
 Workspace::~Workspace() {
-  delete root_;
-}
-
-void Workspace::Render(Gwen::Skin::Base* gwen_skin) {
-  root_->SetScreenRect(Rect(0, 0, Width(), Height()));
-  root_->Render(skin_, gwen_skin->GetRender());
 }

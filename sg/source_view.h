@@ -9,21 +9,20 @@
 #include <vector>
 
 #include "base/string16.h"
-#include "ui/contents.h"
 #include "Gwen/Controls/Base.h"
 #include "Gwen/Font.h"
 #include "Gwen/Structures.h"
 #include "sg/lexer.h"
+#include "sg/ui/contents.h"
 
 namespace Gwen { namespace Skin { class Base; }}
 class Skin;
 
-class SourceView : public Gwen::Controls::Base, public Contents {
+class SourceView : public Contents {
  public:
-  GWEN_CONTROL(SourceView, Gwen::Controls::Base);
+  SourceView(const Skin& skin);
 
-  virtual void Render(Gwen::Skin::Base* skin);
-  virtual void Render(const Skin& skin, Gwen::Renderer::Base* renderer);
+  virtual void Render(Gwen::Renderer::Base* renderer);
 
   virtual bool OnMouseWheeled(int delta);
   virtual bool OnKeyHome(bool down);

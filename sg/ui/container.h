@@ -12,7 +12,7 @@
 
 class Container : public Contents {
  public:
-  Container();
+  Container(const Skin& skin);
   virtual ~Container();
 
   enum Mode {
@@ -25,8 +25,7 @@ class Container : public Contents {
     mode_ = mode;
   }
 
-  virtual void Render(
-      const Skin& skin, Gwen::Renderer::Base* renderer) OVERRIDE;
+  virtual void Render(Gwen::Renderer::Base* renderer) OVERRIDE;
   virtual void AddChild(Contents* contents, const string16& title);
   virtual void AddChild(Contents* contents);
   virtual void SetFraction(Contents* contents, double fraction);
@@ -37,11 +36,10 @@ class Container : public Contents {
  private:
   // Recalculate the screen rect for each of our children (assuming our |rect_|
   // is already up to date here).
-  void PropagateSizeChanges(const Skin& skin);
-  void RenderChildren(const Skin& skin, Gwen::Renderer::Base* renderer);
-  void RenderBorders(const Skin& skin, Gwen::Renderer::Base* renderer);
-  void RenderFrame(
-      const Skin& skin, Gwen::Renderer::Base* renderer, const Rect& rect);
+  void PropagateSizeChanges();
+  void RenderChildren(Gwen::Renderer::Base* renderer);
+  void RenderBorders(Gwen::Renderer::Base* renderer);
+  void RenderFrame(Gwen::Renderer::Base* renderer, const Rect& rect);
 
   struct ChildData {
     Contents* contents;

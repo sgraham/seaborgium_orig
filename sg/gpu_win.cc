@@ -17,6 +17,10 @@
 #include "base/lazy_instance.h"
 #include "sg/app_thread.h"
 #include "sg/application_window.h"
+#include "sg/ui/contents.h"
+#include "sg/workspace.h"
+
+#include "Gwen/Renderers/Direct2D.h"
 
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
@@ -26,14 +30,16 @@
 
 namespace {
 
-class Renderer {
+class GpuSystem {
  public:
-  Renderer(HWND hwnd)
+  GpuSystem(HWND hwnd, Contents* view_root)
       : hwnd_(hwnd),
         d2d_factory_(NULL),
         dwrite_factory_(NULL),
         wic_factory_(NULL),
-        render_target_(NULL) {
+        render_target_(NULL),
+        renderer_(NULL),
+        view_root_(view_root) {
   }
 
   void Init() {
@@ -57,21 +63,28 @@ class Renderer {
     CHECK(SUCCEEDED(hr));
 
     CreateDeviceResources();
+
+    CreateRenderer();
   }
 
   void Paint() {
     if (SUCCEEDED(CreateDeviceResources())) {
       render_target_->BeginDraw();
       render_target_->SetTransform(D2D1::Matrix3x2F::Identity());
-      // TODO(rendering)
-      //g_main_canvas->RenderCanvas();
+      view_root_->Render(renderer_);
       HRESULT hr = render_target_->EndDraw();
       if (hr == D2DERR_RECREATE_TARGET) {
         DiscardDeviceResources();
-        // TODO(rendering)
-        //g_pRenderer->DeviceLost();
+        renderer_->DeviceLost();
       }
     }
+  }
+
+  void Resize(const Rect& rect) {
+    D2D1_SIZE_U size = D2D1::SizeU(rect.w, rect.h);
+    render_target_->Resize(size);
+    view_root_->SetScreenRect(rect);
+    Paint();
   }
 
  private:
@@ -111,10 +124,9 @@ class Renderer {
         return hr;
       render_target_->SetTextRenderingParams(custom_params);
 
-      // if (SUCCEEDED(hr) && g_pRenderer != NULL) {
-        // TODO(rendering)
-        //g_pRenderer->DeviceAcquired(render_target_);
-      //}
+      if (SUCCEEDED(hr) && renderer_ != NULL) {
+        renderer_->DeviceAcquired(render_target_);
+      }
     }
     return hr;
   }
@@ -126,16 +138,23 @@ class Renderer {
     }
   }
 
+  void CreateRenderer() {
+    renderer_ = new Gwen::Renderer::Direct2D(
+        render_target_, dwrite_factory_, wic_factory_);
+  }
+
   HWND hwnd_;
   ID2D1Factory* d2d_factory_;
   IDWriteFactory* dwrite_factory_;
   IWICImagingFactory* wic_factory_;
   ID2D1HwndRenderTarget* render_target_;
+  Gwen::Renderer::Direct2D* renderer_;
+  Contents* view_root_;
 
-  DISALLOW_COPY_AND_ASSIGN(Renderer);
+  DISALLOW_COPY_AND_ASSIGN(GpuSystem);
 };
 
-base::LazyInstance<std::map<ApplicationWindow*, Renderer*> > g_window_map =
+base::LazyInstance<std::map<ApplicationWindow*, GpuSystem*> > g_window_map =
     LAZY_INSTANCE_INITIALIZER;
 
 }  // namespace
@@ -151,15 +170,23 @@ void Gpu::InitializeForRenderingSurface(
     ApplicationWindow* window, HWND hwnd) {
   OneTimeInitialization();
 
-  Renderer* renderer = new Renderer(hwnd);
+  GpuSystem* gpu_system = new GpuSystem(hwnd, new Workspace);
   DCHECK(g_window_map.Get().find(window) == g_window_map.Get().end());
-  g_window_map.Get()[window] = renderer;
-  renderer->Init();
+  g_window_map.Get()[window] = gpu_system;
+  gpu_system->Init();
 
-  // This Unretained is OK because the ApplicationWindow isn't destroyed until
-  // after all the other non-UI threads (including this one) are shut down.
+  // TODO(gputhread)
+  window->Show();
+  /*
   AppThread::PostTask(AppThread::UI, FROM_HERE, base::Bind(
       &ApplicationWindow::Show, base::Unretained(window)));
+      */
+}
+
+// static
+void Gpu::Resize(ApplicationWindow* window, Rect rect) {
+  DCHECK(g_window_map.Get().find(window) != g_window_map.Get().end());
+  g_window_map.Get()[window]->Resize(rect);
 }
 
 // static
