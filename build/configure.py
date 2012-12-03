@@ -198,7 +198,7 @@ def main():
   objext = '.obj'
 
   def src(filename):
-    return os.path.join('src', filename)
+    return os.path.join('sg', filename)
   def base_src(filename):
     return os.path.join('third_party', 'base', filename)
   def gwen_src(filename):
@@ -238,12 +238,12 @@ def main():
             '/D_WIN32_WINNT=0x0601',
             '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
             '-Ithird_party/re2',
-            '-FIsrc/global.h']
+            '-FIsg/global.h']
   if options.debug:
     cflags += ['/D_DEBUG', '/MTd']
   else:
     cflags += ['/DNDEBUG', '/MT']
-  ldflags = ['/DEBUG']
+  ldflags = ['/DEBUG', '/SUBSYSTEM:WINDOWS']
   if not options.debug:
     cflags += ['/Ox', '/DNDEBUG', '/GL']
     ldflags += ['/LTCG', '/OPT:REF', '/OPT:ICF']
@@ -277,11 +277,17 @@ def main():
   n.comment('Core source files all build into sg library.')
   for name in [
                'cpp_lexer',
+               'debug_presenter',
+               'debug_presenter_display',
                'lexer',
                'lexer_state',
-               'main_frame',
+               'source_files',
                'source_view',
-               'top_level_frame',
+               'ui\\container',
+               'ui\\contents',
+               'ui\\focus',
+               'ui\\skin',
+               'workspace',
               ]:
     objs += cxx(name)
   sg_lib = n.build(built('sg.lib'), 'ar', inputs=objs)
@@ -330,7 +336,13 @@ def main():
   all_targets = []
 
   n.comment('Main executable is library plus main() function.')
-  objs = cxx('window_setup_win')
+  objs = []
+  objs += cxx('app_thread')
+  objs += cxx('application')
+  objs += cxx('application_window_win')
+  objs += cxx('gpu_win')
+  objs += cxx('main_loop')
+  objs += cxx('main_win')
   sg = n.build(binary('sg'), 'link', inputs=objs,
                implicit=sg_lib + base_lib + gwen_lib + re2_lib,
                variables=[('libs', libs)])
@@ -341,7 +353,7 @@ def main():
 
   variables = []
   test_cflags = None
-  test_ldflags = None
+  test_ldflags = ['/SUBSYSTEM:CONSOLE']
   test_libs = libs
   objs = []
   path = 'third_party/testing/gtest'
