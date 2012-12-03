@@ -5,7 +5,7 @@
 #ifndef SG_RENDERER_H_
 #define SG_RENDERER_H_
 
-#include "font.h"
+#include "sg/font.h"
 
 class Renderer {
  public:

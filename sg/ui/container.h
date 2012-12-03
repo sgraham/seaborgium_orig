@@ -12,7 +12,7 @@
 
 class Container : public Contents {
  public:
-  Container(const Skin& skin);
+  explicit Container(const Skin& skin);
   virtual ~Container();
 
   enum Mode {

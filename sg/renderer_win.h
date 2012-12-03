@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef SG_RENDERER_WIN_H_
+#define SG_RENDERER_WIN_H_
+
 #include "sg/renderer.h"
 
 class RendererWin : public Renderer {
  public:
-  RendererWin(...);
-
+  explicit RendererWin(...);
 
   // Implementation of Renderer:
   virtual void SetColor(const Color& color) OVERRIDE;
@@ -20,3 +22,5 @@ class RendererWin : public Renderer {
 
   virtual void DrawFilledRect(const Rect& rect) OVERRIDE;
 };
+
+#endif  // SG_RENDERER_WIN_H_

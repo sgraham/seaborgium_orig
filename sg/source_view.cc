@@ -63,7 +63,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   static const int right_margin = 15;
   renderer->SetDrawColor(skin.GetColorScheme().margin());
   renderer->DrawFilledRect(Gwen::Rect(
-        X(), Y(), left_margin + largest_numbers_width + right_margin, Height()));
+      X(), Y(), left_margin + largest_numbers_width + right_margin, Height()));
 
   for (size_t i = start_line; i < lines_.size(); ++i) {
     // Extra |g_line_height| added to height so that a full line is drawn at

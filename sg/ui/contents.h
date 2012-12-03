@@ -13,7 +13,7 @@ class Skin;
 
 class Contents {
  public:
-  Contents(const Skin& skin) : parent_(NULL), skin_(skin) {}
+  explicit Contents(const Skin& skin) : parent_(NULL), skin_(skin) {}
   virtual ~Contents() {}
 
   virtual void SetParent(Contents* parent) {

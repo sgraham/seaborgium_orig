@@ -10,7 +10,7 @@
 
 // TODO(rendering): Maybe move this to a gpu_win.h.
 #if defined(OS_WIN)
-#include <windows.h>
+#include <windows.h>  // NOLINT(build/include_order)
 typedef HWND RenderingSurface;
 #endif
 

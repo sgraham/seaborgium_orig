@@ -20,7 +20,7 @@ class Skin;
 
 class SourceView : public Contents {
  public:
-  SourceView(const Skin& skin);
+  explicit SourceView(const Skin& skin);
 
   virtual void Render(Gwen::Renderer::Base* renderer);
 

@@ -10,9 +10,8 @@
 #include <d2d1.h>
 #include <d2d1helper.h>
 #include <dwrite.h>
-#include <map>
 #include <wincodec.h>
-
+#include <map>
 #include "base/bind.h"
 #include "base/lazy_instance.h"
 #include "sg/app_thread.h"
