@@ -4,7 +4,7 @@
 
 #include "base/at_exit.h"
 #include "base/command_line.h"
-#include "sg/application_window.h"
+#include "sg/application.h"
 #include "sg/main_loop.h"
 
 int RunMain(HINSTANCE instance) {
@@ -12,7 +12,7 @@ int RunMain(HINSTANCE instance) {
   main_loop->Init();
   main_loop->MainMessageLoopStart();
   main_loop->CreateThreads();
-  scoped_ptr<ApplicationWindow> app_window(ApplicationWindow::Create());
+  scoped_ptr<Application> app_window(new Application);
   main_loop->MainMessageLoopRun();
   main_loop->ShutdownThreadsAndCleanUp();
   app_window.reset();

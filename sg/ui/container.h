@@ -28,6 +28,7 @@ class Container : public Contents {
   virtual void Render(Gwen::Renderer::Base* renderer) OVERRIDE;
   virtual void AddChild(Contents* contents, const string16& title);
   virtual void AddChild(Contents* contents);
+  virtual void SetTitle(Contents* contents, const string16& title);
   virtual void SetFraction(Contents* contents, double fraction);
   virtual bool CanHoldChildren() const { return true; }
   virtual size_t ChildCount() const { return children_.size(); }

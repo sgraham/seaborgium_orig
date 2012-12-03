@@ -29,7 +29,10 @@ void* GetWindowUserData(HWND hwnd) {
 
 class ApplicationWindowWin : public ApplicationWindow {
  public:
-  ApplicationWindowWin() : got_create_(false), got_valid_hwnd_(false) {
+  ApplicationWindowWin()
+      : got_create_(false),
+        got_valid_hwnd_(false),
+        contents_(NULL) {
     CreateHwnd();
   }
 
@@ -42,6 +45,16 @@ class ApplicationWindowWin : public ApplicationWindow {
     SetForegroundWindow(hwnd_);
     SetFocus(hwnd_);
   }
+
+  virtual void SetContents(Contents* contents) {
+    contents_ = contents;
+    // TODO(scottmg): This is a hokey way of propagating size to the view.
+    RECT rc;
+    GetClientRect(hwnd_, &rc);
+    Gpu::Resize(this, Rect(rc.left, rc.top,
+                           rc.right - rc.left, rc.bottom - rc.top));
+  }
+  virtual Contents* GetContents() { return contents_; }
 
  private:
   LRESULT OnWndProc(UINT msg, WPARAM w_param, LPARAM l_param) {
@@ -142,6 +155,7 @@ class ApplicationWindowWin : public ApplicationWindow {
   HWND hwnd_;
   bool got_create_;
   bool got_valid_hwnd_;
+  Contents* contents_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationWindowWin);
 };

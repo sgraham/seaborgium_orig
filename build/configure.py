@@ -277,8 +277,11 @@ def main():
   n.comment('Core source files all build into sg library.')
   for name in [
                'cpp_lexer',
+               'debug_presenter',
+               'debug_presenter_display',
                'lexer',
                'lexer_state',
+               'source_files',
                'source_view',
                'ui\\container',
                'ui\\focus',
@@ -334,6 +337,7 @@ def main():
   n.comment('Main executable is library plus main() function.')
   objs = []
   objs += cxx('app_thread')
+  objs += cxx('application')
   objs += cxx('application_window_win')
   objs += cxx('gpu_win')
   objs += cxx('main_loop')

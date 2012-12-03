@@ -31,14 +31,14 @@ namespace {
 
 class GpuSystem {
  public:
-  GpuSystem(HWND hwnd, Contents* view_root)
+  GpuSystem(ApplicationWindow* window, HWND hwnd)
       : hwnd_(hwnd),
         d2d_factory_(NULL),
         dwrite_factory_(NULL),
         wic_factory_(NULL),
         render_target_(NULL),
         renderer_(NULL),
-        view_root_(view_root) {
+        application_window_(window) {
   }
 
   void Init() {
@@ -70,7 +70,9 @@ class GpuSystem {
     if (SUCCEEDED(CreateDeviceResources())) {
       render_target_->BeginDraw();
       render_target_->SetTransform(D2D1::Matrix3x2F::Identity());
-      view_root_->Render(renderer_);
+      Contents* contents = application_window_->GetContents();
+      if (contents)
+        contents->Render(renderer_);
       HRESULT hr = render_target_->EndDraw();
       if (hr == D2DERR_RECREATE_TARGET) {
         DiscardDeviceResources();
@@ -82,8 +84,11 @@ class GpuSystem {
   void Resize(const Rect& rect) {
     D2D1_SIZE_U size = D2D1::SizeU(rect.w, rect.h);
     render_target_->Resize(size);
-    view_root_->SetScreenRect(rect);
-    Paint();
+    Contents* contents = application_window_->GetContents();
+    if (contents) {
+      contents->SetScreenRect(rect);
+      Paint();
+    }
   }
 
  private:
@@ -148,7 +153,7 @@ class GpuSystem {
   IWICImagingFactory* wic_factory_;
   ID2D1HwndRenderTarget* render_target_;
   Gwen::Renderer::Direct2D* renderer_;
-  Contents* view_root_;
+  ApplicationWindow* application_window_;
 
   DISALLOW_COPY_AND_ASSIGN(GpuSystem);
 };
@@ -169,7 +174,7 @@ void Gpu::InitializeForRenderingSurface(
     ApplicationWindow* window, HWND hwnd) {
   OneTimeInitialization();
 
-  GpuSystem* gpu_system = new GpuSystem(hwnd, new Workspace);
+  GpuSystem* gpu_system = new GpuSystem(window, hwnd);
   DCHECK(g_window_map.Get().find(window) == g_window_map.Get().end());
   g_window_map.Get()[window] = gpu_system;
   gpu_system->Init();

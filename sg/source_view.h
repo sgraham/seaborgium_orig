@@ -24,6 +24,8 @@ class SourceView : public Contents {
 
   virtual void Render(Gwen::Renderer::Base* renderer);
 
+  virtual void SetData(const std::string& utf8_text);
+
   virtual bool OnMouseWheeled(int delta);
   virtual bool OnKeyHome(bool down);
   virtual bool OnKeyEnd(bool down);

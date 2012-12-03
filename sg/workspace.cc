@@ -18,14 +18,6 @@ Container* Placeholder(const Skin& skin, const string16& name) {
   return container;
 }
 
-Container* MakeSourceView(const Skin& skin,
-                          const string16& source_file) {
-  Container* container = new Container(skin);
-  SourceView* source_view = new SourceView(skin);
-  container->AddChild(source_view, source_file);
-  return container;
-}
-
 }  // namespace
 
 Workspace::Workspace()
@@ -43,15 +35,17 @@ Workspace::Workspace()
   bottom->AddChild(log);
   bottom->SetFraction(output, .6);
 
-  Container* source = MakeSourceView(skin_, L"sample_source_code_file.cc");
+  source_view_ = new SourceView(skin_);
+  source_view_container_ = new Container(skin_);
+  source_view_container_->AddChild(source_view_);
   Container* middle = new Container(skin_);
   middle->SetMode(Container::SplitVertical);
   Container* views = new Container(skin_);
   views->SetMode(Container::SplitVertical);
-  top->AddChild(source);
+  top->AddChild(source_view_container_);
   top->AddChild(middle);
   top->AddChild(views);
-  top->SetFraction(source, .4);
+  top->SetFraction(source_view_container_, .4);
   top->SetFraction(middle, .65);
 
   Contents* stack = Placeholder(skin_, L"Stack");
@@ -66,8 +60,16 @@ Workspace::Workspace()
   views->AddChild(locals);
   views->SetFraction(watch, .6);
 
-  SetFocusedContents(source->Child(0));
+  SetFocusedContents(source_view_container_->Child(0));
 }
 
 Workspace::~Workspace() {
+}
+
+void Workspace::SetFileName(const FilePath& filename) {
+  source_view_container_->SetTitle(source_view_, filename.LossyDisplayName());
+}
+
+void Workspace::SetFileData(const std::string& utf8_text) {
+  source_view_->SetData(utf8_text);
 }

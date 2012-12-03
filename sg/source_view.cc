@@ -26,17 +26,17 @@ SourceView::SourceView(const Skin& skin)
   y_pixel_scroll_target_ = 0.f;
   font_.facename = L"Consolas";
   font_.size = 13.f;
-  std::string utf8_text = "File\nload\nfailed!\n";
-  /*
-  if (file_util::ReadFileToString(
-      FilePath(FILE_PATH_LITERAL("sample_source_code_file.cc")), &utf8_text)) {
-  }
-  */
-  SyntaxHighlight(utf8_text, &lines_);
   /*
   SetKeyboardInputEnabled(true);
   Focus();
   */
+}
+void SourceView::SetData(const std::string& utf8_text) {
+  lines_.clear();
+  // TODO(jank): This needs to be on a background thread. Perhaps the data
+  // that's received should already be tokenized? Tokenization for highlighting
+  // does seem pretty clearly only for the view though.
+  SyntaxHighlight(utf8_text, &lines_);
 }
 
 // TODO(rendering): Brutal efficiency.
@@ -68,7 +68,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   for (size_t i = start_line; i < lines_.size(); ++i) {
     // Extra |g_line_height| added to height so that a full line is drawn at
     // the bottom when partial-line pixel scrolled.
-    if ((i - start_line) * g_line_height > Height() + g_line_height - 500)
+    if ((i - start_line) * g_line_height > Height() + g_line_height)
       break;
 
     // Line numbers.

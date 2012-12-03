@@ -49,6 +49,16 @@ void Container::AddChild(Contents* contents) {
   AddChild(contents, L"<none>");
 }
 
+void Container::SetTitle(Contents* contents, const string16& title) {
+  for (size_t i = 0; i < children_.size(); ++i) {
+    if (children_[i].contents == contents) {
+      children_[i].title = title;
+      return;
+    }
+  }
+  NOTREACHED();
+}
+
 void Container::SetFraction(Contents* contents, double fraction) {
   // TODO(testing): Verify legal, or renormalize.
   // TODO(scottmg): Maybe should be stored in child?
