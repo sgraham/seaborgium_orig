@@ -13,21 +13,17 @@ class Skin;
 
 class Contents {
  public:
-  explicit Contents(const Skin& skin) : parent_(NULL), skin_(skin) {}
-  virtual ~Contents() {}
-
-  virtual void SetParent(Contents* parent) {
-    parent_ = parent;
-  }
-  virtual Contents* GetParent() const {
-    return parent_;
-  }
+  explicit Contents(const Skin& skin);
+  virtual ~Contents();
 
   virtual void Render(Gwen::Renderer::Base* renderer) = 0;
 
-  virtual void SetScreenRect(const Rect& rect) {
-    rect_ = rect;
-  }
+  virtual void SetParent(Contents* parent);
+  virtual Contents* GetParent() const;
+
+  virtual void SetScreenRect(const Rect& rect);
+
+  virtual void Invalidate();
 
   virtual int X() const { return rect_.x; }
   virtual int Y() const { return rect_.y; }

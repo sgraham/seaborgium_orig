@@ -4,10 +4,11 @@
 
 #include "sg/workspace.h"
 
-#include "ui/container.h"
-#include "ui/focus.h"
-#include "ui/solid_color.h"
+#include "sg/application_window.h"
 #include "sg/source_view.h"
+#include "sg/ui/container.h"
+#include "sg/ui/focus.h"
+#include "sg/ui/solid_color.h"
 
 namespace {
 
@@ -21,7 +22,8 @@ Container* Placeholder(const Skin& skin, const string16& name) {
 }  // namespace
 
 Workspace::Workspace()
-    : Container(this->skin_) {
+    : Container(this->skin_),
+      delegate_(NULL) {
   Container* top = new Container(skin_);
   Container* bottom = new Container(skin_);
   this->SetMode(Container::SplitVertical);
@@ -64,6 +66,15 @@ Workspace::Workspace()
 }
 
 Workspace::~Workspace() {
+}
+
+void Workspace::SetDelegate(ApplicationWindow* delegate) {
+  delegate_ = delegate;
+}
+
+void Workspace::Invalidate() {
+  if (delegate_)
+    delegate_->Paint();
 }
 
 void Workspace::SetFileName(const FilePath& filename) {

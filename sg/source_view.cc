@@ -37,6 +37,7 @@ void SourceView::SetData(const std::string& utf8_text) {
   // that's received should already be tokenized? Tokenization for highlighting
   // does seem pretty clearly only for the view though.
   SyntaxHighlight(utf8_text, &lines_);
+  Invalidate();
 }
 
 // TODO(rendering): Brutal efficiency.

@@ -46,6 +46,11 @@ class ApplicationWindowWin : public ApplicationWindow {
     SetFocus(hwnd_);
   }
 
+  virtual void Paint() OVERRIDE {
+    Gpu::Paint(this);
+    ValidateRect(hwnd_, NULL);
+  }
+
   virtual void SetContents(Contents* contents) {
     contents_ = contents;
     // TODO(scottmg): This is a hokey way of propagating size to the view.
@@ -66,8 +71,7 @@ class ApplicationWindowWin : public ApplicationWindow {
         AppThread::PostTask(
             AppThread::GPU, FROM_HERE, base::Bind(&Gpu::Paint, this));
             */
-        Gpu::Paint(this);
-        ValidateRect(hwnd_, NULL);
+        Paint();
         return 0;
       case WM_SIZE:
         RECT rc;

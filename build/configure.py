@@ -284,6 +284,7 @@ def main():
                'source_files',
                'source_view',
                'ui\\container',
+               'ui\\contents',
                'ui\\focus',
                'ui\\skin',
                'workspace',

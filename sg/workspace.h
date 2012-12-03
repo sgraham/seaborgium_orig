@@ -11,6 +11,7 @@
 #include "sg/ui/container.h"
 #include "sg/ui/skin.h"
 
+class ApplicationWindow;
 class Container;
 class SourceView;
 
@@ -18,6 +19,10 @@ class Workspace : public Container, public DebugPresenterDisplay {
  public:
   Workspace();
   virtual ~Workspace();
+
+  virtual void SetDelegate(ApplicationWindow* delegate);
+
+  virtual void Invalidate();
 
   // Implementation of DebugPresenterDisplay.
   virtual void SetFileName(const FilePath& filename) OVERRIDE;
@@ -27,6 +32,7 @@ class Workspace : public Container, public DebugPresenterDisplay {
   Skin skin_;
   SourceView* source_view_;
   Container* source_view_container_;
+  ApplicationWindow* delegate_;
 };
 
 #endif  // SG_WORKSPACE_H_
