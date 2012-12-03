@@ -30,7 +30,7 @@ class Container : public Contents {
   virtual void AddChild(Contents* contents);
   virtual void SetTitle(Contents* contents, const string16& title);
   virtual void SetFraction(Contents* contents, double fraction);
-  virtual bool CanHoldChildren() const { return true; }
+  virtual bool IsLeaf() const { return false; }
   virtual size_t ChildCount() const { return children_.size(); }
   virtual Contents* Child(size_t i) { return children_[i].contents; }
 

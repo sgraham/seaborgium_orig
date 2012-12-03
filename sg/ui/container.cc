@@ -84,7 +84,7 @@ void Container::PropagateSizeChanges() {
   }
   if (children_.size() == 1) {
     ChildData* child = &children_[0];
-    if (!child->contents->CanHoldChildren()) {
+    if (child->contents->IsLeaf()) {
       rect.y += skin.title_bar_size();
       rect.h -= skin.title_bar_size();
     }
@@ -133,7 +133,7 @@ void Container::RenderBorders(Gwen::Renderer::Base* renderer) {
       skin.border_size(), skin.border_size());
   if (children_.size() == 1) {
     ChildData* child = &children_[0];
-    if (!child->contents->CanHoldChildren()) {
+    if (child->contents->IsLeaf()) {
       Rect rect = child->contents->GetScreenRect().Expand(title_border_size);
       RenderFrame(renderer, rect);
 

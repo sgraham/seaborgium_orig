@@ -32,7 +32,7 @@ class Contents {
 
   virtual const Rect& GetScreenRect() const { return rect_; }
 
-  virtual bool CanHoldChildren() const { return false; }
+  virtual bool IsLeaf() const { return true; }
 
   virtual const Skin& GetSkin() const { return skin_; }
 
