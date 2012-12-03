@@ -15,7 +15,7 @@ class SourceFiles;
 
 class DebugPresenter {
  public:
-  DebugPresenter(SourceFiles* source_files);
+  explicit DebugPresenter(SourceFiles* source_files);
   virtual ~DebugPresenter();
 
   virtual void SetDisplay(DebugPresenterDisplay* display);

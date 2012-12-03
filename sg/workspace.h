@@ -5,6 +5,8 @@
 #ifndef SG_WORKSPACE_H_
 #define SG_WORKSPACE_H_
 
+#include <string>
+
 #include "sg/debug_presenter_display.h"
 #include "sg/ui/container.h"
 #include "sg/ui/skin.h"

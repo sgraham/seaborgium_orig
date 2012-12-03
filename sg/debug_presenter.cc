@@ -10,7 +10,7 @@
 #include "sg/debug_presenter_display.h"
 #include "sg/source_files.h"
 
-DebugPresenter::DebugPresenter(SourceFiles* source_files) 
+DebugPresenter::DebugPresenter(SourceFiles* source_files)
     : source_files_(source_files) {
   std::string* result = new std::string;
   FilePath path(FILE_PATH_LITERAL("sample_source_code_file.cc"));
