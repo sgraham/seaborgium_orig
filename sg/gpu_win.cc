@@ -179,12 +179,10 @@ void Gpu::InitializeForRenderingSurface(
   g_window_map.Get()[window] = gpu_system;
   gpu_system->Init();
 
-  // TODO(gputhread)
-  window->Show();
-  /*
+  // Posted so that the CreateWindow can complete, otherwise we'll maximize on
+  // initial show, which will lose the non-maximized window size.
   AppThread::PostTask(AppThread::UI, FROM_HERE, base::Bind(
       &ApplicationWindow::Show, base::Unretained(window)));
-      */
 }
 
 // static

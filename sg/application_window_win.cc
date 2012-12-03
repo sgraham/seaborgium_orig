@@ -41,6 +41,7 @@ class ApplicationWindowWin : public ApplicationWindow {
 
   virtual void Show() OVERRIDE {
     DCHECK(AppThread::CurrentlyOn(AppThread::UI));
+    SetWindowText(hwnd_, L"Seaborgium");
     ShowWindow(hwnd_, SW_SHOWMAXIMIZED);
     SetForegroundWindow(hwnd_);
     SetFocus(hwnd_);
@@ -144,10 +145,12 @@ class ApplicationWindowWin : public ApplicationWindow {
     int height = 1024;
     RECT rect;
     SystemParametersInfo(SPI_GETWORKAREA, 0, &rect, 0);
+    // TODO(scottmg): The window text doesn't get set, for reasons unclear to
+    // me. It's set at initial show above instead.
     CreateWindowExW(
         (WS_EX_APPWINDOW | WS_EX_WINDOWEDGE),
         wc.lpszClassName,
-        L"Seaborgium",
+        L"",
         WS_OVERLAPPEDWINDOW,
         (rect.right - rect.left - width) / 2 + rect.left,
         (rect.bottom - rect.top - height) / 2 + rect.top,
