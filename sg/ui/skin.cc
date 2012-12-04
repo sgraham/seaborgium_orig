@@ -47,5 +47,5 @@ ColorScheme::ColorScheme()
     margin_text_(kBase0) {
 }
 
-Skin::Skin() : title_bar_size_(19), border_size_(3) {
+Skin::Skin() : title_bar_size_(19), border_size_(3), status_bar_size_(26) {
 }

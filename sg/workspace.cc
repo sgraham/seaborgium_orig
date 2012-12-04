@@ -6,6 +6,7 @@
 
 #include "sg/application_window.h"
 #include "sg/source_view.h"
+#include "sg/status_bar.h"
 #include "sg/ui/container.h"
 #include "sg/ui/focus.h"
 #include "sg/ui/solid_color.h"
@@ -24,12 +25,17 @@ Container* Placeholder(const Skin& skin, const string16& name) {
 Workspace::Workspace()
     : Container(this->skin_),
       delegate_(NULL) {
+  main_area_ = new Container(skin_);
+  status_bar_ = new StatusBar(skin_);
+  AddChild(main_area_);
+  AddChild(status_bar_);
+
   Container* top = new Container(skin_);
   Container* bottom = new Container(skin_);
-  this->SetMode(Container::SplitVertical);
-  this->Container::AddChild(top);
-  this->Container::AddChild(bottom);
-  this->SetFraction(top, .7);
+  main_area_->SetMode(Container::SplitVertical);
+  main_area_->Container::AddChild(top);
+  main_area_->Container::AddChild(bottom);
+  main_area_->SetFraction(top, .7);
 
   Contents* output = Placeholder(skin_, L"Output");
   Contents* log = Placeholder(skin_, L"Log");
@@ -70,6 +76,21 @@ Workspace::~Workspace() {
 
 void Workspace::SetDelegate(ApplicationWindow* delegate) {
   delegate_ = delegate;
+}
+
+void Workspace::SetScreenRect(const Rect& rect) {
+  set_screen_rect(rect);
+  const Skin& skin = GetSkin();
+  Rect outer_border_size(
+      skin.border_size(), skin.border_size(),
+      skin.border_size(), skin.border_size());
+  Rect remaining = rect.Contract(outer_border_size);
+  Rect main_area_rect = remaining.Contract(
+      Rect(0, 0, 0, skin.status_bar_size()));
+  main_area_->SetScreenRect(main_area_rect);
+  status_bar_->SetScreenRect(
+      Rect(remaining.x, remaining.y + main_area_rect.h + skin.border_size(),
+           remaining.w, skin.status_bar_size() - skin.border_size()));
 }
 
 void Workspace::Invalidate() {

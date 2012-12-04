@@ -276,6 +276,7 @@ def main():
 
   n.comment('Core source files all build into sg library.')
   for name in [
+               'backend\\backend_native_win',
                'cpp_lexer',
                'debug_presenter',
                'debug_presenter_display',
@@ -283,6 +284,7 @@ def main():
                'lexer_state',
                'source_files',
                'source_view',
+               'status_bar',
                'ui\\container',
                'ui\\contents',
                'ui\\focus',

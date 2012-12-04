@@ -21,8 +21,6 @@ class Contents {
   virtual void SetParent(Contents* parent);
   virtual Contents* GetParent() const;
 
-  virtual void SetScreenRect(const Rect& rect);
-
   virtual void Invalidate();
 
   virtual int X() const { return rect_.x; }
@@ -30,6 +28,8 @@ class Contents {
   virtual int Width() const { return rect_.w; }
   virtual int Height() const { return rect_.h; }
 
+  virtual void SetScreenRect(const Rect& rect);
+  void set_screen_rect(const Rect& rect) { rect_ = rect; }
   virtual const Rect& GetScreenRect() const { return rect_; }
   virtual Rect GetClientRect() const {
     return Rect(0, 0, rect_.w, rect_.h);

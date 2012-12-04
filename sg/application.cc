@@ -5,11 +5,13 @@
 #include "sg/application.h"
 
 #include "sg/application_window.h"
+#include "sg/backend/backend_native_win.h"
 #include "sg/debug_presenter.h"
 #include "sg/source_files.h"
 #include "sg/workspace.h"
 
 Application::Application() {
+  debug_connection_.reset(new DebugConnectionNativeWin);
   source_files_.reset(new SourceFiles);
   main_window_.reset(ApplicationWindow::Create());
   workspace_.reset(new Workspace);

@@ -7,8 +7,10 @@
 
 #include "base/basictypes.h"
 #include "base/memory/scoped_ptr.h"
+#include "sg/backend/backend.h"
 
 class ApplicationWindow;
+class DebugConnection;
 class DebugPresenter;
 class SourceFiles;
 class Workspace;
@@ -26,6 +28,7 @@ class Application {
   scoped_ptr<ApplicationWindow> main_window_;
   scoped_ptr<Workspace> workspace_;
   scoped_ptr<DebugPresenter> presenter_;
+  scoped_ptr<DebugConnection> debug_connection_;
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

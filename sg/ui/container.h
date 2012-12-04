@@ -25,7 +25,10 @@ class Container : public Contents {
     mode_ = mode;
   }
 
+  // Implementation of Contents.
   virtual void Render(Gwen::Renderer::Base* renderer) OVERRIDE;
+  virtual void SetScreenRect(const Rect& rect) OVERRIDE;
+
   virtual void AddChild(Contents* contents, const string16& title);
   virtual void AddChild(Contents* contents);
   virtual void SetTitle(Contents* contents, const string16& title);
@@ -34,13 +37,13 @@ class Container : public Contents {
   virtual size_t ChildCount() const { return children_.size(); }
   virtual Contents* Child(size_t i) { return children_[i].contents; }
 
- private:
-  // Recalculate the screen rect for each of our children (assuming our |rect_|
-  // is already up to date here).
-  void PropagateSizeChanges();
+ protected:
   void RenderChildren(Gwen::Renderer::Base* renderer);
   void RenderBorders(Gwen::Renderer::Base* renderer);
   void RenderFrame(Gwen::Renderer::Base* renderer, const Rect& rect);
+
+ private:
+  void DoStandardLayout();
 
   struct ChildData {
     Contents* contents;

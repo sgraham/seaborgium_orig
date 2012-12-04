@@ -25,9 +25,13 @@ Container::~Container() {
 }
 
 void Container::Render(Gwen::Renderer::Base* renderer) {
-  PropagateSizeChanges();
   RenderChildren(renderer);
   RenderBorders(renderer);
+}
+
+void Container::SetScreenRect(const Rect& rect) {
+  set_screen_rect(rect);
+  DoStandardLayout();
 }
 
 void Container::AddChild(Contents* contents, const string16& title) {
@@ -71,17 +75,11 @@ void Container::SetFraction(Contents* contents, double fraction) {
   NOTREACHED() << "Child not found.";
 }
 
-void Container::PropagateSizeChanges() {
+void Container::DoStandardLayout() {
   if (children_.size() == 0)
     return;
   Rect rect = GetScreenRect();
   const Skin& skin = GetSkin();
-  if (GetParent() == NULL) {
-    Rect outer_border_size(
-        skin.border_size(), skin.border_size(),
-        skin.border_size(), skin.border_size());
-    rect = rect.Contract(outer_border_size);
-  }
   if (children_.size() == 1) {
     ChildData* child = &children_[0];
     if (child->contents->IsLeaf()) {
@@ -96,7 +94,8 @@ void Container::PropagateSizeChanges() {
       skin.border_size() * (children_.size() - 1);
   double current = mode_ == SplitHorizontal ? rect.x : rect.y;
   double last_fraction = 0.0;
-  // TODO(scottmg): This might have some rounding problems.
+  // TODO(scottmg): This has some rounding problems (so frame will be one
+  // pixel too big sometimes).
   for (size_t i = 0; i < children_.size(); ++i) {
     Rect result = rect;  // For x/w or y/h that isn't changed below.
     ChildData* child = &children_[i];
@@ -129,17 +128,14 @@ void Container::RenderChildren(Gwen::Renderer::Base* renderer) {
 }
 
 void Container::RenderBorders(Gwen::Renderer::Base* renderer) {
-  // TODO(scottmg): This (and the resize code) is wrong.
   const Skin& skin = GetSkin();
-  if (GetParent() == NULL)
-    RenderFrame(renderer, GetClientRect());
   Rect title_border_size(
       skin.border_size(), skin.border_size() + skin.title_bar_size(),
       skin.border_size(), skin.border_size());
   if (children_.size() == 1) {
     ChildData* child = &children_[0];
     if (child->contents->IsLeaf()) {
-      // TODO(rendering): This have a GetRectRelativeTo(this).
+      // TODO(rendering): We should have a GetRectRelativeTo(this).
       Rect self_rect = GetScreenRect();
       Rect child_rect = child->contents->GetScreenRect();
       Rect relative_rect = Rect(child_rect.x - self_rect.x,

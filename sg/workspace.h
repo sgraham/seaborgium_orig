@@ -14,6 +14,7 @@
 class ApplicationWindow;
 class Container;
 class SourceView;
+class StatusBar;
 
 class Workspace : public Container, public DebugPresenterDisplay {
  public:
@@ -22,7 +23,8 @@ class Workspace : public Container, public DebugPresenterDisplay {
 
   virtual void SetDelegate(ApplicationWindow* delegate);
 
-  virtual void Invalidate();
+  virtual void SetScreenRect(const Rect& rect) OVERRIDE;
+  virtual void Invalidate() OVERRIDE;
 
   // Implementation of DebugPresenterDisplay.
   virtual void SetFileName(const FilePath& filename) OVERRIDE;
@@ -30,6 +32,10 @@ class Workspace : public Container, public DebugPresenterDisplay {
 
  private:
   Skin skin_;
+
+  Container* main_area_;
+  StatusBar* status_bar_;
+
   SourceView* source_view_;
   Container* source_view_container_;
   ApplicationWindow* delegate_;
