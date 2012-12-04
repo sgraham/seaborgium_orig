@@ -23,7 +23,9 @@ class ProcessNativeWin : public Process {
   virtual bool Resume(string16* error) { return false; }
   virtual bool GetName(string16* name, string16* error) { return false; }
   virtual void GetThreadList(std::vector<ThreadId>* result) {}
-  virtual Thread* GetThread(ThreadId thread_id, string16* error) { return NULL; }
+  virtual Thread* GetThread(ThreadId thread_id, string16* error) {
+    return NULL;
+  }
   virtual void GetHeapList(std::vector<HeapId>* result) {}
   virtual Heap* GetHeap(HeapId heap_id, string16* error) { return NULL; }
 };
@@ -50,8 +52,8 @@ Process* DebugConnectionNativeWin::ProcessCreate(
     const std::vector<string16> environment,
     const string16& working_directory,
     string16* error) {
-  DCHECK(environment.size() == 0) << "todo;";
-  DCHECK(working_directory.size() == 0) << "todo;";
+  DCHECK_EQ(0, environment.size()) << "todo;";
+  DCHECK_EQ(0, working_directory.size()) << "todo;";
   scoped_ptr<ProcessNativeWin> process(new ProcessNativeWin);
   // CreateProcessW can modify input buffer so we have to make a copy here.
   scoped_array<char16> command_line_copy(new char16[command_line.size() + 1]);

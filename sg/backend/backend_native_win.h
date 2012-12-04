@@ -5,6 +5,8 @@
 #ifndef SG_BACKEND_BACKEND_NATIVE_WIN_H_
 #define SG_BACKEND_BACKEND_NATIVE_WIN_H_
 
+#include <vector>
+
 #include "sg/backend/backend.h"
 
 class DebugPresenterNotify;
@@ -14,7 +16,8 @@ class DebugPresenterNotify;
 
 class DebugConnectionNativeWin : public DebugConnection {
  public:
-  DebugConnectionNativeWin(DebugPresenterNotify* debug_presenter_notify);
+  explicit DebugConnectionNativeWin(
+      DebugPresenterNotify* debug_presenter_notify);
   virtual ~DebugConnectionNativeWin();
 
   // Implementation of DebugConnection:

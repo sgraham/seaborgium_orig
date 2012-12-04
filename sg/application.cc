@@ -4,6 +4,8 @@
 
 #include "sg/application.h"
 
+#include <vector>
+
 #include "base/logging.h"
 #include "sg/application_window.h"
 #include "sg/backend/backend_native_win.h"
