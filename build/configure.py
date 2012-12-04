@@ -38,6 +38,7 @@ def GetChromiumBaseFileList(base_dir):
                 'symbolize', 'string16.cc', '_chromeos', 'nix\\', 'xdg_',
                 'file_path_watcher_stub.cc', 'dtoa.cc',
                 'event_recorder_stubs.cc', '_mock.cc', 'check_example.cc',
+                'dynamic_annotations.c', # avoid futzing with .c
                 'debug_message.cc',
                 'allocator\\', # Kind of overly involved for user-configuration.
                 'field_trial.cc', # Has screwy winsock inclusion, don't need it.
@@ -166,6 +167,7 @@ def GetRe2FileList():
     'util/stringpiece',
     'util/stringprintf',
     'util/strutil',
+    'util/valgrind',
     ]
   return [os.path.normpath(p) for p in files]
 
@@ -187,6 +189,9 @@ def main():
   if args:
     print 'ERROR: extra unparsed command-line arguments:', args
     sys.exit(1)
+  if not options.debug:
+    print 'Oops, I broke non-debug linking, temporarily forcing --debug.'
+    options.debug = True
 
   BUILD_FILENAME = 'build.ninja'
   buildfile = open(BUILD_FILENAME, 'w')
@@ -209,12 +214,12 @@ def main():
     return os.path.join('third_party', 're2', filename)
   def built(filename):
     return os.path.join('$builddir', 'obj', filename)
-  def cc(name, src=src, **kwargs):
-    return n.build(built(name + objext), 'cxx', src(name + '.c'), **kwargs)
   def cxx(name, src=src, **kwargs):
-    return n.build(built(name + objext), 'cxx', src(name + '.cc'), **kwargs)
+    return n.build(built(name + objext), 'cxx', src(name + '.cc'),
+                   implicit=built('sg.pch'), **kwargs)
   def cpp(name, src=src, **kwargs):
-    return n.build(built(name + objext), 'cxx', src(name + '.cpp'), **kwargs)
+    return n.build(built(name + objext), 'cxx', src(name + '.cpp'),
+                   implicit=built('sg.pch'), **kwargs)
   def rc(name, src=src, **kwargs):
     return n.build(built(name + objext), 'rc', src(name + '.rc'), **kwargs)
   def binary(name):
@@ -240,17 +245,21 @@ def main():
             '/DUNICODE', '/D_UNICODE',
             '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
             '/D_WIN32_WINNT=0x0601', '/D_VARIADIC_MAX=10',
+            '/DDYNAMIC_ANNOTATIONS_ENABLED=0',
             '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
             '-Ithird_party/re2',
-            '-FIsg/global.h']
+            '-FIsg/global.h',
+            '/Yusg/global.h']
   if options.debug:
     cflags += ['/D_DEBUG', '/MTd']
   else:
     cflags += ['/DNDEBUG', '/MT']
-  ldflags = ['/DEBUG', '/SUBSYSTEM:WINDOWS', '/INCREMENTAL']
+  ldflags = ['/DEBUG', '/SUBSYSTEM:WINDOWS']
   if not options.debug:
     cflags += ['/Ox', '/DNDEBUG', '/GL']
     ldflags += ['/LTCG', '/OPT:REF', '/OPT:ICF']
+  else:
+    ldflags += ['/INCREMENTAL']
   libs = []
 
   n.newline()
@@ -259,16 +268,12 @@ def main():
   n.variable('ldflags', ' '.join(ldflags))
   n.newline()
 
-  compiler = '%s -o $out -- $cxx /showIncludes' % 'ninja -t msvc'
+  compiler = 'ninja -t msvc -o $out -- $cxx /showIncludes'
   n.rule('cxx',
-    command='%s $cflags -c $in /Fo$out' % compiler,
+    command=('%s $cflags /Fp%s '
+             '-c $in /Fo$out' % (compiler, built('sg.pch'))),
     depfile='$out.d',
     description='CXX $out')
-  n.newline()
-
-  n.rule('ar',
-        command='lib /nologo /ltcg $libflags /out:$out $in',
-        description='LIB $out')
   n.newline()
 
   n.rule('link',
@@ -279,6 +284,17 @@ def main():
   n.rule('rc',
       command='rc /r /nologo /fo $out $in',
         description='RC $out')
+  n.newline()
+
+  n.rule('cxx_pch',
+    command=('%s $cflags /Ycsg/global.h /Fp%s '
+             '-c $in /Fo$objname' % (compiler, built('sg.pch'))),
+    depfile='$out.d',
+    description='CXX $out')
+  n.newline()
+
+  n.comment('Build the precompiled header.')
+  n.build([built('sg.pch')], 'cxx_pch', src('sg_pch.cc'))
   n.newline()
 
   sg_objs = []
@@ -320,10 +336,7 @@ def main():
   base_objs = []
   for name in crfiles:
     base, ext = os.path.splitext(name)
-    if ext == '.c':
-      base_objs += cc(base, src=base_src)
-    else:
-      base_objs += cxx(base, src=base_src)
+    base_objs += cxx(base, src=base_src)
   n.newline()
 
   libs = ['advapi32.lib',
@@ -363,18 +376,20 @@ def main():
 
   variables = []
   test_cflags = None
-  test_ldflags = ['/SUBSYSTEM:CONSOLE']
+  test_ldflags = ldflags + ['/SUBSYSTEM:CONSOLE']
   test_libs = libs
   test_objs = []
   path = 'third_party/testing/gtest'
 
   gtest_all_incs = ['-I%s' % path,  '-I%s' % os.path.join(path, 'include')]
-  gtest_cflags = cflags + ['/nologo', '/EHsc', '/Zi'] + gtest_all_incs
+  gtest_cflags = cflags + gtest_all_incs
   test_objs += n.build(built('gtest-all' + objext), 'cxx',
                        inputs=os.path.join(path, 'src', 'gtest-all.cc'),
+                       implicit=built('sg.pch'),
                        variables=[('cflags', gtest_cflags)])
   test_objs += n.build(built('gtest_main' + objext), 'cxx',
                        inputs=os.path.join(path, 'src', 'gtest_main.cc'),
+                       implicit=built('sg.pch'),
                        variables=[('cflags', gtest_cflags)])
 
   test_cflags = cflags + ['-DGTEST_HAS_RTTI=0',

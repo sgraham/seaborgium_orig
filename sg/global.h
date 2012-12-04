@@ -6,13 +6,36 @@
 #define SG_GLOBAL_H_
 
 #ifdef _DEBUG
-
 #define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
+#endif
+
+#define _INTSAFE_H_INCLUDED_  // What a cluster.
+
+#include <algorithm>
+#include <functional>
+#include <iosfwd>
+#include <list>
+#include <map>
+#include <set>
+#include <stack>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <crtdbg.h>  // NOLINT(build/include_order)
+#include <stdio.h>  // NOLINT(build/include_order)
+#include <string.h>  // NOLINT(build/include_order)
+#include <stdint.h>  // NOLINT(build/include_order)
+#include <stdlib.h>  // NOLINT(build/include_order)
+#include <stddef.h>  // NOLINT(build/include_order)
+#include <assert.h>  // NOLINT(build/include_order)
+#include <stdarg.h>  // NOLINT(build/include_order)
+#include <time.h>  // NOLINT(build/include_order)
 // base::strdup fails if this is |#define|d.
 #undef strdup
 
+#ifdef _WIN32
+#include <windows.h>  // NOLINT(build/include_order)
 #endif
 
 #endif  // SG_GLOBAL_H_

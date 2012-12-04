@@ -4,8 +4,6 @@
 
 #include "sg/gpu.h"
 
-#define WIN32_LEAN_AND_MEAN
-#define _INTSAFE_H_INCLUDED_  // What a cluster.
 #include <windows.h>
 #include <d2d1.h>
 #include <d2d1helper.h>

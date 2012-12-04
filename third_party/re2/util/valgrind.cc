@@ -5,7 +5,7 @@
 #include "util/util.h"
 #include "util/valgrind.h"
 
-namespace re2 {
+extern "C" {
 
 int RunningOnValgrind() {
 #ifdef RUNNING_ON_VALGRIND
@@ -15,4 +15,4 @@ int RunningOnValgrind() {
 #endif
 }
 
-}  // namespace re2
+}  // extern "C"
