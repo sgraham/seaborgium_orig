@@ -4,6 +4,7 @@
 
 #include "sg/application.h"
 
+#include "base/logging.h"
 #include "sg/application_window.h"
 #include "sg/backend/backend_native_win.h"
 #include "sg/debug_presenter.h"
@@ -20,6 +21,15 @@ Application::Application() {
   presenter_->SetDisplay(workspace_.get());
   main_window_->SetDebugPresenterNotify(presenter_.get());
   debug_connection_.reset(new DebugConnectionNativeWin(presenter_.get()));
+  std::vector<string16> empty_environment;
+  string16 err;
+  Process* p = debug_connection_->ProcessCreate(
+      L"test_binary.exe",
+      L"this is stuff",
+      empty_environment,
+      L"",
+      &err);
+  DVLOG(1) << p;
 }
 
 Application::~Application() {

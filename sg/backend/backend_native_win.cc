@@ -4,7 +4,27 @@
 
 #include "sg/backend/backend_native_win.h"
 
+#include <windows.h>
+
+#include "base/logging.h"
+#include "base/memory/scoped_ptr.h"
 #include "sg/debug_presenter_notify.h"
+
+// TODO(scottmg): All temp.
+class ProcessNativeWin : public Process {
+ public:
+  ProcessNativeWin() {}
+  PROCESS_INFORMATION process_information;
+
+  // (Non-)Implementation of Process.
+  virtual bool Suspend(string16* err) { return false; }
+  virtual bool Resume(string16* err) { return false; }
+  virtual bool GetName(string16* name, string16* err) { return false; }
+  virtual void GetThreadList(std::vector<ThreadId>* result) {}
+  virtual Thread* GetThread(ThreadId thread_id, string16* err) { return NULL; }
+  virtual void GetHeapList(std::vector<HeapId>* result) {}
+  virtual Heap* GetHeap(HeapId heap_id, string16* err) { return NULL; }
+};
 
 DebugConnectionNativeWin::DebugConnectionNativeWin(
     DebugPresenterNotify* debug_presenter_notify)
@@ -28,6 +48,24 @@ Process* DebugConnectionNativeWin::ProcessCreate(
     const std::vector<string16> environment,
     const string16& working_directory,
     string16* err) {
+  DCHECK(environment.size() == 0) << "todo;";
+  DCHECK(working_directory.size() == 0) << "todo;";
+  scoped_ptr<ProcessNativeWin> process(new ProcessNativeWin);
+  // CreateProcessW can modify input buffer so we have to make a copy here.
+  scoped_array<char16> command_line_copy(new char16[command_line.size() + 1]);
+  BOOL result = CreateProcess(
+      application.c_str(),
+      command_line_copy.get(),
+      NULL, NULL,
+      FALSE,
+      CREATE_SUSPENDED | DEBUG_PROCESS | DETACHED_PROCESS,
+      NULL,  // environment
+      NULL,  // working directory
+      NULL,
+      &process->process_information);
+  if (result)
+    return process.release();
+  // TODO(scottmg): Fill out err.
   return NULL;
 }
 
