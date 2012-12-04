@@ -14,8 +14,8 @@
 Gwen::Font kStatusBarFont(L"Segoe UI", 12.f);
 
 StatusBar::StatusBar(const Skin& skin) : Contents(skin) {
-  debug_state_ = L"Win32 (native) not connected.";
-  ms_per_frame_ = L"16.6ms";
+  debug_state_ = L"";
+  ms_per_frame_ = L"";
 }
 
 StatusBar::~StatusBar() {
