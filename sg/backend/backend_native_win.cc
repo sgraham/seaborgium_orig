@@ -53,12 +53,21 @@ Process* DebugConnectionNativeWin::ProcessCreate(
     const string16& working_directory,
     string16* error) {
   DCHECK_EQ(0, environment.size()) << "todo;";
-  DCHECK_EQ(0, working_directory.size()) << "todo;";
   scoped_ptr<ProcessNativeWin> process(new ProcessNativeWin);
   // CreateProcessW can modify input buffer so we have to make a copy here.
   scoped_array<char16> command_line_copy(new char16[command_line.size() + 1]);
   command_line.copy(command_line_copy.get(), command_line.size());
   command_line_copy[command_line.size()] = 0;
+
+  STARTUPINFO startup_info;
+  memset(&startup_info, 0, sizeof(startup_info));
+  startup_info.cb = sizeof(STARTUPINFO);
+  /* TODO(handles)
+  startup_info.dwFlags = STARTF_USESTDHANDLES;
+  startup_info.hStdInput = nul;
+  startup_info.hStdOutput = child_pipe;
+  startup_info.hStdError = child_pipe;
+  */
   BOOL result = CreateProcess(
       application.c_str(),
       command_line_copy.get(),
@@ -66,8 +75,8 @@ Process* DebugConnectionNativeWin::ProcessCreate(
       FALSE,
       CREATE_SUSPENDED | DEBUG_PROCESS | DETACHED_PROCESS,
       NULL,  // environment
-      NULL,  // working directory
-      NULL,
+      working_directory.c_str(),
+      &startup_info,
       &process->process_information);
   if (result)
     return process.release();

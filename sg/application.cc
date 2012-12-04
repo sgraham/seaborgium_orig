@@ -26,12 +26,12 @@ Application::Application() {
   std::vector<string16> empty_environment;
   string16 error;
   Process* p = debug_connection_->ProcessCreate(
-      L"test_binary.exe",
+      L"test_data\\test_binary.exe",
       L"this is stuff",
       empty_environment,
-      L"",
+      L"test_data",
       &error);
-  DVLOG(1) << p;
+  DCHECK(p) << "couldn't launch test_binary.exe";
 }
 
 Application::~Application() {
