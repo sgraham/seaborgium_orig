@@ -235,7 +235,7 @@ def main():
             '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
             '/DUNICODE', '/D_UNICODE',
             '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
-            '/D_WIN32_WINNT=0x0601',
+            '/D_WIN32_WINNT=0x0601', '/D_VARIADIC_MAX=10',
             '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
             '-Ithird_party/re2',
             '-FIsg/global.h']
