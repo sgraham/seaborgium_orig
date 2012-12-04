@@ -9,6 +9,7 @@
 #include "sg/app_thread.h"
 #include "sg/gpu.h"
 #include "sg/ui/base_types.h"
+#include "sg/ui/contents.h"
 
 namespace {
 
@@ -58,11 +59,10 @@ class ApplicationWindowWin : public ApplicationWindow {
 
   virtual void SetContents(Contents* contents) {
     contents_ = contents;
-    // TODO(scottmg): This is a hokey way of propagating size to the view.
     RECT rc;
     GetClientRect(hwnd_, &rc);
-    Gpu::Resize(this, Rect(rc.left, rc.top,
-                           rc.right - rc.left, rc.bottom - rc.top));
+    contents_->SetScreenRect(
+        Rect(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top));
   }
   virtual Contents* GetContents() { return contents_; }
 
