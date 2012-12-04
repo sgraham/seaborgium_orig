@@ -18,6 +18,12 @@
 namespace Gwen { namespace Skin { class Base; }}
 class Skin;
 
+struct ColoredText {
+  Lexer::TokenType type;
+  string16 text;
+};
+typedef std::vector<ColoredText> Line;
+
 class SourceView : public Contents {
  public:
   explicit SourceView(const Skin& skin);
@@ -37,17 +43,12 @@ class SourceView : public Contents {
   virtual bool WantKeyEvents() { return true; }
 
  private:
-  struct ColoredText {
-    Lexer::TokenType type;
-    string16 text;
-  };
-  typedef std::vector<ColoredText> Line;
 
-  void SyntaxHighlight(const std::string& input, std::vector<Line>* lines);
   const Gwen::Color& ColorForTokenType(const Skin& skin, Lexer::TokenType type);
   float GetLargestScrollLocation();
   void ClampScrollTarget();
   void ScrollView(int number_of_lines);
+  void CommitAfterHighlight(std::vector<Line> lines);
 
   float y_pixel_scroll_;
   float y_pixel_scroll_target_;

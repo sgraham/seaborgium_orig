@@ -7,17 +7,55 @@
 #include <algorithm>
 
 #include "Gwen/Gwen.h"
+#include "base/bind.h"
 #include "base/file_util.h"
 #include "base/logging.h"
 #include "base/string_number_conversions.h"
 #include "base/string_piece.h"
 #include "base/utf_string_conversions.h"
+#include "sg/app_thread.h"
 #include "sg/cpp_lexer.h"
 #include "sg/lexer.h"
 #include "sg/ui/skin.h"
 
 namespace {
+
+// TODO(config):
+// TODO(rendering): Font line height.
 const int g_line_height = 16;
+
+// TODO(scottmg): Losing last line if doesn't end in \n.
+void SyntaxHighlight(const std::string& input, std::vector<Line>* lines) {
+  scoped_ptr<Lexer> lexer(MakeCppLexer());
+  std::vector<Token> tokens;
+  lexer->GetTokensUnprocessed(input, &tokens);
+  Line current_line;
+  for (size_t i = 0; i < tokens.size(); ++i) {
+    const Token& token = tokens[i];
+    if (token.value == "\n") {
+      lines->push_back(current_line);
+      current_line.clear();
+    } else {
+      ColoredText fragment;
+      fragment.type = token.token;
+      fragment.text = UTF8ToUTF16(token.value);
+      current_line.push_back(fragment);
+      if (token.token == Lexer::CommentSingle) {
+        // Includes \n in its value so we don't otherwise see it.
+        lines->push_back(current_line);
+        current_line.clear();
+      }
+    }
+  }
+}
+
+std::vector<Line> HighlightOnFILE(std::string utf8_text) {
+  std::vector<Line> into;
+  //Sleep(10000);
+  SyntaxHighlight(utf8_text, &into);
+  return into;
+}
+
 }  // namespace
 
 SourceView::SourceView(const Skin& skin)
@@ -30,10 +68,28 @@ SourceView::SourceView(const Skin& skin)
 
 void SourceView::SetData(const std::string& utf8_text) {
   lines_.clear();
-  // TODO(jank): This needs to be on a background thread. Perhaps the data
-  // that's received should already be tokenized? Tokenization for highlighting
-  // does seem pretty clearly only for the view though.
-  SyntaxHighlight(utf8_text, &lines_);
+
+  // Add placeholder while we're processing.
+  // TODO(jank): The file access happens on FILE too, but we could push the
+  // placeholder from when we first queue the request to load the file.
+  ColoredText segment;
+  segment.type = Lexer::Text;
+  segment.text = L"Loading...";
+  Line line;
+  line.push_back(segment);
+  lines_.push_back(line);
+
+  // TODO(scottmg): There's a crazy amount of by-value copying going on here.
+  // Better than on-thread, but probably should RefPtr some structures instead.
+  AppThread::PostTaskAndReplyWithResult(AppThread::FILE, FROM_HERE,
+      base::Bind(&HighlightOnFILE,
+                 utf8_text),
+      base::Bind(&SourceView::CommitAfterHighlight, base::Unretained(this)));
+  Invalidate();
+}
+
+void SourceView::CommitAfterHighlight(std::vector<Line> lines) {
+  lines_ = lines;
   Invalidate();
 }
 
@@ -138,32 +194,6 @@ void SourceView::ScrollView(int number_of_lines) {
     static_cast<int>(y_pixel_scroll_target_ / g_line_height) * g_line_height;
   y_pixel_scroll_target_ += g_line_height * number_of_lines;
   ClampScrollTarget();
-}
-
-// TODO(scottmg): Losing last line if doesn't end in \n.
-void SourceView::SyntaxHighlight(
-    const std::string& input, std::vector<Line>* lines) {
-  scoped_ptr<Lexer> lexer(MakeCppLexer());
-  std::vector<Token> tokens;
-  lexer->GetTokensUnprocessed(input, &tokens);
-  Line current_line;
-  for (size_t i = 0; i < tokens.size(); ++i) {
-    const Token& token = tokens[i];
-    if (token.value == "\n") {
-      lines->push_back(current_line);
-      current_line.clear();
-    } else {
-      ColoredText fragment;
-      fragment.type = token.token;
-      fragment.text = UTF8ToUTF16(token.value);
-      current_line.push_back(fragment);
-      if (token.token == Lexer::CommentSingle) {
-        // Includes \n in its value so we don't otherwise see it.
-        lines->push_back(current_line);
-        current_line.clear();
-      }
-    }
-  }
 }
 
 const Gwen::Color& SourceView::ColorForTokenType(

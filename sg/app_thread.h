@@ -8,6 +8,7 @@
 #include "base/basictypes.h"
 #include "base/location.h"
 #include "base/message_loop.h"
+#include "base/task_runner_util.h"
 #include "base/threading/thread.h"
 
 class AppThread : public base::Thread {
