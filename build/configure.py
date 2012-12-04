@@ -31,11 +31,12 @@ def GetChromiumBaseFileList(base_dir):
     result = all_files[:]
     if 'win' in for_types:
       for x in ('_posix', '_mac', '_android', '_linux', '_ios', '_solaris',
-                '.java', '_gcc', '.mm', 'android\\', '_libevent', 'chromeos\\',
-                'data\\', '_freebsd', '_nacl', 'linux_', '_glib', '_gtk', 'mac\\',
-                'unix_', 'file_descriptor', '_aurax11', 'sha1_win.cc', '_openbsd',
-                'xdg_mime', '_kqueue', 'symbolize', 'string16.cc', '_chromeos',
-                'nix\\', 'xdg_', 'file_path_watcher_stub.cc', 'dtoa.cc',
+                '.java', '_gcc', '.mm', 'android\\', '_libevent',
+                'chromeos\\', 'data\\', '_freebsd', '_nacl', 'linux_',
+                '_glib', '_gtk', 'mac\\', 'unix_', 'file_descriptor',
+                '_aurax11', 'sha1_win.cc', '_openbsd', 'xdg_mime', '_kqueue',
+                'symbolize', 'string16.cc', '_chromeos', 'nix\\', 'xdg_',
+                'file_path_watcher_stub.cc', 'dtoa.cc',
                 'event_recorder_stubs.cc', '_mock.cc',
                 'allocator\\', # Kind of overly involved for user-configuration.
                 'field_trial.cc', # Has screwy winsock inclusion, don't need it.
@@ -213,6 +214,8 @@ def main():
     return n.build(built(name + objext), 'cxx', src(name + '.cc'), **kwargs)
   def cpp(name, src=src, **kwargs):
     return n.build(built(name + objext), 'cxx', src(name + '.cpp'), **kwargs)
+  def rc(name, src=src, **kwargs):
+    return n.build(built(name + objext), 'rc', src(name + '.rc'), **kwargs)
   def binary(name):
     exe = os.path.join('$builddir', name + '.exe')
     n.build(name, 'phony', exe)
@@ -270,6 +273,11 @@ def main():
   n.rule('link',
         command='$cxx $in $libs /nologo /link $ldflags /out:$out',
         description='LINK $out')
+  n.newline()
+
+  n.rule('rc',
+      command='rc /r /nologo /fo $out $in',
+        description='RC $out')
   n.newline()
 
   objs = []
@@ -345,6 +353,7 @@ def main():
   objs += cxx('gpu_win')
   objs += cxx('main_loop')
   objs += cxx('main_win')
+  objs += rc('sg', implicit=['art\\sg.ico'])
   sg = n.build(binary('sg'), 'link', inputs=objs,
                implicit=sg_lib + base_lib + gwen_lib + re2_lib,
                variables=[('libs', libs)])

@@ -206,6 +206,7 @@ class ApplicationWindowWin : public ApplicationWindow {
     wc.lpszClassName = L"SeaborgiumWindow";
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
+    wc.hIcon = LoadIcon(wc.hInstance, MAKEINTRESOURCE(1));
     RegisterClass(&wc);
 
     int width = 1280;
