@@ -7,12 +7,14 @@
 
 #include "sg/backend/backend.h"
 
+class DebugPresenterNotify;
+
 // An implementation of a debugger backend using Win32 APIs. Note: Requires a
 // smattering of helper DLLs to be available.
 
 class DebugConnectionNativeWin : public DebugConnection {
  public:
-  DebugConnectionNativeWin();
+  DebugConnectionNativeWin(DebugPresenterNotify* debug_presenter_notify);
   virtual ~DebugConnectionNativeWin();
 
   // Implementation of DebugConnection:
@@ -27,6 +29,7 @@ class DebugConnectionNativeWin : public DebugConnection {
   virtual Process* ProcessAttach(ProcessId process_id, string16* err);
 
  private:
+  DebugPresenterNotify* debug_presenter_notify_;
 
   DISALLOW_COPY_AND_ASSIGN(DebugConnectionNativeWin);
 };

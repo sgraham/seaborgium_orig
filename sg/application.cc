@@ -11,15 +11,15 @@
 #include "sg/workspace.h"
 
 Application::Application() {
-  debug_connection_.reset(new DebugConnectionNativeWin);
   source_files_.reset(new SourceFiles);
   main_window_.reset(ApplicationWindow::Create());
   workspace_.reset(new Workspace);
-  main_window_->SetDebugPresenterNotify(workspace_.get());
   main_window_->SetContents(workspace_.get());
   workspace_->SetDelegate(main_window_.get());
   presenter_.reset(new DebugPresenter(source_files_.get()));
   presenter_->SetDisplay(workspace_.get());
+  main_window_->SetDebugPresenterNotify(presenter_.get());
+  debug_connection_.reset(new DebugConnectionNativeWin(presenter_.get()));
 }
 
 Application::~Application() {

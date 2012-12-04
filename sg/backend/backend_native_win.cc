@@ -4,7 +4,14 @@
 
 #include "sg/backend/backend_native_win.h"
 
-DebugConnectionNativeWin::DebugConnectionNativeWin() {
+#include "sg/debug_presenter_notify.h"
+
+DebugConnectionNativeWin::DebugConnectionNativeWin(
+    DebugPresenterNotify* debug_presenter_notify)
+    : debug_presenter_notify_(debug_presenter_notify) {
+  string16 name;
+  GetName(&name, NULL);
+  debug_presenter_notify_->NotifyDebugStateChanged(name);
 }
 
 DebugConnectionNativeWin::~DebugConnectionNativeWin() {

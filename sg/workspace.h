@@ -8,7 +8,6 @@
 #include <string>
 
 #include "sg/debug_presenter_display.h"
-#include "sg/debug_presenter_notify.h"
 #include "sg/ui/container.h"
 #include "sg/ui/skin.h"
 
@@ -17,9 +16,7 @@ class Container;
 class SourceView;
 class StatusBar;
 
-class Workspace : public Container,
-                  public DebugPresenterDisplay,
-                  public DebugPresenterNotify {
+class Workspace : public Container, public DebugPresenterDisplay {
  public:
   Workspace();
   virtual ~Workspace();
@@ -32,10 +29,8 @@ class Workspace : public Container,
   // Implementation of DebugPresenterDisplay.
   virtual void SetFileName(const FilePath& filename) OVERRIDE;
   virtual void SetFileData(const std::string& utf8_text) OVERRIDE;
-  virtual void SetDebugState(const string16& debug_state);
-
-  // Implementation of DebugPresenterDisplay.
-  virtual void NotifyFramePainted(double frame_time_in_ms);
+  virtual void SetDebugState(const string16& debug_state) OVERRIDE;
+  virtual void SetRenderTime(double ms_per_frame) OVERRIDE;
 
  private:
   Skin skin_;

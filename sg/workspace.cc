@@ -110,6 +110,6 @@ void Workspace::SetDebugState(const string16& debug_state) {
   status_bar_->SetDebugState(debug_state);
 }
 
-void Workspace::NotifyFramePainted(double frame_time_in_ms) {
+void Workspace::SetRenderTime(double frame_time_in_ms) {
   status_bar_->SetRenderTime(frame_time_in_ms);
 }

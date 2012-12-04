@@ -9,16 +9,21 @@
 
 #include "base/basictypes.h"
 #include "base/file_path.h"
+#include "sg/debug_presenter_notify.h"
 
 class DebugPresenterDisplay;
 class SourceFiles;
 
-class DebugPresenter {
+class DebugPresenter : public DebugPresenterNotify {
  public:
   explicit DebugPresenter(SourceFiles* source_files);
   virtual ~DebugPresenter();
 
   virtual void SetDisplay(DebugPresenterDisplay* display);
+
+  // Implementation of DebugPresenterNotify.
+  virtual void NotifyFramePainted(double frame_time_in_ms);
+  virtual void NotifyDebugStateChanged(const string16& state);
 
  private:
   void ReadFileOnFILE(FilePath path, std::string* result);

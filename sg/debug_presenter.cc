@@ -30,6 +30,15 @@ void DebugPresenter::SetDisplay(DebugPresenterDisplay* display) {
   display_ = display;
 }
 
+void DebugPresenter::NotifyFramePainted(double frame_time_in_ms) {
+  // Should really store this to some model.
+  display_->SetRenderTime(frame_time_in_ms);
+}
+
+void DebugPresenter::NotifyDebugStateChanged(const string16& state) {
+  display_->SetDebugState(state);
+}
+
 void DebugPresenter::ReadFileOnFILE(FilePath path, std::string* result) {
   file_util::ReadFileToString(path, result);
 }
