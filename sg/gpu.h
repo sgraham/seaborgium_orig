@@ -15,14 +15,16 @@ typedef HWND RenderingSurface;
 #endif
 
 class ApplicationWindow;
+class DebugPresenterNotify;
 
 class Gpu {
  public:
   static void Paint(ApplicationWindow* window);
   static void InitializeForRenderingSurface(
-      ApplicationWindow* window,
-      RenderingSurface surface);
+      ApplicationWindow* window, RenderingSurface surface);
   static void Resize(ApplicationWindow* window, Rect rect);
+  static void SetDebugPresenterNotify(
+      ApplicationWindow* window, DebugPresenterNotify* notifier);
 
  private:
   static void OneTimeInitialization();

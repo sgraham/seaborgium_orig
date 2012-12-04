@@ -52,6 +52,10 @@ class ApplicationWindowWin : public ApplicationWindow {
     ValidateRect(hwnd_, NULL);
   }
 
+  virtual void SetDebugPresenterNotify(DebugPresenterNotify* notifier) {
+    Gpu::SetDebugPresenterNotify(this, notifier);
+  }
+
   virtual void SetContents(Contents* contents) {
     contents_ = contents;
     // TODO(scottmg): This is a hokey way of propagating size to the view.

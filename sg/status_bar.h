@@ -13,8 +13,8 @@ class StatusBar : public Contents {
   explicit StatusBar(const Skin& skin);
   virtual ~StatusBar();
 
-  void UpdateFps(const string16& status);
-  void UpdateDebugState(const string16& status);
+  void SetRenderTime(double ms_per_frame);
+  void SetDebugState(const string16& status);
 
   virtual void Render(Gwen::Renderer::Base* renderer);
 

@@ -105,3 +105,11 @@ void Workspace::SetFileName(const FilePath& filename) {
 void Workspace::SetFileData(const std::string& utf8_text) {
   source_view_->SetData(utf8_text);
 }
+
+void Workspace::SetDebugState(const string16& debug_state) {
+  status_bar_->SetDebugState(debug_state);
+}
+
+void Workspace::NotifyFramePainted(double frame_time_in_ms) {
+  status_bar_->SetRenderTime(frame_time_in_ms);
+}

@@ -4,6 +4,8 @@
 
 #include "sg/status_bar.h"
 
+#include "base/string_number_conversions.h"
+#include "base/utf_string_conversions.h"
 #include "Gwen/Font.h"
 #include "sg/ui/skin.h"
 
@@ -19,10 +21,12 @@ StatusBar::StatusBar(const Skin& skin) : Contents(skin) {
 StatusBar::~StatusBar() {
 }
 
-void StatusBar::UpdateFps(const string16& status) {
+void StatusBar::SetRenderTime(double ms_per_frame) {
+  ms_per_frame_ = UTF8ToUTF16(base::DoubleToString(ms_per_frame)) + L" ms";
 }
 
-void StatusBar::UpdateDebugState(const string16& status) {
+void StatusBar::SetDebugState(const string16& status) {
+  debug_state_ = status;
 }
 
 void StatusBar::Render(Gwen::Renderer::Base* renderer) {

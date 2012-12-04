@@ -4,6 +4,7 @@
 
 #include "base/at_exit.h"
 #include "base/command_line.h"
+#include "base/time.h"
 #include "sg/application.h"
 #include "sg/main_loop.h"
 
@@ -26,6 +27,7 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE prev, wchar_t*, int) {
   // _CrtSetBreakAlloc(85175);
 
   CommandLine::Init(0, NULL);
+  base::Time::EnableHighResolutionTimer(true);
   base::AtExitManager exit_manager;
   return RunMain(instance);
 }

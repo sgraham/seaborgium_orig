@@ -7,6 +7,7 @@
 
 #include "sg/gpu.h"
 class Contents;
+class DebugPresenterNotify;
 
 class ApplicationWindow {
  public:
@@ -18,6 +19,8 @@ class ApplicationWindow {
 
   virtual void SetContents(Contents* contents) = 0;
   virtual Contents* GetContents() = 0;
+
+  virtual void SetDebugPresenterNotify(DebugPresenterNotify* notifier) = 0;
 
   static ApplicationWindow* Create();
 };

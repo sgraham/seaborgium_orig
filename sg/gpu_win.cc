@@ -16,6 +16,7 @@
 #include "base/lazy_instance.h"
 #include "sg/app_thread.h"
 #include "sg/application_window.h"
+#include "sg/debug_presenter_notify.h"
 #include "sg/ui/contents.h"
 #include "sg/workspace.h"
 
@@ -38,7 +39,8 @@ class GpuSystem {
         wic_factory_(NULL),
         render_target_(NULL),
         renderer_(NULL),
-        application_window_(window) {
+        application_window_(window),
+        debug_presenter_notify_(NULL) {
   }
 
   void Init() {
@@ -67,6 +69,7 @@ class GpuSystem {
   }
 
   void Paint() {
+    base::TimeTicks before = base::TimeTicks::HighResNow();
     if (SUCCEEDED(CreateDeviceResources())) {
       render_target_->BeginDraw();
       render_target_->SetTransform(D2D1::Matrix3x2F::Identity());
@@ -79,6 +82,10 @@ class GpuSystem {
         renderer_->DeviceLost();
       }
     }
+    base::TimeTicks after = base::TimeTicks::HighResNow();
+    base::TimeDelta delta = after - before;
+    if (debug_presenter_notify_)
+      debug_presenter_notify_->NotifyFramePainted(delta.InMillisecondsF());
   }
 
   void Resize(const Rect& rect) {
@@ -89,6 +96,10 @@ class GpuSystem {
       contents->SetScreenRect(rect);
       Paint();
     }
+  }
+
+  void SetDebugPresenterNotify(DebugPresenterNotify* notify) {
+    debug_presenter_notify_ = notify;
   }
 
  private:
@@ -154,6 +165,7 @@ class GpuSystem {
   ID2D1HwndRenderTarget* render_target_;
   Gwen::Renderer::Direct2D* renderer_;
   ApplicationWindow* application_window_;
+  DebugPresenterNotify* debug_presenter_notify_;
 
   DISALLOW_COPY_AND_ASSIGN(GpuSystem);
 };
@@ -183,6 +195,12 @@ void Gpu::InitializeForRenderingSurface(
   // initial show, which will lose the non-maximized window size.
   AppThread::PostTask(AppThread::UI, FROM_HERE, base::Bind(
       &ApplicationWindow::Show, base::Unretained(window)));
+}
+
+void Gpu::SetDebugPresenterNotify(
+    ApplicationWindow* window, DebugPresenterNotify* notifier) {
+  DCHECK(g_window_map.Get().find(window) != g_window_map.Get().end());
+  g_window_map.Get()[window]->SetDebugPresenterNotify(notifier);
 }
 
 // static
