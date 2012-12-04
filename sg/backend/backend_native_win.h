@@ -18,15 +18,15 @@ class DebugConnectionNativeWin : public DebugConnection {
   virtual ~DebugConnectionNativeWin();
 
   // Implementation of DebugConnection:
-  virtual bool GetName(string16* name, string16* err);
+  virtual bool GetName(string16* name, string16* error);
   virtual Process* ProcessCreate(
       const string16& application,
       const string16& command_line,
       const std::vector<string16> environment,
       const string16& working_directory,
-      string16* err);
+      string16* error);
   virtual void GetProcessList(std::vector<ProcessId>* result);
-  virtual Process* ProcessAttach(ProcessId process_id, string16* err);
+  virtual Process* ProcessAttach(ProcessId process_id, string16* error);
 
  private:
   DebugPresenterNotify* debug_presenter_notify_;

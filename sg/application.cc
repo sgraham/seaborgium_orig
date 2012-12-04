@@ -22,13 +22,13 @@ Application::Application() {
   main_window_->SetDebugPresenterNotify(presenter_.get());
   debug_connection_.reset(new DebugConnectionNativeWin(presenter_.get()));
   std::vector<string16> empty_environment;
-  string16 err;
+  string16 error;
   Process* p = debug_connection_->ProcessCreate(
       L"test_binary.exe",
       L"this is stuff",
       empty_environment,
       L"",
-      &err);
+      &error);
   DVLOG(1) << p;
 }
 
