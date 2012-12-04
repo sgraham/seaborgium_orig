@@ -7,6 +7,7 @@ import sys
 ninja_dir = os.path.join(os.path.split(__file__)[0],
                          '..', 'third_party', 'ninja')
 ninja_misc_dir = os.path.join(ninja_dir, 'misc')
+print 'Updating git submodules...'
 if os.system('git submodule update --init') != 0:
   raise SystemExit("Couldn't update git submodules")
 
@@ -189,9 +190,6 @@ def main():
   if args:
     print 'ERROR: extra unparsed command-line arguments:', args
     sys.exit(1)
-  if not options.debug:
-    print 'Oops, I broke non-debug linking, temporarily forcing --debug.'
-    options.debug = True
 
   BUILD_FILENAME = 'build.ninja'
   buildfile = open(BUILD_FILENAME, 'w')
@@ -214,12 +212,18 @@ def main():
     return os.path.join('third_party', 're2', filename)
   def built(filename):
     return os.path.join('$builddir', 'obj', filename)
+  pch_name = built('sg.pch')
+  pch_implicit = None
+  pch_compile = ''
+  if options.debug:
+    pch_implicit = pch_name
+    pch_compile = '/Fp' + pch_name + ' /Yusg/global.h'
   def cxx(name, src=src, **kwargs):
     return n.build(built(name + objext), 'cxx', src(name + '.cc'),
-                   implicit=built('sg.pch'), **kwargs)
+                   implicit=pch_implicit, **kwargs)
   def cpp(name, src=src, **kwargs):
     return n.build(built(name + objext), 'cxx', src(name + '.cpp'),
-                   implicit=built('sg.pch'), **kwargs)
+                   implicit=pch_implicit, **kwargs)
   def rc(name, src=src, **kwargs):
     return n.build(built(name + objext), 'rc', src(name + '.rc'), **kwargs)
   def binary(name):
@@ -248,8 +252,7 @@ def main():
             '/DDYNAMIC_ANNOTATIONS_ENABLED=0',
             '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
             '-Ithird_party/re2',
-            '-FIsg/global.h',
-            '/Yusg/global.h']
+            '-FIsg/global.h']
   if options.debug:
     cflags += ['/D_DEBUG', '/MTd']
   else:
@@ -270,8 +273,8 @@ def main():
 
   compiler = 'ninja -t msvc -o $out -- $cxx /showIncludes'
   n.rule('cxx',
-    command=('%s $cflags /Fp%s '
-             '-c $in /Fo$out' % (compiler, built('sg.pch'))),
+    command=('%s $cflags %s '
+             '-c $in /Fo$out' % (compiler, pch_compile)),
     depfile='$out.d',
     description='CXX $out')
   n.newline()
@@ -287,8 +290,8 @@ def main():
   n.newline()
 
   n.rule('cxx_pch',
-    command=('%s $cflags /Ycsg/global.h /Fp%s '
-             '-c $in /Fo$objname' % (compiler, built('sg.pch'))),
+    command=('%s $cflags /Ycsg/global.h %s '
+             '-c $in /Fo$objname' % (compiler, pch_compile)),
     depfile='$out.d',
     description='CXX $out')
   n.newline()
