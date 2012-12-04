@@ -9,9 +9,10 @@
 #include "base/compiler_specific.h"
 #include "Gwen/BaseRender.h"
 #include "sg/ui/base_types.h"
+#include "sg/ui/input.h"
 class Skin;
 
-class Contents {
+class Contents : public InputHandler {
  public:
   explicit Contents(const Skin& skin);
   virtual ~Contents();
@@ -38,6 +39,22 @@ class Contents {
   virtual bool IsLeaf() const { return true; }
 
   virtual const Skin& GetSkin() const { return skin_; }
+
+  // Default implementation of InputHandler.
+  virtual bool NotifyMouseMoved(
+      int x, int y, int dx, int dy, const InputModifiers& modifiers) OVERRIDE {
+    return false;
+  }
+  virtual bool NotifyMouseWheel(
+      int delta, const InputModifiers& modifiers) OVERRIDE {
+    return false;
+  }
+  virtual bool NotifyKey(
+      InputKey key, bool down, const InputModifiers& modifiers) OVERRIDE {
+    return false;
+  }
+  virtual bool WantMouseEvents() { return false; }
+  virtual bool WantKeyEvents() { return false; }
 
  private:
   Contents* parent_;

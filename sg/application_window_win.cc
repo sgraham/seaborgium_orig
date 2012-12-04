@@ -9,7 +9,8 @@
 #include "sg/app_thread.h"
 #include "sg/gpu.h"
 #include "sg/ui/base_types.h"
-#include "sg/ui/contents.h"
+#include "sg/ui/input.h"
+#include "sg/workspace.h"
 
 namespace {
 
@@ -33,7 +34,9 @@ class ApplicationWindowWin : public ApplicationWindow {
   ApplicationWindowWin()
       : got_create_(false),
         got_valid_hwnd_(false),
-        contents_(NULL) {
+        workspace_(NULL),
+        last_mouse_x_(0),
+        last_mouse_y_(0) {
     CreateHwnd();
   }
 
@@ -57,14 +60,14 @@ class ApplicationWindowWin : public ApplicationWindow {
     Gpu::SetDebugPresenterNotify(this, notifier);
   }
 
-  virtual void SetContents(Contents* contents) {
-    contents_ = contents;
+  virtual void SetContents(Workspace* workspace) {
+    workspace_ = workspace;
     RECT rc;
     GetClientRect(hwnd_, &rc);
-    contents_->SetScreenRect(
+    workspace_->SetScreenRect(
         Rect(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top));
   }
-  virtual Contents* GetContents() { return contents_; }
+  virtual Workspace* GetContents() { return workspace_; }
 
  private:
   LRESULT OnWndProc(UINT msg, WPARAM w_param, LPARAM l_param) {
@@ -106,8 +109,68 @@ class ApplicationWindowWin : public ApplicationWindow {
         // TODO(scottmg): Probably not where this should be.
         MessageLoopForUI::current()->Quit();
         return 0;
+
+      case WM_MOUSEMOVE: {
+        int x = static_cast<SHORT>(LOWORD(l_param));
+        int y = static_cast<SHORT>(HIWORD(l_param));
+        int dx = x - last_mouse_x_;
+        int dy = y - last_mouse_y_;
+        last_mouse_x_ = x;
+        last_mouse_y_ = y;
+        DCHECK(workspace_->WantMouseEvents());
+        workspace_->NotifyMouseMoved(x, y, dx, dy, GetInputModifiers());
+        break;
+      }
+
+      case WM_MOUSEWHEEL:
+        DCHECK(workspace_->WantMouseEvents());
+        workspace_->NotifyMouseWheel(
+            static_cast<SHORT>(HIWORD(w_param)),
+            GetInputModifiers());
+        break;
+
+      case WM_KEYDOWN:
+      case WM_KEYUP: {
+        bool down = msg == WM_KEYDOWN;
+        InputKey key;
+        switch (w_param) {
+          case VK_SHIFT: key = kShift; break;
+          case VK_RETURN: key = kReturn; break;
+          case VK_BACK: key = kBackspace; break;
+          case VK_DELETE: key = kDelete; break;
+          case VK_TAB: key = kTab; break;
+          case VK_SPACE: key = kSpace; break;
+          case VK_HOME: key = kHome; break;
+          case VK_END: key = kEnd; break;
+          case VK_CONTROL: key = kControl; break;
+          case VK_UP: key = kUp; break;
+          case VK_DOWN: key = kDown; break;
+          case VK_LEFT: key = kLeft; break;
+          case VK_RIGHT: key = kRight; break;
+          case VK_PRIOR: key = kPageUp; break;
+          case VK_NEXT: key = kPageDown; break;
+          default: key = kNone; break;
+        }
+
+        if (key != kNone) {
+          DCHECK(workspace_->WantKeyEvents());
+          workspace_->NotifyKey(key, down, GetInputModifiers());
+          return 0;
+        }
+        break;
+      }
     }
     return DefWindowProc(hwnd_, msg, w_param, l_param);
+  }
+
+  InputModifiers GetInputModifiers() {
+    return InputModifiers(
+        GetKeyState(VK_LCONTROL) & 0x8000,
+        GetKeyState(VK_RCONTROL) & 0x8000,
+        GetKeyState(VK_LSHIFT) & 0x8000,
+        GetKeyState(VK_RSHIFT) & 0x8000,
+        GetKeyState(VK_LMENU) & 0x8000,
+        GetKeyState(VK_RMENU) & 0x8000);
   }
 
   static LRESULT CALLBACK WndProc(
@@ -166,7 +229,9 @@ class ApplicationWindowWin : public ApplicationWindow {
   HWND hwnd_;
   bool got_create_;
   bool got_valid_hwnd_;
-  Contents* contents_;
+  Workspace* workspace_;
+  int last_mouse_x_;
+  int last_mouse_y_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationWindowWin);
 };

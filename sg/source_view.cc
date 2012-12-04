@@ -26,11 +26,8 @@ SourceView::SourceView(const Skin& skin)
   y_pixel_scroll_target_ = 0.f;
   font_.facename = L"Consolas";
   font_.size = 13.f;
-  /*
-  SetKeyboardInputEnabled(true);
-  Focus();
-  */
 }
+
 void SourceView::SetData(const std::string& utf8_text) {
   lines_.clear();
   // TODO(jank): This needs to be on a background thread. Perhaps the data
@@ -48,6 +45,8 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   y_pixel_scroll_ += (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.2f;
   if (fabsf(y_pixel_scroll_target_ - y_pixel_scroll_) < 1.f)
     y_pixel_scroll_ = y_pixel_scroll_target_;
+  else
+    Invalidate();
 
   renderer->SetDrawColor(skin.GetColorScheme().background());
   renderer->DrawFilledRect(Gwen::Rect(0, 0, Width(), Height()));
@@ -102,9 +101,35 @@ void SourceView::ClampScrollTarget() {
       GetLargestScrollLocation(), y_pixel_scroll_target_);
 }
 
-bool SourceView::OnMouseWheeled(int delta) {
-  y_pixel_scroll_target_ -= delta * .5f;  // TODO(scottmg): Random scale.
+bool SourceView::NotifyMouseMoved(
+    int x, int y, int dx, int dy, const InputModifiers& modifiers) {
+  return false;
+}
+
+bool SourceView::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
+  y_pixel_scroll_target_ -= delta * .5f;  // TODO(config): Random scale.
   ClampScrollTarget();
+  Invalidate();
+  return true;
+}
+
+bool SourceView::NotifyKey(
+    InputKey key, bool down, const InputModifiers& modifiers) {
+  if (!down)
+    return false;
+  if (key == kDown)
+    ScrollView(-1);
+  else if (key == kUp)
+    ScrollView(1);
+  else if (key == kPageUp || (key == kSpace && modifiers.ShiftPressed()))
+    ScrollView(-(Height() / g_line_height - 1));
+  else if (key == kPageDown || (key == kSpace && !modifiers.ShiftPressed()))
+    ScrollView(Height() / g_line_height - 1);
+  else if (key == kHome)
+    y_pixel_scroll_target_ = 0.f;
+  else if (key == kEnd)
+    y_pixel_scroll_target_ = GetLargestScrollLocation();
+  Invalidate();
   return true;
 }
 
@@ -113,51 +138,6 @@ void SourceView::ScrollView(int number_of_lines) {
     static_cast<int>(y_pixel_scroll_target_ / g_line_height) * g_line_height;
   y_pixel_scroll_target_ += g_line_height * number_of_lines;
   ClampScrollTarget();
-}
-
-// Note: These are the Up arrow and Down arrow keys, not press/release.
-bool SourceView::OnKeyUp(bool down) {
-  if (down)
-    ScrollView(-1);
-  return true;
-}
-
-bool SourceView::OnKeyDown(bool down) {
-  if (down)
-    ScrollView(1);
-  return true;
-}
-
-bool SourceView::OnKeyPageUp(bool down) {
-  if (down)
-    ScrollView(-(Height() / g_line_height - 1));
-  return true;
-}
-
-bool SourceView::OnKeyPageDown(bool down) {
-  if (down)
-    ScrollView(Height() / g_line_height - 1);
-  return true;
-}
-
-bool SourceView::OnKeySpace(bool down) {
-  if (down) {
-    if (Gwen::Input::IsShiftDown())
-      OnKeyPageUp(true);
-    else
-      OnKeyPageDown(true);
-  }
-  return true;
-}
-
-bool SourceView::OnKeyHome(bool down) {
-  y_pixel_scroll_target_ = 0.f;
-  return true;
-}
-
-bool SourceView::OnKeyEnd(bool down) {
-  y_pixel_scroll_target_ = GetLargestScrollLocation();
-  return true;
 }
 
 // TODO(scottmg): Losing last line if doesn't end in \n.

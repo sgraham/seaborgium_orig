@@ -6,7 +6,7 @@
 #define SG_APPLICATION_WINDOW_H_
 
 #include "sg/gpu.h"
-class Contents;
+class Workspace;
 class DebugPresenterNotify;
 
 class ApplicationWindow {
@@ -17,8 +17,8 @@ class ApplicationWindow {
   virtual void Show() = 0;
   virtual void Paint() = 0;
 
-  virtual void SetContents(Contents* contents) = 0;
-  virtual Contents* GetContents() = 0;
+  virtual void SetContents(Workspace* contents) = 0;
+  virtual Workspace* GetContents() = 0;
 
   virtual void SetDebugPresenterNotify(DebugPresenterNotify* notifier) = 0;
 

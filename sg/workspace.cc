@@ -4,6 +4,8 @@
 
 #include "sg/workspace.h"
 
+#include "base/bind.h"
+#include "sg/app_thread.h"
 #include "sg/application_window.h"
 #include "sg/source_view.h"
 #include "sg/status_bar.h"
@@ -94,8 +96,11 @@ void Workspace::SetScreenRect(const Rect& rect) {
 }
 
 void Workspace::Invalidate() {
-  if (delegate_)
-    delegate_->Paint();
+  if (delegate_) {
+    AppThread::PostTask(AppThread::UI, FROM_HERE,
+                        base::Bind(&ApplicationWindow::Paint,
+                                   base::Unretained(delegate_)));
+  }
 }
 
 void Workspace::SetFileName(const FilePath& filename) {
@@ -112,4 +117,27 @@ void Workspace::SetDebugState(const string16& debug_state) {
 
 void Workspace::SetRenderTime(double frame_time_in_ms) {
   status_bar_->SetRenderTime(frame_time_in_ms);
+}
+
+bool Workspace::NotifyMouseMoved(
+    int x, int y, int dx, int dy, const InputModifiers& modifiers) {
+  Contents* focused = GetFocusedContents();
+  if (!focused || !focused->WantMouseEvents())
+    return false;
+  return focused->NotifyMouseMoved(x, y, dx, dy, modifiers);
+}
+
+bool Workspace::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
+  Contents* focused = GetFocusedContents();
+  if (!focused || !focused->WantMouseEvents())
+    return false;
+  return focused->NotifyMouseWheel(delta, modifiers);
+}
+
+bool Workspace::NotifyKey(
+    InputKey key, bool down, const InputModifiers& modifiers) {
+  Contents* focused = GetFocusedContents();
+  if (!focused || !focused->WantKeyEvents())
+    return false;
+  return focused->NotifyKey(key, down, modifiers);
 }

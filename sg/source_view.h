@@ -26,14 +26,15 @@ class SourceView : public Contents {
 
   virtual void SetData(const std::string& utf8_text);
 
-  virtual bool OnMouseWheeled(int delta);
-  virtual bool OnKeyHome(bool down);
-  virtual bool OnKeyEnd(bool down);
-  virtual bool OnKeyUp(bool down);
-  virtual bool OnKeyDown(bool down);
-  virtual bool OnKeyPageUp(bool down);
-  virtual bool OnKeyPageDown(bool down);
-  virtual bool OnKeySpace(bool down);
+  // Implementation of InputHandler.
+  virtual bool NotifyMouseMoved(
+      int x, int y, int dx, int dy, const InputModifiers& modifiers) OVERRIDE;
+  virtual bool NotifyMouseWheel(
+      int delta, const InputModifiers& modifiers) OVERRIDE;
+  virtual bool NotifyKey(
+      InputKey key, bool down, const InputModifiers& modifiers) OVERRIDE;
+  virtual bool WantMouseEvents() { return true; }
+  virtual bool WantKeyEvents() { return true; }
 
  private:
   struct ColoredText {
