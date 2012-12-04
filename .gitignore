@@ -1,5 +1,6 @@
 out/
-*.pdb
+vc100.pdb
+*.obj
 *.pyc
 *.ilk
 build.ninja
