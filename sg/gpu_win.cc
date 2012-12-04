@@ -22,10 +22,6 @@
 
 #include "Gwen/Renderers/Direct2D.h"
 
-#pragma comment(lib, "d2d1.lib")
-#pragma comment(lib, "dwrite.lib")
-#pragma comment(lib, "windowscodecs.lib")
-
 // Implementation of Gpu for Windows using Direct2D and DirectWrite.
 
 namespace {

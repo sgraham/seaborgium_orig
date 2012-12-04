@@ -37,7 +37,8 @@ def GetChromiumBaseFileList(base_dir):
                 '_aurax11', 'sha1_win.cc', '_openbsd', 'xdg_mime', '_kqueue',
                 'symbolize', 'string16.cc', '_chromeos', 'nix\\', 'xdg_',
                 'file_path_watcher_stub.cc', 'dtoa.cc',
-                'event_recorder_stubs.cc', '_mock.cc',
+                'event_recorder_stubs.cc', '_mock.cc', 'check_example.cc',
+                'debug_message.cc',
                 'allocator\\', # Kind of overly involved for user-configuration.
                 'field_trial.cc', # Has screwy winsock inclusion, don't need it.
                 'i18n\\', # Requires icu (I think)
@@ -246,7 +247,7 @@ def main():
     cflags += ['/D_DEBUG', '/MTd']
   else:
     cflags += ['/DNDEBUG', '/MT']
-  ldflags = ['/DEBUG', '/SUBSYSTEM:WINDOWS']
+  ldflags = ['/DEBUG', '/SUBSYSTEM:WINDOWS', '/INCREMENTAL']
   if not options.debug:
     cflags += ['/Ox', '/DNDEBUG', '/GL']
     ldflags += ['/LTCG', '/OPT:REF', '/OPT:ICF']
@@ -280,10 +281,10 @@ def main():
         description='RC $out')
   n.newline()
 
-  objs = []
-
-  n.comment('Core source files all build into sg library.')
+  sg_objs = []
+  n.comment('Core source files.')
   for name in [
+               'app_thread',
                'backend\\backend_native_win',
                'cpp_lexer',
                'debug_presenter',
@@ -299,63 +300,61 @@ def main():
                'ui\\skin',
                'workspace',
               ]:
-    objs += cxx(name)
-  sg_lib = n.build(built('sg.lib'), 'ar', inputs=objs)
+    sg_objs += cxx(name)
   n.newline() 
 
-  objs = []
-  n.comment('Gwen UI lib.')
+  gwen_objs = []
+  n.comment('Gwen.')
   for base in GetGwenFileList():
-    objs += cpp(base, src=gwen_src)
-  gwen_lib = n.build(built('gwen.lib'), 'ar', inputs=objs)
+    gwen_objs += cpp(base, src=gwen_src)
   n.newline()
 
-  objs = []
-  n.comment('RE2 lib.')
+  re2_objs = []
+  n.comment('RE2.')
   for base in GetRe2FileList():
-    objs += cxx(base, src=re2_src)
-  re2_lib = n.build(built('re2.lib'), 'ar', inputs=objs)
+    re2_objs += cxx(base, src=re2_src)
   n.newline()
 
-  n.comment('Chromium base lib.')
+  n.comment('Chromium base.')
   crfiles = GetChromiumBaseFileList('third_party/base')
-  objs = []
+  base_objs = []
   for name in crfiles:
     base, ext = os.path.splitext(name)
     if ext == '.c':
-      objs += cc(base, src=base_src)
+      base_objs += cc(base, src=base_src)
     else:
-      objs += cxx(base, src=base_src)
-  base_lib = n.build(built('base.lib'), 'ar', inputs=objs)
+      base_objs += cxx(base, src=base_src)
   n.newline()
 
-  libs.extend(['advapi32.lib',
-               'comdlg32.lib',
-               'dbghelp.lib',
-               'gdi32.lib',
-               'ole32.lib',
-               'opengl32.lib',
-               'shell32.lib',
-               'user32.lib',
-               ])
-  libs.extend(sg_lib)
-  libs.extend(gwen_lib)
-  libs.extend(base_lib)
-  libs.extend(re2_lib)
+  libs = ['advapi32.lib',
+          'comdlg32.lib',
+          'dbghelp.lib',
+          'd2d1.lib',
+          'dwrite.lib',
+          'gdi32.lib',
+          'ole32.lib',
+          'oleaut32.lib',
+          'opengl32.lib',
+          'shell32.lib',
+          'user32.lib',
+          'version.lib',
+          'windowscodecs.lib',
+         ]
 
   all_targets = []
 
-  n.comment('Main executable is library plus main() function.')
-  objs = []
-  objs += cxx('app_thread')
-  objs += cxx('application')
-  objs += cxx('application_window_win')
-  objs += cxx('gpu_win')
-  objs += cxx('main_loop')
-  objs += cxx('main_win')
-  objs += rc('sg', implicit=['art\\sg.ico'])
-  sg = n.build(binary('sg'), 'link', inputs=objs,
-               implicit=sg_lib + base_lib + gwen_lib + re2_lib,
+  app_objs = sg_objs + base_objs + gwen_objs + re2_objs
+
+  n.comment('Main executable is library plus main() and some startup goop.')
+  main_objs = []
+  main_objs += cxx('application')
+  main_objs += cxx('application_window_win')
+  main_objs += cxx('gpu_win')
+  main_objs += cxx('main_loop')
+  main_objs += cxx('main_win')
+  main_objs += rc('sg', implicit=['art\\sg.ico'])
+  # No .libs for /incremental to work.
+  sg = n.build(binary('sg'), 'link', inputs=main_objs + app_objs,
                variables=[('libs', libs)])
   n.newline()
   all_targets += sg
@@ -366,17 +365,17 @@ def main():
   test_cflags = None
   test_ldflags = ['/SUBSYSTEM:CONSOLE']
   test_libs = libs
-  objs = []
+  test_objs = []
   path = 'third_party/testing/gtest'
 
   gtest_all_incs = ['-I%s' % path,  '-I%s' % os.path.join(path, 'include')]
   gtest_cflags = cflags + ['/nologo', '/EHsc', '/Zi'] + gtest_all_incs
-  objs += n.build(built('gtest-all' + objext), 'cxx',
-                  inputs=os.path.join(path, 'src', 'gtest-all.cc'),
-                  variables=[('cflags', gtest_cflags)])
-  objs += n.build(built('gtest_main' + objext), 'cxx',
-                  inputs=os.path.join(path, 'src', 'gtest_main.cc'),
-                  variables=[('cflags', gtest_cflags)])
+  test_objs += n.build(built('gtest-all' + objext), 'cxx',
+                       inputs=os.path.join(path, 'src', 'gtest-all.cc'),
+                       variables=[('cflags', gtest_cflags)])
+  test_objs += n.build(built('gtest_main' + objext), 'cxx',
+                       inputs=os.path.join(path, 'src', 'gtest_main.cc'),
+                       variables=[('cflags', gtest_cflags)])
 
   test_cflags = cflags + ['-DGTEST_HAS_RTTI=0',
                           '-I%s' % os.path.join(path, 'include')]
@@ -384,10 +383,9 @@ def main():
   for name in [
                'lexer_test'
               ]:
-    objs += cxx(name, variables=[('cflags', test_cflags)])
+    test_objs += cxx(name, variables=[('cflags', test_cflags)])
 
-  sg_test = n.build(binary('sg_test'), 'link', inputs=objs,
-                    implicit=sg_lib + base_lib + gwen_lib + re2_lib,
+  sg_test = n.build(binary('sg_test'), 'link', inputs=test_objs + app_objs,
                     variables=[('ldflags', test_ldflags),
                                ('libs', test_libs)])
   n.newline()
@@ -396,7 +394,7 @@ def main():
 
   n.comment('Regenerate build files if build script changes.')
   n.rule('configure',
-          command='python build/configure.py $configure_args',
+          command='cmd /c python build/configure.py $configure_args',
           generator=True)
   n.build('build.ninja', 'configure',
           implicit=[os.path.normpath('build/configure.py'),
