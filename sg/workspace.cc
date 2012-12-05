@@ -90,8 +90,8 @@ void Workspace::Init() {
     main_area_->AddChild(first_row);
     main_area_->AddChild(second_row);
     main_area_->AddChild(third_row);
-    main_area_->SetFraction(first_row, .45);
-    main_area_->SetFraction(second_row, .75);
+    main_area_->SetFraction(first_row, .5);
+    main_area_->SetFraction(second_row, .8);
 
     Container* top_right = new Container(skin_);
     top_right->SetMode(Container::SplitVertical);
