@@ -243,7 +243,7 @@ def main():
             '/wd4530', '/wd4100', '/wd4706', '/wd4245', '/wd4018',
             '/wd4512', '/wd4800', '/wd4702', '/wd4819', '/wd4355',
             '/wd4996', '/wd4481', '/wd4127', '/wd4310', '/wd4244',
-            '/wd4701', '/wd4201', '/wd4389',
+            '/wd4701', '/wd4201', '/wd4389', '/wd4722',
             '/GR-',  # Disable RTTI.
             '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
             '/DUNICODE', '/D_UNICODE',
@@ -290,17 +290,20 @@ def main():
         description='RC $out')
   n.newline()
 
+  pch_objs = []
   if options.debug:
     n.rule('cxx_pch',
       command=('%s $cflags /Ycsg/global.h %s '
               '-c $in /Fo$objname' % (compiler, pch_compile)),
-      depfile='$out.d',
+      depfile=built('sg_pch.d'),
       description='CXX $out')
     n.newline()
 
     n.comment('Build the precompiled header.')
-    n.build(built('sg.pch'), 'cxx_pch', src('sg_pch.cc'),
+
+    n.build([built('sg.pch'), built('sg_pch.obj')], 'cxx_pch', src('sg_pch.cc'),
             variables=[('objname', built('sg_pch.obj'))])
+    pch_objs = [built('sg_pch.obj')]
     n.newline()
 
   sg_objs = []
@@ -364,7 +367,7 @@ def main():
 
   all_targets = []
 
-  app_objs = sg_objs + base_objs + gwen_objs + re2_objs
+  app_objs = sg_objs + base_objs + gwen_objs + re2_objs + pch_objs
 
   n.comment('Main executable is library plus main() and some startup goop.')
   main_objs = []
