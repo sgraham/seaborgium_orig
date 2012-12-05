@@ -16,6 +16,10 @@ class ApplicationWindow {
 
   virtual void Show() = 0;
   virtual void Paint() = 0;
+  // Corresponds to screen that this window is on, not necessarily the window
+  // size itself. TODO(config): This probably should be removed because it
+  // should be user-configured anyway.
+  virtual bool IsLandscape() = 0;
 
   virtual void SetContents(Workspace* contents) = 0;
   virtual Workspace* GetContents() = 0;

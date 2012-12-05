@@ -26,49 +26,91 @@ Container* Placeholder(const Skin& skin, const string16& name) {
 
 Workspace::Workspace()
     : Container(this->skin_),
-      delegate_(NULL) {
+      delegate_(NULL),
+      main_area_(NULL),
+      status_bar_(NULL),
+      source_view_(NULL),
+      source_view_container_(NULL) {
+  // Initialization deferred until Init when we know our window size.
+}
+
+void Workspace::Init() {
+  DCHECK(!main_area_);
   main_area_ = new Container(skin_);
   status_bar_ = new StatusBar(skin_);
   AddChild(main_area_);
   AddChild(status_bar_);
 
-  Container* top = new Container(skin_);
-  Container* bottom = new Container(skin_);
-  main_area_->SetMode(Container::SplitVertical);
-  main_area_->Container::AddChild(top);
-  main_area_->Container::AddChild(bottom);
-  main_area_->SetFraction(top, .7);
-
-  Contents* output = Placeholder(skin_, L"Output");
-  Contents* log = Placeholder(skin_, L"Log");
-  bottom->AddChild(output);
-  bottom->AddChild(log);
-  bottom->SetFraction(output, .6);
-
   source_view_ = new SourceView(skin_);
   source_view_container_ = new Container(skin_);
   source_view_container_->AddChild(source_view_);
-  Container* middle = new Container(skin_);
-  middle->SetMode(Container::SplitVertical);
-  Container* views = new Container(skin_);
-  views->SetMode(Container::SplitVertical);
-  top->AddChild(source_view_container_);
-  top->AddChild(middle);
-  top->AddChild(views);
-  top->SetFraction(source_view_container_, .4);
-  top->SetFraction(middle, .65);
 
-  Contents* stack = Placeholder(skin_, L"Stack");
-  Contents* breakpoints = Placeholder(skin_, L"Breakpoints");
-  middle->AddChild(stack);
-  middle->AddChild(breakpoints);
-  middle->SetFraction(stack, .75);
-
+  Contents* output = Placeholder(skin_, L"Output");
+  Contents* log = Placeholder(skin_, L"Log");
   Contents* watch = Placeholder(skin_, L"Watch");
   Contents* locals = Placeholder(skin_, L"Locals");
-  views->AddChild(watch);
-  views->AddChild(locals);
-  views->SetFraction(watch, .6);
+  Contents* stack = Placeholder(skin_, L"Stack");
+  Contents* breakpoints = Placeholder(skin_, L"Breakpoints");
+
+  bool is_landscape = GetClientRect().w > GetClientRect().h;
+  if (is_landscape) {
+    Container* top = new Container(skin_);
+    Container* bottom = new Container(skin_);
+    main_area_->SetMode(Container::SplitVertical);
+    main_area_->Container::AddChild(top);
+    main_area_->Container::AddChild(bottom);
+    main_area_->SetFraction(top, .7);
+
+    bottom->AddChild(output);
+    bottom->AddChild(log);
+    bottom->SetFraction(output, .6);
+
+    Container* middle = new Container(skin_);
+    middle->SetMode(Container::SplitVertical);
+    Container* views = new Container(skin_);
+    views->SetMode(Container::SplitVertical);
+    top->AddChild(source_view_container_);
+    top->AddChild(middle);
+    top->AddChild(views);
+    top->SetFraction(source_view_container_, .4);
+    top->SetFraction(middle, .65);
+
+    middle->AddChild(stack);
+    middle->AddChild(breakpoints);
+    middle->SetFraction(stack, .75);
+
+    views->AddChild(watch);
+    views->AddChild(locals);
+    views->SetFraction(watch, .6);
+  } else {
+    Container* first_row = new Container(skin_);
+    Container* second_row = new Container(skin_);
+    Container* third_row = new Container(skin_);
+    main_area_->SetMode(Container::SplitVertical);
+    main_area_->AddChild(first_row);
+    main_area_->AddChild(second_row);
+    main_area_->AddChild(third_row);
+    main_area_->SetFraction(first_row, .45);
+    main_area_->SetFraction(second_row, .75);
+
+    Container* top_right = new Container(skin_);
+    top_right->SetMode(Container::SplitVertical);
+    top_right->AddChild(stack);
+    top_right->AddChild(breakpoints);
+    first_row->AddChild(source_view_container_);
+    first_row->AddChild(top_right);
+    first_row->SetFraction(source_view_container_, .6);
+
+    Container* views = new Container(skin_);
+    views->SetMode(Container::SplitHorizontal);
+    second_row->AddChild(watch);
+    second_row->AddChild(locals);
+    second_row->SetFraction(watch, .6);
+
+    third_row->AddChild(output);
+    third_row->AddChild(log);
+    third_row->SetFraction(output, .7);
+  }
 
   SetFocusedContents(source_view_container_->Child(0));
 }

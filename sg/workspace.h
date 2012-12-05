@@ -23,6 +23,7 @@ class Workspace : public Container,
   Workspace();
   virtual ~Workspace();
 
+  virtual void Init();
   virtual void SetDelegate(ApplicationWindow* delegate);
 
   virtual void SetScreenRect(const Rect& rect) OVERRIDE;

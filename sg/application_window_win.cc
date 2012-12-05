@@ -62,12 +62,15 @@ class ApplicationWindowWin : public ApplicationWindow {
 
   virtual void SetContents(Workspace* workspace) {
     workspace_ = workspace;
-    RECT rc;
-    GetClientRect(hwnd_, &rc);
-    workspace_->SetScreenRect(
-        Rect(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top));
   }
   virtual Workspace* GetContents() { return workspace_; }
+
+  virtual bool IsLandscape() {
+    // TODO(config): Probably wrong on multi mon, but should be removed anyway.
+    int w = GetSystemMetrics(SM_CXFULLSCREEN);
+	  int h = GetSystemMetrics(SM_CYFULLSCREEN);
+    return w > h;
+  }
 
  private:
   LRESULT OnWndProc(UINT msg, WPARAM w_param, LPARAM l_param) {

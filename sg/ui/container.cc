@@ -35,6 +35,7 @@ void Container::SetScreenRect(const Rect& rect) {
 }
 
 void Container::AddChild(Contents* contents, const string16& title) {
+  DCHECK(!contents->GetParent());
   // Scale existing children by (N-1)/N of space (where N includes addition).
   double new_count = static_cast<double>(children_.size() + 1);
   double scale = static_cast<double>(children_.size()) / new_count;
