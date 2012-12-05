@@ -32,7 +32,7 @@ class MainLoop {
   // Members initialized in |RunMainMessageLoopParts()|
   scoped_ptr<AppThread> file_thread_;
   scoped_ptr<AppThread> backend_thread_;
-  scoped_ptr<AppThread> gpu_thread_;
+  scoped_ptr<AppThread> aux_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(MainLoop);
 };

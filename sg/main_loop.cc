@@ -69,8 +69,9 @@ void MainLoop::CreateThreads() {
         thread_to_start = &backend_thread_;
         options = &io_message_loop_options;
         break;
-      case AppThread::GPU:
-        thread_to_start = &gpu_thread_;
+      case AppThread::AUX:
+        thread_to_start = &aux_thread_;
+        // Maybe unnecessary? It might have to pump on Windows.
         options = &ui_message_loop_options;
         break;
       case AppThread::UI:
@@ -125,8 +126,8 @@ void MainLoop::ShutdownThreadsAndCleanUp() {
       case AppThread::BACKEND:
         thread_to_stop = &backend_thread_;
         break;
-      case AppThread::GPU:
-        thread_to_stop = &gpu_thread_;
+      case AppThread::AUX:
+        thread_to_stop = &aux_thread_;
         break;
       case AppThread::UI:
       case AppThread::ID_COUNT:

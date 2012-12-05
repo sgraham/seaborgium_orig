@@ -32,6 +32,8 @@ class DebugConnectionNativeWin : public DebugConnection {
   virtual Process* ProcessAttach(ProcessId process_id, string16* error);
 
  private:
+  void DebugEventLoop();
+
   DebugPresenterNotify* debug_presenter_notify_;
 
   DISALLOW_COPY_AND_ASSIGN(DebugConnectionNativeWin);

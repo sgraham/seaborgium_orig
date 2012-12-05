@@ -56,13 +56,17 @@ Process* DebugConnectionNativeWin::ProcessCreate(
       command_line_copy.get(),
       NULL, NULL,
       FALSE,
-      CREATE_SUSPENDED | DEBUG_PROCESS | DETACHED_PROCESS,
+      /*CREATE_SUSPENDED |*/ DEBUG_PROCESS | DETACHED_PROCESS,
       NULL,  // environment
       working_directory.c_str(),
       &startup_info,
       &process->process_information);
-  if (result)
+  if (result) {
+    // TODO(backend): Apparently can't be on a background thread unless the
+    // CreateProces is too? wat XXX XXX XXX XXX XXX
+    process->DebugEventLoop();
     return process.release();
+  }
   *error = FormatLastError(L"CreateProcess");
   return NULL;
 }

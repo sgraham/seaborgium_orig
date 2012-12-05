@@ -20,11 +20,14 @@ class AppThread : public base::Thread {
     // This is the thread that interacts with the file system.
     FILE,
 
-    // This thread is for the main operations of the debugging backend.
+    // This thread is that handles communication between the UI and the
+    // backend. The main backend objects live on this thread.
     BACKEND,
 
-    // This thread is for rendering/gpu operations.
-    GPU,
+    // This is a helper thread for the backend that communicates with the
+    // target process in a blocking loop and posts to the BACKEND thread when
+    // it has results.
+    AUX,
 
     // This identifier does not represent a thread.  Instead it counts the
     // number of well-known threads.
@@ -106,7 +109,7 @@ class AppThread : public base::Thread {
   void UIThreadRun(MessageLoop* message_loop);
   void FileThreadRun(MessageLoop* message_loop);
   void BackendThreadRun(MessageLoop* message_loop);
-  void GpuThreadRun(MessageLoop* message_loop);
+  void AuxThreadRun(MessageLoop* message_loop);
 
   static bool PostTaskHelper(
       ID identifier,

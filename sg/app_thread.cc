@@ -20,7 +20,7 @@ static const char* g_app_thread_names[AppThread::ID_COUNT] = {
   "",  // UI (name assembled in main_loop.cc).
   "Seaborgium_FileThread",  // FILE
   "Seaborgium_BackendThread",  // BACKEND
-  "Seaborgium_GpuThread",  // GPU
+  "Seaborgium_AuxThread",  // AUX
 };
 
 struct AppThreadGlobals {
@@ -106,7 +106,7 @@ NOINLINE void AppThread::BackendThreadRun(MessageLoop* message_loop) {
   CHECK_GT(line_number, 0);
 }
 
-NOINLINE void AppThread::GpuThreadRun(MessageLoop* message_loop) {
+NOINLINE void AppThread::AuxThreadRun(MessageLoop* message_loop) {
   volatile int line_number = __LINE__;
   Thread::Run(message_loop);
   CHECK_GT(line_number, 0);
@@ -127,8 +127,8 @@ void AppThread::Run(MessageLoop* message_loop) {
       return FileThreadRun(message_loop);
     case AppThread::BACKEND:
       return BackendThreadRun(message_loop);
-    case AppThread::GPU:
-      return GpuThreadRun(message_loop);
+    case AppThread::AUX:
+      return AuxThreadRun(message_loop);
     case AppThread::ID_COUNT:
       CHECK(false);  // This shouldn't actually be reached!
       break;
