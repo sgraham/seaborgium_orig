@@ -292,16 +292,17 @@ def main():
 
   pch_objs = []
   if options.debug:
+    compiler = 'ninja -t msvc -o $objname -- $cxx /showIncludes'
     n.rule('cxx_pch',
       command=('%s $cflags /Ycsg/global.h %s '
               '-c $in /Fo$objname' % (compiler, pch_compile)),
-      depfile=built('sg_pch.d'),
+      depfile=built('sg_pch.obj.d'),
       description='CXX $out')
     n.newline()
 
     n.comment('Build the precompiled header.')
 
-    n.build([built('sg.pch'), built('sg_pch.obj')], 'cxx_pch', src('sg_pch.cc'),
+    n.build([built('sg_pch.obj'), built('sg.pch')], 'cxx_pch', src('sg_pch.cc'),
             variables=[('objname', built('sg_pch.obj'))])
     pch_objs = [built('sg_pch.obj')]
     n.newline()
