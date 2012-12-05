@@ -8,7 +8,26 @@
 
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/string16.h"
 #include "sg/debug_presenter_notify.h"
+
+string16 FormatLastError(const string16& function) {
+  LPTSTR error_text = NULL;
+  FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
+                    FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                    FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL, GetLastError(),
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                (LPTSTR)&error_text, 0, NULL);
+  if (error_text) {
+    string16 result(function + string16(L": "));
+    result += error_text;
+    LocalFree(error_text);
+    return result;
+  } else {
+    return string16(function + L": couldn't retrieve error!");
+  }
+}
 
 // TODO(scottmg): All temp.
 class ProcessNativeWin : public Process {
@@ -80,7 +99,7 @@ Process* DebugConnectionNativeWin::ProcessCreate(
       &process->process_information);
   if (result)
     return process.release();
-  // TODO(scottmg): Fill out error.
+  *error = FormatLastError(L"CreateProcess");
   return NULL;
 }
 
