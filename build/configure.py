@@ -250,6 +250,7 @@ def main():
             '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
             '/D_WIN32_WINNT=0x0601', '/D_VARIADIC_MAX=10',
             '/DDYNAMIC_ANNOTATIONS_ENABLED=0',
+            '/Fd$builddir\\sg_intermediate.pdb',
             '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
             '-Ithird_party/re2',
             '-FIsg/global.h']
@@ -297,7 +298,8 @@ def main():
   n.newline()
 
   n.comment('Build the precompiled header.')
-  n.build([built('sg.pch')], 'cxx_pch', src('sg_pch.cc'))
+  n.build(built('sg.pch'), 'cxx_pch', src('sg_pch.cc'),
+          variables=[('objname', built('sg_pch.obj'))])
   n.newline()
 
   sg_objs = []
