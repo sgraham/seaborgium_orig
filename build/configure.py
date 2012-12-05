@@ -372,7 +372,8 @@ def main():
   main_objs += cxx('main_win')
   main_objs += rc('sg', implicit=['art\\sg.ico'])
   # No .libs for /incremental to work.
-  sg = n.build(binary('sg'), 'link', inputs=main_objs + app_objs,
+  sg_binary = binary('sg')
+  sg = n.build(sg_binary, 'link', inputs=main_objs + app_objs,
                variables=[('libs', libs)])
   n.newline()
   all_targets += sg
@@ -406,6 +407,10 @@ def main():
     test_objs += cxx(name, variables=[('cflags', test_cflags)])
 
   sg_test = n.build(binary('sg_test'), 'link', inputs=test_objs + app_objs,
+                    # Unnecessary but orders pdb access so test link isn't
+                    # accessing the intermediate pdb while the main-app-only
+                    # objs are still compiling.
+                    order_only=sg_binary,
                     variables=[('ldflags', test_ldflags),
                                ('libs', test_libs)])
   n.newline()
