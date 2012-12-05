@@ -290,17 +290,18 @@ def main():
         description='RC $out')
   n.newline()
 
-  n.rule('cxx_pch',
-    command=('%s $cflags /Ycsg/global.h %s '
-             '-c $in /Fo$objname' % (compiler, pch_compile)),
-    depfile='$out.d',
-    description='CXX $out')
-  n.newline()
+  if options.debug:
+    n.rule('cxx_pch',
+      command=('%s $cflags /Ycsg/global.h %s '
+              '-c $in /Fo$objname' % (compiler, pch_compile)),
+      depfile='$out.d',
+      description='CXX $out')
+    n.newline()
 
-  n.comment('Build the precompiled header.')
-  n.build(built('sg.pch'), 'cxx_pch', src('sg_pch.cc'),
-          variables=[('objname', built('sg_pch.obj'))])
-  n.newline()
+    n.comment('Build the precompiled header.')
+    n.build(built('sg.pch'), 'cxx_pch', src('sg_pch.cc'),
+            variables=[('objname', built('sg_pch.obj'))])
+    n.newline()
 
   sg_objs = []
   n.comment('Core source files.')
