@@ -7,7 +7,7 @@
 #include "base/bind.h"
 #include "base/threading/thread.h"
 #include "sg/backend/backend_native_win.h"
-#include "sg/backend/debug_connection_native_win.h"
+#include "sg/backend/debug_core_native_win.h"
 
 ProcessNativeWin::ProcessNativeWin() {
   memset(&process_information, 0, sizeof(process_information));
