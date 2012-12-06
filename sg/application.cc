@@ -8,7 +8,7 @@
 
 #include "base/logging.h"
 #include "sg/application_window.h"
-#include "sg/backend/debug_connection_native_win.h"
+#include "sg/backend/debug_core_native_win.h"
 #include "sg/debug_presenter.h"
 #include "sg/source_files.h"
 #include "sg/workspace.h"
@@ -23,6 +23,7 @@ Application::Application() {
   presenter_.reset(new DebugPresenter(source_files_.get()));
   presenter_->SetDisplay(workspace_.get());
   main_window_->SetDebugPresenterNotify(presenter_.get());
+  /*
   debug_connection_.reset(new DebugConnectionNativeWin(presenter_.get()));
   std::vector<string16> empty_environment;
   string16 error;
@@ -33,6 +34,7 @@ Application::Application() {
       L"test_data",
       &error);
   DCHECK(p) << "couldn't launch test_binary.exe";
+  */
 }
 
 Application::~Application() {

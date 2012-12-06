@@ -312,7 +312,7 @@ def main():
   for name in [
                'app_thread',
                'backend\\backend_native_win',
-               'backend\\debug_connection_native_win',
+               #'backend\\debug_core_native_win',
                'backend\\process_native_win',
                'cpp_lexer',
                'debug_presenter',
@@ -409,7 +409,8 @@ def main():
                           '-I%s' % os.path.join(path, 'include')]
 
   for name in [
-               'lexer_test'
+               'lexer_test',
+               'backend\\debug_core_native_win_test',
               ]:
     test_objs += cxx(name, variables=[('cflags', test_cflags)])
 
