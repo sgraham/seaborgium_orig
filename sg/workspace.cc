@@ -124,6 +124,8 @@ void Workspace::SetDelegate(ApplicationWindow* delegate) {
 
 void Workspace::SetScreenRect(const Rect& rect) {
   set_screen_rect(rect);
+  if (!main_area_)
+    Init();
   const Skin& skin = GetSkin();
   Rect outer_border_size(
       skin.border_size(), skin.border_size(),

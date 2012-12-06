@@ -19,7 +19,6 @@ Application::Application() {
   workspace_.reset(new Workspace);
   main_window_->SetContents(workspace_.get());
   workspace_->SetDelegate(main_window_.get());
-  workspace_->Init();
   presenter_.reset(new DebugPresenter(source_files_.get()));
   presenter_->SetDisplay(workspace_.get());
   main_window_->SetDebugPresenterNotify(presenter_.get());
