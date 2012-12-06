@@ -14,29 +14,23 @@ class DebugPresenterNotify;
 // An implementation of a debugger backend using Win32 APIs. Note: Requires a
 // smattering of helper DLLs to be available.
 
-class DebugConnectionNativeWin : public DebugConnection {
+class DebugCoreNativeWin /* : public DebugCore */ {
  public:
-  explicit DebugConnectionNativeWin(
-      DebugPresenterNotify* debug_presenter_notify);
-  virtual ~DebugConnectionNativeWin();
+  DebugCoreNativeWin();
+  virtual ~DebugCoreNativeWin();
 
-  // Implementation of DebugConnection:
-  virtual bool GetName(string16* name, string16* error);
-  virtual Process* ProcessCreate(
+  // Implementation of DebugCore:
+  virtual void ProcessStart(
       const string16& application,
       const string16& command_line,
       const std::vector<string16> environment,
-      const string16& working_directory,
-      string16* error);
-  virtual void GetProcessList(std::vector<ProcessId>* result);
-  virtual Process* ProcessAttach(ProcessId process_id, string16* error);
+      const string16& working_directory);
+
+  static DebugCoreNativeWin* CreateOnDBG();
 
  private:
-  void DebugEventLoop();
 
-  DebugPresenterNotify* debug_presenter_notify_;
-
-  DISALLOW_COPY_AND_ASSIGN(DebugConnectionNativeWin);
+  DISALLOW_COPY_AND_ASSIGN(DebugCoreNativeWin);
 };
 
 #endif  // SG_BACKEND_DEBUG_CONNECTION_NATIVE_WIN_H_

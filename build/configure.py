@@ -312,7 +312,7 @@ def main():
   for name in [
                'app_thread',
                'backend\\backend_native_win',
-               #'backend\\debug_core_native_win',
+               'backend\\debug_core_native_win',
                'backend\\process_native_win',
                'cpp_lexer',
                'debug_presenter',
@@ -401,7 +401,7 @@ def main():
                        implicit=built('sg.pch'),
                        variables=[('cflags', gtest_cflags)])
   test_objs += n.build(built('gtest_main' + objext), 'cxx',
-                       inputs=os.path.join(path, 'src', 'gtest_main.cc'),
+                       inputs='sg/main_test.cc',
                        implicit=built('sg.pch'),
                        variables=[('cflags', gtest_cflags)])
 

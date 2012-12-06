@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "debug_connection_native_win.h"
+#include "sg/backend/debug_core_native_win.h"
 
 #include <windows.h>
 
@@ -13,38 +13,27 @@
 #include "sg/backend/process_native_win.h"
 #include "sg/debug_presenter_notify.h"
 
-DebugConnectionNativeWin::DebugConnectionNativeWin(
-    DebugPresenterNotify* debug_presenter_notify)
-    : debug_presenter_notify_(debug_presenter_notify) {
-  string16 name;
-  GetName(&name, NULL);
-  debug_presenter_notify_->NotifyDebugStateChanged(name);
+DebugCoreNativeWin::DebugCoreNativeWin() {
 }
 
-DebugConnectionNativeWin::~DebugConnectionNativeWin() {
+DebugCoreNativeWin::~DebugCoreNativeWin() {
 }
 
-bool DebugConnectionNativeWin::GetName(string16* name, string16* error) {
-  *name = L"Win32 (native)";
-  return true;
-}
-
-Process* DebugConnectionNativeWin::ProcessCreate(
+void DebugCoreNativeWin::ProcessStart(
     const string16& application,
     const string16& command_line,
     const std::vector<string16> environment,
-    const string16& working_directory,
-    string16* error) {
+    const string16& working_directory) {
   DCHECK_EQ(0, environment.size()) << "todo;";
-  scoped_ptr<ProcessNativeWin> process(new ProcessNativeWin);
+
   // CreateProcessW can modify input buffer so we have to make a copy here.
   scoped_array<char16> command_line_copy(new char16[command_line.size() + 1]);
   command_line.copy(command_line_copy.get(), command_line.size());
   command_line_copy[command_line.size()] = 0;
 
-  STARTUPINFO startup_info;
-  memset(&startup_info, 0, sizeof(startup_info));
-  startup_info.cb = sizeof(STARTUPINFO);
+  STARTUPINFO startup_information = {0};
+  startup_information.cb = sizeof(STARTUPINFO);
+  PROCESS_INFORMATION process_information = {0};
   /* TODO(handles)
   startup_info.dwFlags = STARTF_USESTDHANDLES;
   startup_info.hStdInput = nul;
@@ -58,24 +47,16 @@ Process* DebugConnectionNativeWin::ProcessCreate(
       FALSE,
       /*CREATE_SUSPENDED |*/ DEBUG_PROCESS | DETACHED_PROCESS,
       NULL,  // environment
-      working_directory.c_str(),
-      &startup_info,
-      &process->process_information);
-  if (result) {
-    // TODO(backend): Apparently can't be on a background thread unless the
-    // CreateProces is too? wat XXX XXX XXX XXX XXX
-    process->DebugEventLoop();
-    return process.release();
-  }
-  *error = FormatLastError(L"CreateProcess");
-  return NULL;
+      NULL,
+      &startup_information,
+      &process_information);
+  CHECK(result);  // TODO: dispatch FormatLastError
+
+  // TODO(temp):
+  result = TerminateProcess(process_information.hProcess, 999);
+  CHECK(result);
 }
 
-void DebugConnectionNativeWin::GetProcessList(std::vector<ProcessId>* result) {
-  result->clear();
-}
-
-Process* DebugConnectionNativeWin::ProcessAttach(
-    ProcessId process_id, string16* error) {
-  return NULL;
+DebugCoreNativeWin* DebugCoreNativeWin::CreateOnDBG() {
+  return new DebugCoreNativeWin;
 }

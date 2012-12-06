@@ -4,46 +4,51 @@
 
 #include <gtest/gtest.h>
 
-#include <windows.h>
+#include "base/at_exit.h"
+#include "base/run_loop.h"
+#include "base/synchronization/waitable_event.h"
+#include "base/task_runner_util.h"
+#include "base/threading/thread.h"
+#include "sg/backend/debug_core_native_win.h"
 
 class DebugCoreNativeWinTest : public testing::Test {
  public:
   DebugCoreNativeWinTest() {
+    MessageLoopForUI main_message_loop;
+    debug_thread_.reset(new base::Thread("DBG"));
+    debug_thread_->Start();
+    base::PostTaskAndReplyWithResult(
+        debug_thread_->message_loop_proxy(),
+        FROM_HERE,
+        base::Bind(&DebugCoreNativeWin::CreateOnDBG),
+        base::Bind(&DebugCoreNativeWinTest::OnCreate, base::Unretained(this)));
+    main_message_loop.Run();
   }
 
-  //scoped_ptr<Debugger> debugger_;
+  void OnCreate(DebugCoreNativeWin* new_core) {
+    debug_core_ = new_core;
+    MessageLoopForUI::current()->Quit();
+  }
+
+  virtual ~DebugCoreNativeWinTest() {
+  }
+
+  DebugCoreNativeWin* debug_core_;
+  scoped_ptr<base::Thread> debug_thread_;
 };
 
-TEST_F(DebugCoreNativeWinTest, CreateOK) {
-  STARTUPINFO startup_info = {0};
-  startup_info.cb = sizeof(STARTUPINFO);
-  PROCESS_INFORMATION process_information = {0};
-  /* TODO(handles)
-  startup_info.dwFlags = STARTF_USESTDHANDLES;
-  startup_info.hStdInput = nul;
-  startup_info.hStdOutput = child_pipe;
-  startup_info.hStdError = child_pipe;
-  */
-  BOOL result;
-  result = CreateProcess(
-      L"test_data/test_binary.exe",
-      NULL,
-      NULL, NULL,
-      FALSE,
-      /*CREATE_SUSPENDED |*/ DEBUG_PROCESS | DETACHED_PROCESS,
-      NULL,  // environment
-      NULL,
-      &startup_info,
-      &process_information);
-  EXPECT_TRUE(result);
+TEST_F(DebugCoreNativeWinTest, StartAndKillImmediately) {
+  debug_core_->ProcessStart(
+      L"test_data\\test_binary.exe", L"", std::vector<string16>(), L"");
 
+  // TODO XXX XXX XXX
+
+  /*
   // Immediately terminate it. We'll still get a create and a load dll for
   // ntdll.dll.
-  result = TerminateProcess(process_information.hProcess, 999);
-  EXPECT_TRUE(result);
 
+  debug_core_->GetDebugEvents();
   DEBUG_EVENT debug_event = {0};
-
   result = WaitForDebugEvent(&debug_event, INFINITE);
   EXPECT_TRUE(result);
   EXPECT_EQ(CREATE_PROCESS_DEBUG_EVENT, debug_event.dwDebugEventCode);
@@ -61,7 +66,8 @@ TEST_F(DebugCoreNativeWinTest, CreateOK) {
   result = WaitForDebugEvent(&debug_event, INFINITE);
   EXPECT_TRUE(result);
   EXPECT_EQ(EXIT_PROCESS_DEBUG_EVENT, debug_event.dwDebugEventCode);
-
+  EXPECT_EQ(999, debug_event.u.ExitProcess.dwExitCode);
+*/
 
   /*
   debugger_->ProcessStart(
