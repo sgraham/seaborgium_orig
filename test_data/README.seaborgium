@@ -1,6 +1,12 @@
-To build mingw test data, get mingw-get-inst, and install it. Then,
+To build mingw test data, get mingw-get-inst
 
-  mingw-get install gdb
+  http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/
+
+and install it. Then,
+
+  mingw-get upgrade
   mingw-get install g++
+  mingw-get install gdb-python
 
-TODO(scottmg): Add this to configure.py, and build these binaries automatically.
+TODO(scottmg): Add this to configure.py, and build the test binaries
+automatically.
