@@ -9,8 +9,6 @@
 
 #include "sg/backend/backend.h"
 
-class DebugPresenterNotify;
-
 // An implementation of a debugger backend using GDB/MI.
 
 class DebugCoreGdb /* : public DebugCore */ {
@@ -19,7 +17,9 @@ class DebugCoreGdb /* : public DebugCore */ {
   virtual ~DebugCoreGdb();
 
   // Implementation of DebugCore:
-  virtual void ProcessStart(
+  virtual void SetDebugNotification(DebugNotification* debug_notification);
+
+  virtual void LoadProcess(
       const string16& application,
       const string16& command_line,
       const std::vector<string16> environment,
@@ -28,6 +28,7 @@ class DebugCoreGdb /* : public DebugCore */ {
   static DebugCoreGdb* CreateOnDBG();
 
  private:
+  DebugNotification* debug_notification_;
 
   DISALLOW_COPY_AND_ASSIGN(DebugCoreGdb);
 };

@@ -42,7 +42,7 @@ struct SubprocessTest : public testing::Test {
 // Run a command that fails and emits to stderr.
 TEST_F(SubprocessTest, BadCommandStderr) {
   Subprocess* subproc = subprocs_.Add(L"cmd /c ninja_no_such_command");
-  ASSERT_NE((Subprocess *) 0, subproc);
+  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
 
   while (!subproc->Done()) {
     // Pretend we discovered that stderr was ready for writing.
@@ -56,7 +56,7 @@ TEST_F(SubprocessTest, BadCommandStderr) {
 // Run a command that does not exist
 TEST_F(SubprocessTest, NoSuchCommand) {
   Subprocess* subproc = subprocs_.Add(L"ninja_no_such_command");
-  ASSERT_NE((Subprocess *) 0, subproc);
+  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
 
   while (!subproc->Done()) {
     // Pretend we discovered that stderr was ready for writing.
@@ -76,7 +76,7 @@ TEST_F(SubprocessTest, NoSuchCommand) {
 
 TEST_F(SubprocessTest, InterruptChild) {
   Subprocess* subproc = subprocs_.Add("kill -INT $$");
-  ASSERT_NE((Subprocess *) 0, subproc);
+  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
 
   while (!subproc->Done()) {
     subprocs_.DoWork();
@@ -87,7 +87,7 @@ TEST_F(SubprocessTest, InterruptChild) {
 
 TEST_F(SubprocessTest, InterruptParent) {
   Subprocess* subproc = subprocs_.Add("kill -INT $PPID ; sleep 1");
-  ASSERT_NE((Subprocess *) 0, subproc);
+  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
 
   while (!subproc->Done()) {
     bool interrupted = subprocs_.DoWork();
@@ -102,7 +102,7 @@ TEST_F(SubprocessTest, InterruptParent) {
 
 TEST_F(SubprocessTest, SetWithSingle) {
   Subprocess* subproc = subprocs_.Add(kSimpleCommand);
-  ASSERT_NE((Subprocess *) 0, subproc);
+  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
 
   while (!subproc->Done()) {
     subprocs_.DoWork();
@@ -128,7 +128,7 @@ TEST_F(SubprocessTest, SetWithMulti) {
 
   for (int i = 0; i < 3; ++i) {
     processes[i] = subprocs_.Add(kCommands[i]);
-    ASSERT_NE((Subprocess *) 0, processes[i]);
+    ASSERT_NE(static_cast<Subprocess*>(NULL), processes[i]);
   }
 
   ASSERT_EQ(3u, subprocs_.running_.size());
@@ -171,7 +171,7 @@ TEST_F(SubprocessTest, SetWithLots) {
   vector<Subprocess*> procs;
   for (size_t i = 0; i < kNumProcs; ++i) {
     Subprocess* subproc = subprocs_.Add("/bin/echo");
-    ASSERT_NE((Subprocess *) 0, subproc);
+    ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
     procs.push_back(subproc);
   }
   while (!subprocs_.running_.empty())

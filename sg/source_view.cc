@@ -51,7 +51,7 @@ void SyntaxHighlight(const std::string& input, std::vector<Line>* lines) {
 
 std::vector<Line> HighlightOnFILE(std::string utf8_text) {
   std::vector<Line> into;
-  //Sleep(10000);
+  // Sleep(10000);
   SyntaxHighlight(utf8_text, &into);
   return into;
 }

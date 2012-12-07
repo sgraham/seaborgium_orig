@@ -103,7 +103,7 @@ bool Subprocess::Start(SubprocessSet* set, const string16& command) {
                      NULL, NULL,
                      &startup_info, &process_info)) {
     DWORD error = GetLastError();
-    if (error == ERROR_FILE_NOT_FOUND) { 
+    if (error == ERROR_FILE_NOT_FOUND) {
       // File (program) not found error is treated as a normal build action
       // failure.
       if (child_pipe)
@@ -167,7 +167,7 @@ ExitStatus Subprocess::Finish() {
   if (!child_)
     return ExitFailure;
 
-  // TODO: add error handling for all of these.
+  // TODO(scottmg): add error handling for all of these.
   WaitForSingleObject(child_, INFINITE);
 
   DWORD exit_code = 0;
@@ -216,8 +216,8 @@ BOOL WINAPI SubprocessSet::NotifyInterrupted(DWORD dwCtrlType) {
   return FALSE;
 }
 
-Subprocess *SubprocessSet::Add(const string16& command) {
-  Subprocess *subprocess = new Subprocess;
+Subprocess* SubprocessSet::Add(const string16& command) {
+  Subprocess* subprocess = new Subprocess;
   if (!subprocess->Start(this, command)) {
     delete subprocess;
     return 0;
@@ -240,9 +240,11 @@ bool SubprocessSet::DoWork() {
       NOTREACHED() << ("GetQueuedCompletionStatus");
   }
 
-  if (!subproc) // A NULL subproc indicates that we were interrupted and is
-                // delivered by NotifyInterrupted above.
+  if (!subproc) {
+    // A NULL subproc indicates that we were interrupted and is
+    // delivered by NotifyInterrupted above.
     return true;
+  }
 
   subproc->OnPipeReady();
 

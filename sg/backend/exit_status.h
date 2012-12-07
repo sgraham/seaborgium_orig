@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef NINJA_EXIT_STATUS_H_
-#define NINJA_EXIT_STATUS_H_
+#ifndef SG_BACKEND_EXIT_STATUS_H_
+#define SG_BACKEND_EXIT_STATUS_H_
 
 enum ExitStatus {
   ExitSuccess,
@@ -21,4 +21,4 @@ enum ExitStatus {
   ExitInterrupted
 };
 
-#endif  // NINJA_EXIT_STATUS_H_
+#endif  // SG_BACKEND_EXIT_STATUS_H_

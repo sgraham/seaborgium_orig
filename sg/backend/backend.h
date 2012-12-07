@@ -9,6 +9,14 @@
 
 #include "base/string16.h"
 
+class DebugNotification {
+ public:
+  virtual ~DebugNotification() {}
+
+  virtual void OnProcessLoad();
+  virtual void OnProcessContinue();
+};
+
 class ThreadCallStack {
  public:
   virtual ~ThreadCallStack() {}

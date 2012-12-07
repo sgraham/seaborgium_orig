@@ -5,6 +5,8 @@
 #ifndef SG_BACKEND_PROCESS_NATIVE_WIN_H_
 #define SG_BACKEND_PROCESS_NATIVE_WIN_H_
 
+#include <vector>
+
 #include "base/memory/scoped_ptr.h"
 #include "sg/backend/backend.h"
 
@@ -34,8 +36,8 @@ class ProcessNativeWin : public Process {
   virtual Heap* GetHeap(HeapId heap_id, string16* error) { return NULL; }
 
   void DebugEventLoop();
- private:
 
+ private:
   scoped_ptr<base::Thread> event_loop_thread_;
 };
 

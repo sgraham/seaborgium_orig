@@ -17,14 +17,14 @@
 #ifndef SG_BACKEND_SUBPROCESS_H_
 #define SG_BACKEND_SUBPROCESS_H_
 
-#include <vector>
-#include <queue>
-
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <signal.h>
 #endif
+
+#include <vector>
+#include <queue>
 
 #include "base/string16.h"
 #include "sg/backend/exit_status.h"
@@ -96,4 +96,4 @@ struct SubprocessSet {
 #endif
 };
 
-#endif // SG_BACKEND_SUBPROCESS_H_
+#endif  // SG_BACKEND_SUBPROCESS_H_

@@ -43,7 +43,6 @@ class SourceView : public Contents {
   virtual bool WantKeyEvents() { return true; }
 
  private:
-
   const Gwen::Color& ColorForTokenType(const Skin& skin, Lexer::TokenType type);
   float GetLargestScrollLocation();
   void ClampScrollTarget();

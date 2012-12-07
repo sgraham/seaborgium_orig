@@ -23,11 +23,11 @@ void ProcessNativeWin::StartEventLoop(
   event_loop_thread_->Start();
   event_loop_thread_->message_loop()->PostTask(
       FROM_HERE, base::Bind(&ProcessNativeWin::DebugEventLoop,
-                            base::Unretained(this))); // TODO(lifetime)
+                            base::Unretained(this)));  // TODO(lifetime)
 }
 
 void ProcessNativeWin::DebugEventLoop() {
-  DWORD continue_status = DBG_CONTINUE; // exception continuation
+  DWORD continue_status = DBG_CONTINUE;  // Exception continuation.
   DEBUG_EVENT debug_event = {0};
   for (;;) {
     // Block until the next event.
@@ -43,7 +43,7 @@ void ProcessNativeWin::DebugEventLoop() {
         // status parameter (continue_status). This value
         // is used by the ContinueDebugEvent function.
 
-        switch(debug_event.u.Exception.ExceptionRecord.ExceptionCode) {
+        switch (debug_event.u.Exception.ExceptionRecord.ExceptionCode) {
           case EXCEPTION_ACCESS_VIOLATION:
             // First chance: Pass this on to the system.
             // Last chance: Display an appropriate error.
@@ -107,7 +107,7 @@ void ProcessNativeWin::DebugEventLoop() {
         // Display the process's exit code.
         // continue_status = OnExitProcessDebugEvent(debug_event);
         continue_status = DBG_CONTINUE;
-        return; // TODO(backend) XXX XXX XXX XXX
+        return;  // TODO(backend) XXX XXX XXX XXX
         break;
 
       case LOAD_DLL_DEBUG_EVENT:

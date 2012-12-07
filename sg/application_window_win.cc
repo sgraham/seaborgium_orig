@@ -68,7 +68,7 @@ class ApplicationWindowWin : public ApplicationWindow {
   virtual bool IsLandscape() {
     // TODO(config): Probably wrong on multi mon, but should be removed anyway.
     int w = GetSystemMetrics(SM_CXFULLSCREEN);
-	  int h = GetSystemMetrics(SM_CYFULLSCREEN);
+    int h = GetSystemMetrics(SM_CYFULLSCREEN);
     return w > h;
   }
 

@@ -41,7 +41,7 @@ TEST_F(DebugCoreNativeWinTest, StartAndKillImmediately) {
   debug_core_->ProcessStart(
       L"test_data\\test_binary.exe", L"", std::vector<string16>(), L"");
 
-  // TODO XXX XXX XXX
+  // XXX XXX XXX
 
   /*
   // Immediately terminate it. We'll still get a create and a load dll for
@@ -53,7 +53,7 @@ TEST_F(DebugCoreNativeWinTest, StartAndKillImmediately) {
   EXPECT_TRUE(result);
   EXPECT_EQ(CREATE_PROCESS_DEBUG_EVENT, debug_event.dwDebugEventCode);
   ContinueDebugEvent(debug_event.dwProcessId,
-                    debug_event.dwThreadId, 
+                    debug_event.dwThreadId,
                     DBG_CONTINUE);
 
   result = WaitForDebugEvent(&debug_event, INFINITE);
@@ -93,5 +93,5 @@ TEST_F(DebugCoreNativeWinTest, StartAndKillImmediately) {
   // Still have to poll. Could have it WFDE(INFINITE), but then code execution
   // would be quite different.
   //
-  // 
+  //
 }

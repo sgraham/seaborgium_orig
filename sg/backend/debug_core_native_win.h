@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SG_BACKEND_DEBUG_CONNECTION_NATIVE_WIN_H_
-#define SG_BACKEND_DEBUG_CONNECTION_NATIVE_WIN_H_
+#ifndef SG_BACKEND_DEBUG_CORE_NATIVE_WIN_H_
+#define SG_BACKEND_DEBUG_CORE_NATIVE_WIN_H_
 
 #include <vector>
 
@@ -29,8 +29,7 @@ class DebugCoreNativeWin /* : public DebugCore */ {
   static DebugCoreNativeWin* CreateOnDBG();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(DebugCoreNativeWin);
 };
 
-#endif  // SG_BACKEND_DEBUG_CONNECTION_NATIVE_WIN_H_
+#endif  // SG_BACKEND_DEBUG_CORE_NATIVE_WIN_H_

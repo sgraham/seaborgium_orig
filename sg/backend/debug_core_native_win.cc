@@ -50,7 +50,7 @@ void DebugCoreNativeWin::ProcessStart(
       NULL,
       &startup_information,
       &process_information);
-  CHECK(result);  // TODO: dispatch FormatLastError
+  CHECK(result);  // TODO(error): dispatch FormatLastError
 
   // TODO(temp):
   result = TerminateProcess(process_information.hProcess, 999);

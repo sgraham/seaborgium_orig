@@ -37,11 +37,31 @@ class DebugCoreGdbTest : public testing::Test {
   scoped_ptr<base::Thread> debug_thread_;
 };
 
-TEST_F(DebugCoreGdbTest, StartAndKillImmediately) {
-  debug_core_->ProcessStart(
-      L"test_data\\test_binary_mingw.exe", L"", std::vector<string16>(), L"");
+class MockNotifier : public DebugNotification {
+ public:
+  virtual ~MockNotifier() {}
 
-  // TODO XXX XXX XXX
+  virtual void 
+};
+
+TEST_F(DebugCoreGdbTest, StartAndKillImmediately) {
+  MockNotifier notifier;
+  debug_core_->SetDebugNotification(&notifier);
+
+  notifier.ExpectLoadProcess();
+
+  debug_core_->LoadProcess(
+      L"test_data\\test_binary_mingw.exe", L"", std::vector<string16>(), L"");
+  debug_core_->BlockAndDispatchEvents();
+
+  notifier.Check();
+
+  notifier.ExpectStart();
+  debug_core_->Start();
+  notifier.Check();
+
+
+  // XXX XXX XXX
 
   /*
   // Immediately terminate it. We'll still get a create and a load dll for
@@ -53,7 +73,7 @@ TEST_F(DebugCoreGdbTest, StartAndKillImmediately) {
   EXPECT_TRUE(result);
   EXPECT_EQ(CREATE_PROCESS_DEBUG_EVENT, debug_event.dwDebugEventCode);
   ContinueDebugEvent(debug_event.dwProcessId,
-                    debug_event.dwThreadId, 
+                    debug_event.dwThreadId,
                     DBG_CONTINUE);
 
   result = WaitForDebugEvent(&debug_event, INFINITE);
@@ -93,5 +113,5 @@ TEST_F(DebugCoreGdbTest, StartAndKillImmediately) {
   // Still have to poll. Could have it WFDE(INFINITE), but then code execution
   // would be quite different.
   //
-  // 
+  //
 }
