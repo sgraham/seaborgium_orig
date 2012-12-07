@@ -14,7 +14,7 @@ DebugCoreGdb::DebugCoreGdb() {
 DebugCoreGdb::~DebugCoreGdb() {
 }
 
-void DebugCoreGdb::ProcessStart(
+void DebugCoreGdb::LoadProcess(
     const string16& application,
     const string16& command_line,
     const std::vector<string16> environment,
@@ -27,6 +27,13 @@ void DebugCoreGdb::ProcessStart(
 void DebugCoreGdb::SetDebugNotification(DebugNotification* debug_notification) {
   debug_notification_ = debug_notification;
 }
+
+void DebugCoreGdb::Start() {
+}
+
+void DebugCoreGdb::BlockAndDispatchEvents() {
+}
+
 
 DebugCoreGdb* DebugCoreGdb::CreateOnDBG() {
   return new DebugCoreGdb;

@@ -13,8 +13,8 @@ class DebugNotification {
  public:
   virtual ~DebugNotification() {}
 
-  virtual void OnProcessLoad();
-  virtual void OnProcessContinue();
+  virtual void OnProcessLoad() {}
+  virtual void OnProcessContinue() {}
 };
 
 class ThreadCallStack {

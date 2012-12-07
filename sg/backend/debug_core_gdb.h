@@ -25,6 +25,10 @@ class DebugCoreGdb /* : public DebugCore */ {
       const std::vector<string16> environment,
       const string16& working_directory);
 
+  virtual void Start();
+
+  virtual void BlockAndDispatchEvents();
+
   static DebugCoreGdb* CreateOnDBG();
 
  private:

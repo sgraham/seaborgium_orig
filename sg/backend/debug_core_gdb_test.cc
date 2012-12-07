@@ -41,7 +41,12 @@ class MockNotifier : public DebugNotification {
  public:
   virtual ~MockNotifier() {}
 
-  virtual void 
+  void ExpectLoadProcess() {
+  }
+  void ExpectStart() {
+  }
+  void Check() {
+  }
 };
 
 TEST_F(DebugCoreGdbTest, StartAndKillImmediately) {
