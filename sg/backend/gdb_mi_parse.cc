@@ -52,9 +52,20 @@ GdbRecord* GdbMiParser::Parse(const base::StringPiece& input) {
     case GdbRecord::RT_LOG_STREAM_OUTPUT:
       record->set_primary_identifier(ConsumeString());
       break;
+    case GdbRecord::RT_EXEC_ASYNC_OUTPUT:
+    case GdbRecord::RT_STATUS_ASYNC_OUTPUT:
+    case GdbRecord::RT_NOTIFY_ASYNC_OUTPUT:
+    case GdbRecord::RT_RESULT_RECORD:
+      record->set_primary_identifier(ConsumeIdentifier());
+      break;
     default:
-      NOTREACHED() << "todo;";
+      ReportError();
   }
+  ConsumeNewline();
+
+  // Unexpected extra input at end of record.
+  if (CanConsume(1))
+    ReportError();
 
   if (error_)
     return NULL;
@@ -139,7 +150,7 @@ std::string GdbMiParser::ConsumeString() {
   ++pos_;
 
   std::string result;
-  char next_char = 0;
+  int next_char;
 
   while (CanConsume(1)) {
     next_char = *pos_++;
@@ -185,7 +196,7 @@ std::string GdbMiParser::ConsumeString() {
       return result;
     } else {
       if (next_char <= kExtendedASCIIStart) {
-        result.push_back(next_char);
+        result.push_back(static_cast<char>(next_char));
       } else {
         ReportError();
         return std::string();
@@ -194,4 +205,37 @@ std::string GdbMiParser::ConsumeString() {
   }
   ReportError();
   return std::string();
+}
+
+std::string GdbMiParser::ConsumeIdentifier() {
+  std::string result;
+  while (CanConsume(1)) {
+    int next_char = *pos_++;
+    if (isalpha(next_char)) {
+      result.push_back(static_cast<char>(next_char));
+    } else {
+      --pos_;
+      return result;
+    }
+  }
+  ReportError();
+  return std::string();
+}
+
+void GdbMiParser::ConsumeNewline() {
+  if (!CanConsume(1)) {
+    ReportError();
+    return;
+  }
+  // CR | CR-LF. i.e. *not* LF alone, which is bizarro. That pretty much has
+  // to be a typo in the docs? TODO(scottmg): Verify with gdb capture on both
+  // Linux and Windows and update tests.
+  if (*pos_++ == '\r') {
+    if (CanConsume(1)) {
+      if (*pos_ == '\n')
+        ++pos_;
+    }
+  } else {
+    ReportError();
+  }
 }

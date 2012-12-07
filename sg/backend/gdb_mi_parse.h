@@ -9,6 +9,7 @@
 
 #include "base/memory/scoped_ptr.h"
 #include "base/string_piece.h"
+#include "base/values.h"
 
 namespace base {
 class ListValue;
@@ -48,7 +49,7 @@ class GdbRecord {
 
   // This is used for result-record and the async-output types and represents
   // their list of results.
-  const base::ListValue* results() const { return results_.get(); }
+  const base::ListValue& results() const { return results_; }
 
  private:
   friend class GdbMiParser;
@@ -64,7 +65,7 @@ class GdbRecord {
   std::string token_;  // Optional string of digits corresponding with input.
   std::string primary_identifier_;
 
-  scoped_ptr<base::ListValue> results_;
+  base::ListValue results_;
 
   DISALLOW_COPY_AND_ASSIGN(GdbRecord);
 };
@@ -98,6 +99,8 @@ class GdbMiParser {
   bool CanConsume(int count);
 
   std::string ConsumeString();
+  std::string ConsumeIdentifier();
+  void ConsumeNewline();
 
   // Pointer to the start of the input data.
   const char* start_pos_;
