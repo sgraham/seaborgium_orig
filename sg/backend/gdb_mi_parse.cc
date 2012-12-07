@@ -8,10 +8,14 @@
 #include "base/values.h"
 
 namespace {
-
 const int32 kExtendedASCIIStart = 0x80;
-
 }  // namespace
+
+GdbRecordResult::GdbRecordResult() {
+}
+
+GdbRecordResult::~GdbRecordResult() {
+}
 
 GdbRecord::GdbRecord(RecordType record_type) : record_type_(record_type) {
 }
@@ -22,6 +26,8 @@ GdbRecord::GdbRecord(RecordType record_type, const std::string& token)
 }
 
 GdbRecord::~GdbRecord() {
+  for (size_t i = 0; i < results_.size(); ++i)
+    delete results_[i];
 }
 
 GdbMiParser::GdbMiParser()
@@ -57,10 +63,17 @@ GdbRecord* GdbMiParser::Parse(const base::StringPiece& input) {
     case GdbRecord::RT_NOTIFY_ASYNC_OUTPUT:
     case GdbRecord::RT_RESULT_RECORD:
       record->set_primary_identifier(ConsumeIdentifier());
+      while (CanConsume(1) && *pos_ == ',' && !error_) {
+        ++pos_;
+        record->AddResult(ConsumeResult());
+      }
       break;
     default:
       ReportError();
   }
+
+  // The stream output types aren't spec'd to have trailing newlines, but
+  // clearly do.
   ConsumeNewline();
 
   // Unexpected extra input at end of record.
@@ -84,13 +97,13 @@ GdbRecord* GdbMiParser::DetermineTypeAndMakeRecord() {
     case '^':
       return new GdbRecord(GdbRecord::RT_RESULT_RECORD, token);
     case '~':
-      CHECK(token.size() == 0);
+      CHECK_EQ(0, token.size());
       return new GdbRecord(GdbRecord::RT_CONSOLE_STREAM_OUTPUT);
     case '@':
-      CHECK(token.size() == 0);
+      CHECK_EQ(0, token.size());
       return new GdbRecord(GdbRecord::RT_TARGET_STREAM_OUTPUT);
     case '&':
-      CHECK(token.size() == 0);
+      CHECK_EQ(0, token.size());
       return new GdbRecord(GdbRecord::RT_LOG_STREAM_OUTPUT);
     case '*':
       return new GdbRecord(GdbRecord::RT_EXEC_ASYNC_OUTPUT, token);
@@ -238,4 +251,31 @@ void GdbMiParser::ConsumeNewline() {
   } else {
     ReportError();
   }
+}
+
+GdbRecordResult* GdbMiParser::ConsumeResult() {
+  scoped_ptr<GdbRecordResult> result(new GdbRecordResult);
+  result->set_variable(ConsumeIdentifier());
+  if (error_ || !CanConsume(1) || *pos_++ != '=') {
+    ReportError();
+    return NULL;
+  }
+  switch (*pos_) {
+    case '"':
+      result->set_value(new base::StringValue(ConsumeString()));
+      break;
+    case '{':
+      NOTREACHED() << "todo;";
+      //result->set_value(ConsumeDictionary());
+      break;
+    case '[':
+      NOTREACHED() << "todo;";
+      //result->set_value(ConsumeList());
+      break;
+    default:
+      ReportError();
+  }
+  if (error_)
+    return NULL;
+  return result.release();
 }

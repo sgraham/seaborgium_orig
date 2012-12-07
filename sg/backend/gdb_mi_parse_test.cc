@@ -21,11 +21,38 @@ TEST(GdbMiParse, LogData) {
   EXPECT_EQ("set disassembly-flavor intel\n", diag->OutputString());
 }
 
-TEST(GdbMiParse, Done) {
+TEST(GdbMiParse, ResultDone) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse("^done\r"));
   EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
-  EXPECT_EQ(0, done->results().GetSize());
+  EXPECT_EQ("done", done->ResultClass());
+  EXPECT_EQ(0, done->results().size());
 }
 
-// TODO: results, errors
+TEST(GdbMiParse, ResultDoneSimple) {
+  GdbMiParser p;
+  scoped_ptr<GdbRecord> done(p.Parse("^done,value=\"42.432000000000002\"\r"));
+  EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
+  EXPECT_EQ("done", done->ResultClass());
+  EXPECT_EQ(1, done->results().size());
+  EXPECT_EQ("value", done->results()[0]->variable());
+  std::string value;
+  EXPECT_TRUE(done->results()[0]->value()->GetAsString(&value));
+  EXPECT_EQ("42.432000000000002", value);
+}
+
+TEST(GdbMiParse, ResultErrorSimple) {
+  GdbMiParser p;
+  scoped_ptr<GdbRecord> done(p.Parse(
+      "^error,msg=\"Undefined info command: \\\"regs\\\"."
+      "  Try \\\"help info\\\".\"\r"));
+  EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
+  EXPECT_EQ("error", done->ResultClass());
+  EXPECT_EQ(1, done->results().size());
+  EXPECT_EQ("msg", done->results()[0]->variable());
+  std::string value;
+  EXPECT_TRUE(done->results()[0]->value()->GetAsString(&value));
+  EXPECT_EQ("Undefined info command: \"regs\".  Try \"help info\".", value);
+}
+
+// TODO(testing): results, errors

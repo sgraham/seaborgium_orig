@@ -19,6 +19,30 @@ class ListValue;
 // the string format is. Some places explicitly say 7-bit strings, so until
 // demonstrated otherwise, the strings and identifiers are parsed as
 // no-high-bit ASCII only.
+//
+// Documentation from:
+// http://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Output-Syntax.html#GDB_002fMI-Output-Syntax
+// titled "GDB/MI Output Syntax" (in case it moves). It is slightly inaccurate
+// as noted in few locations in the implementation.
+
+class GdbRecordResult {
+ public:
+  GdbRecordResult();
+  ~GdbRecordResult();
+  const std::string& variable() const { return variable_; }
+  base::Value* value() const { return value_.get(); }
+
+ private:
+  friend class GdbMiParser;
+
+  void set_variable(const std::string& variable) { variable_ = variable; }
+  void set_value(base::Value* value) { value_.reset(value); }
+
+  std::string variable_;
+  scoped_ptr<base::Value> value_;
+
+  DISALLOW_COPY_AND_ASSIGN(GdbRecordResult);
+};
 
 class GdbRecord {
  public:
@@ -49,7 +73,7 @@ class GdbRecord {
 
   // This is used for result-record and the async-output types and represents
   // their list of results.
-  const base::ListValue& results() const { return results_; }
+  const std::vector<GdbRecordResult*>& results() const { return results_; }
 
  private:
   friend class GdbMiParser;
@@ -61,11 +85,16 @@ class GdbRecord {
     primary_identifier_ = identifier;
   }
 
+  // Takes ownership.
+  void AddResult(GdbRecordResult* result) {
+    results_.push_back(result);
+  }
+
   RecordType record_type_;
   std::string token_;  // Optional string of digits corresponding with input.
   std::string primary_identifier_;
 
-  base::ListValue results_;
+  std::vector<GdbRecordResult*> results_;
 
   DISALLOW_COPY_AND_ASSIGN(GdbRecord);
 };
@@ -101,6 +130,7 @@ class GdbMiParser {
   std::string ConsumeString();
   std::string ConsumeIdentifier();
   void ConsumeNewline();
+  GdbRecordResult* ConsumeResult();
 
   // Pointer to the start of the input data.
   const char* start_pos_;
