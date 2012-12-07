@@ -9,9 +9,11 @@
 int main(int argc, char** argv) {
   printf("This is the test binary!\n");
   printf("argc: %d\n", argc);
+  double f = 42.432;
   for (int i = 0; i < argc; ++i) {
     printf("argv[%d]: %s\n", i, argv[i]);
   }
+  printf("f: %f\n", f);
   for (;;) {
   }
   return 0;

@@ -314,6 +314,7 @@ def main():
                'backend\\backend_native_win',
                'backend\\debug_core_gdb',
                'backend\\debug_core_native_win',
+               'backend\\gdb_mi_parse',
                'backend\\process_native_win',
                'backend\\subprocess_win',
                'cpp_lexer',
@@ -414,6 +415,7 @@ def main():
                'lexer_test',
                'backend\\debug_core_native_win_test',
                'backend\\debug_core_gdb_test',
+               'backend\\gdb_mi_parse_test',
                'backend\\subprocess_test',
               ]:
     test_objs += cxx(name, variables=[('cflags', test_cflags)])
