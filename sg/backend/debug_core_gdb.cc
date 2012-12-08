@@ -21,7 +21,6 @@ void DebugCoreGdb::LoadProcess(
     const string16& working_directory) {
   DCHECK_EQ(0, environment.size()) << "todo;";
   DCHECK_EQ(0, working_directory.size()) << "todo;";
-
 }
 
 void DebugCoreGdb::SetDebugNotification(DebugNotification* debug_notification) {
