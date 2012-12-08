@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/string_piece.h"
 #include "base/values.h"
@@ -58,6 +59,7 @@ class GdbRecord {
     RT_TARGET_STREAM_OUTPUT,
     RT_LOG_STREAM_OUTPUT,
     RT_RESULT_RECORD,
+    RT_TERMINATOR,
   };
 
   RecordType record_type() const { return record_type_; }
@@ -69,9 +71,22 @@ class GdbRecord {
 
   // Some alternate names for |primary_identifier| that are more natural
   // for the types.
-  const std::string& OutputString() const { return primary_identifier(); }
-  const std::string& AsyncClass() const { return primary_identifier(); }
-  const std::string& ResultClass() const { return primary_identifier(); }
+  const std::string& OutputString() const {
+    DCHECK(record_type() == RT_CONSOLE_STREAM_OUTPUT ||
+           record_type() == RT_TARGET_STREAM_OUTPUT ||
+           record_type() == RT_LOG_STREAM_OUTPUT);
+    return primary_identifier();
+  }
+  const std::string& AsyncClass() const {
+    DCHECK(record_type() == RT_EXEC_ASYNC_OUTPUT ||
+           record_type() == RT_STATUS_ASYNC_OUTPUT ||
+           record_type() == RT_NOTIFY_ASYNC_OUTPUT);
+    return primary_identifier();
+  }
+  const std::string& ResultClass() const {
+    DCHECK_EQ(RT_RESULT_RECORD, record_type());
+    return primary_identifier();
+  }
 
   // This is used for result-record and the async-output types and represents
   // their list of results.
@@ -108,12 +123,15 @@ class GdbMiParser {
   GdbMiParser();
   ~GdbMiParser();
 
-  // Returns a parsed GdbRecord (one line of communication). Caller owns.
-  GdbRecord* Parse(const base::StringPiece& input);
+  // Returns a parsed GdbRecord (one line of communication). Caller owns
+  // returned value. |bytes_consumed|, if provided will be fill with how many
+  // bytes of |input| were parsed.
+  GdbRecord* Parse(const base::StringPiece& input, int* bytes_consumed);
 
  private:
   // Construct the top-level GdbRecord based on the initial character in the
-  // input which determines the type.
+  // input which determines the type. We also treat the '(gdb)' terminator as
+  // pseudo-record of RT_TERMINATOR.
   GdbRecord* DetermineTypeAndMakeRecord();
 
   // If there's a leading set of digits, parse, advance past, and return them.
@@ -132,10 +150,6 @@ class GdbMiParser {
   // Parse, advance past, and return an identifier (see IsIdentifierChar for
   // definition 'identifier').
   std::string ConsumeIdentifier();
-
-  // Advance past a 'nl' from the docs. Note that this is (strangely) either a
-  // lone CR, or CR+LF (i.e. the opposite of what you would expect).
-  void ConsumeNewline();
 
   // Parse, advance past, and return what the docs call a "result". That is,
   // an identifier followed by '=', followed by a rich "value" (below). Caller
@@ -157,6 +171,13 @@ class GdbMiParser {
 
   // Determine if the given character is in the identifier set.
   bool IsIdentifierChar(int c);
+
+  // Advance past a 'nl' from the docs. Note that this is (strangely) either a
+  // lone CR, or CR+LF (i.e. the opposite of what you would expect).
+  void ConsumeNewline();
+
+  // Parse and advance past the '(gdb)' terminator.
+  void ConsumeTerminator();
 
   // Pointer to the start of the input data.
   const char* start_pos_;
@@ -185,6 +206,8 @@ class GdbOutput {
   const GdbRecord* at(size_t i) const { return records_.at(i); }
 
  private:
+  friend class GdbMiReader;
+
   std::vector<GdbRecord*> records_;
 };
 

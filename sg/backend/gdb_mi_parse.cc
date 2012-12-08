@@ -43,7 +43,8 @@ GdbMiParser::GdbMiParser()
 GdbMiParser::~GdbMiParser() {
 }
 
-GdbRecord* GdbMiParser::Parse(const base::StringPiece& input) {
+GdbRecord* GdbMiParser::Parse(
+    const base::StringPiece& input, int* bytes_consumed) {
   start_pos_ = input.data();
   pos_ = start_pos_;
   end_pos_ = start_pos_ + input.length();
@@ -70,20 +71,25 @@ GdbRecord* GdbMiParser::Parse(const base::StringPiece& input) {
         record->AddResult(ConsumeResult());
       }
       break;
+    case GdbRecord::RT_TERMINATOR:
+      ConsumeTerminator();
+      break;
     default:
       ReportError();
   }
 
-  // The stream output types aren't spec'd to have trailing newlines, but
+  // The stream output records aren't documented as having a trailing "nl", but
   // clearly do.
   ConsumeNewline();
 
-  // Unexpected extra input at end of record.
-  if (CanConsume(1))
-    ReportError();
+  // We don't test for extra input at the end here so that we can be used as a
+  // subparser in the full output parser.
 
   if (error_)
     return NULL;
+
+  if (bytes_consumed)
+    *bytes_consumed = pos_ - start_pos_;
   return record.release();
 }
 
@@ -113,6 +119,9 @@ GdbRecord* GdbMiParser::DetermineTypeAndMakeRecord() {
       return new GdbRecord(GdbRecord::RT_STATUS_ASYNC_OUTPUT, token);
     case '=':
       return new GdbRecord(GdbRecord::RT_NOTIFY_ASYNC_OUTPUT, token);
+    case '(':
+      CHECK_EQ(0, token.size());
+      return new GdbRecord(GdbRecord::RT_TERMINATOR, token);
     default:
       ReportError();
       return NULL;
@@ -237,24 +246,6 @@ std::string GdbMiParser::ConsumeIdentifier() {
   return std::string();
 }
 
-void GdbMiParser::ConsumeNewline() {
-  if (!CanConsume(1)) {
-    ReportError();
-    return;
-  }
-  // CR | CR-LF. i.e. *not* LF alone, which is bizarro. That pretty much has
-  // to be a typo in the docs? TODO(scottmg): Verify with gdb capture on both
-  // Linux and Windows and update tests.
-  if (*pos_++ == '\r') {
-    if (CanConsume(1)) {
-      if (*pos_ == '\n')
-        ++pos_;
-    }
-  } else {
-    ReportError();
-  }
-}
-
 GdbRecordResult* GdbMiParser::ConsumeResult() {
   scoped_ptr<GdbRecordResult> result(new GdbRecordResult);
   result->set_variable(ConsumeIdentifier());
@@ -297,11 +288,9 @@ base::DictionaryValue* GdbMiParser::ConsumeTuple() {
       ++pos_;
       return result.release();
     }
-    GdbRecordResult* sub_result = ConsumeResult();
-    if (error_) {
-      DCHECK(!sub_result);
+    scoped_ptr<GdbRecordResult> sub_result(ConsumeResult());
+    if (error_)
       break;
-    }
     result->SetWithoutPathExpansion(
         sub_result->variable(), sub_result->release_value());
     if (*pos_ == ',')  // This is strictly unnecessary for parsing, so skip it.
@@ -332,12 +321,10 @@ base::ListValue* GdbMiParser::ConsumeList() {
       converted->Set(sub_result->variable(), sub_result->release_value());
       result->Append(converted.release());
     } else {
-      Value* value = ConsumeValue();
-      if (error_) {
-        DCHECK(!value);
+      scoped_ptr<Value> value(ConsumeValue());
+      if (error_)
         break;
-      }
-      result->Append(value);
+      result->Append(value.release());
     }
     if (*pos_ == ',')  // This is strictly unnecessary for parsing, so skip it.
       ++pos_;
@@ -347,6 +334,35 @@ base::ListValue* GdbMiParser::ConsumeList() {
 
 bool GdbMiParser::IsIdentifierChar(int c) {
   return c == '_' || c == '-' || isalpha(c);
+}
+
+void GdbMiParser::ConsumeNewline() {
+  if (!CanConsume(1)) {
+    ReportError();
+    return;
+  }
+  if (*pos_++ == '\r') {
+    if (CanConsume(1)) {
+      if (*pos_ == '\n')
+        ++pos_;
+    }
+  } else {
+    ReportError();
+  }
+}
+
+void GdbMiParser::ConsumeTerminator() {
+  // Note that we treat the value as the remainder: "gdb)" to make handling
+  // the same as the other record types that have a leading indictor.
+  if (!CanConsume(4) ||
+      pos_[0] != 'g' ||
+      pos_[1] != 'd' ||
+      pos_[2] != 'b' ||
+      pos_[3] != ')') {
+    ReportError();
+    return;
+  }
+  pos_ += 4;
 }
 
 GdbOutput::GdbOutput() {
@@ -365,5 +381,16 @@ GdbMiReader::~GdbMiReader() {
 
 GdbOutput* GdbMiReader::Parse(const base::StringPiece& input) {
   base::StringPiece remaining(input);
+  scoped_ptr<GdbOutput> result(new GdbOutput);
+  for (;;) {
+    int consumed = 0;
+    scoped_ptr<GdbRecord> record(parser_.Parse(remaining, &consumed));
+    if (!record.get())
+      return NULL;
+    if (record->record_type() == GdbRecord::RT_TERMINATOR)
+      return result.release();
+    result->records_.push_back(record.release());
+    remaining.set(remaining.data() + consumed, remaining.size() - consumed);
+  }
   return NULL;
 }
