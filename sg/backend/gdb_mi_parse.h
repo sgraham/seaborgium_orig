@@ -6,6 +6,7 @@
 #define SG_BACKEND_GDB_MI_PARSE_H_
 
 #include <string>
+#include <vector>
 
 #include "base/memory/scoped_ptr.h"
 #include "base/string_piece.h"
@@ -37,6 +38,7 @@ class GdbRecordResult {
 
   void set_variable(const std::string& variable) { variable_ = variable; }
   void set_value(base::Value* value) { value_.reset(value); }
+  base::Value* release_value() { return value_.release(); }
 
   std::string variable_;
   scoped_ptr<base::Value> value_;
@@ -125,12 +127,41 @@ class GdbMiParser {
 
   void ReportError();
 
+  // A lightweight check for whether there's at least |count| bytes of input
+  // remaining in the input buffer.
   bool CanConsume(int count);
 
+  // Parse, advance past, and return a C-style quoted string.
   std::string ConsumeString();
+
+  // Parse, advance past, and return an identifier (see IsIdentifierChar for
+  // definition 'identifier').
   std::string ConsumeIdentifier();
+
+  // Advance past a 'nl' from the docs. Note that this is (strangely) either a
+  // lone CR, or CR+LF (i.e. the opposite of what you would expect).
   void ConsumeNewline();
+
+  // Parse, advance past, and return what the docs call a "result". That is,
+  // an identifier followed by '=', followed by a rich "value" (below). Caller
+  // owns the returned value.
   GdbRecordResult* ConsumeResult();
+
+  // Parse, advance past, and return a "value", which can be either a
+  // C-string, a tuple, or a list. Caller owns the returned value.
+  base::Value* ConsumeValue();
+
+  // Parse, advance past, and return a "tuple" (dictionary). This is a
+  // {}-delimited, comma-separated of "result"s (above). Caller owns the
+  // returned value.
+  base::DictionaryValue* ConsumeTuple();
+
+  // Parse, advance past, and return a "list". This is a []-delimited,
+  // comma-separated list of either
+  base::ListValue* ConsumeList();
+
+  // Determine if the given character is in the identifier set.
+  bool IsIdentifierChar(int c);
 
   // Pointer to the start of the input data.
   const char* start_pos_;

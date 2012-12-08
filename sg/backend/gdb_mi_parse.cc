@@ -4,6 +4,8 @@
 
 #include "sg/backend/gdb_mi_parse.h"
 
+#include <ctype.h>
+
 #include "base/logging.h"
 #include "base/values.h"
 
@@ -224,7 +226,7 @@ std::string GdbMiParser::ConsumeIdentifier() {
   std::string result;
   while (CanConsume(1)) {
     int next_char = *pos_++;
-    if (isalpha(next_char)) {
+    if (IsIdentifierChar(next_char)) {
       result.push_back(static_cast<char>(next_char));
     } else {
       --pos_;
@@ -260,22 +262,89 @@ GdbRecordResult* GdbMiParser::ConsumeResult() {
     ReportError();
     return NULL;
   }
-  switch (*pos_) {
-    case '"':
-      result->set_value(new base::StringValue(ConsumeString()));
-      break;
-    case '{':
-      NOTREACHED() << "todo;";
-      //result->set_value(ConsumeDictionary());
-      break;
-    case '[':
-      NOTREACHED() << "todo;";
-      //result->set_value(ConsumeList());
-      break;
-    default:
-      ReportError();
-  }
+  result->set_value(ConsumeValue());
   if (error_)
     return NULL;
   return result.release();
+}
+
+base::Value* GdbMiParser::ConsumeValue() {
+  if (!CanConsume(1)) {
+    ReportError();
+    return NULL;
+  }
+
+  switch (*pos_) {
+    case '"':
+      return new base::StringValue(ConsumeString());
+    case '{':
+      return ConsumeTuple();
+    case '[':
+      return ConsumeList();
+    default:
+      ReportError();
+      return NULL;
+  }
+}
+
+base::DictionaryValue* GdbMiParser::ConsumeTuple() {
+  DCHECK(CanConsume(1));
+  DCHECK_EQ('{', *pos_);  // This is verified in ConsumeValue.
+  pos_++;
+  scoped_ptr<base::DictionaryValue> result(new base::DictionaryValue);
+  while (CanConsume(1)) {
+    if (*pos_ == '}') {
+      ++pos_;
+      return result.release();
+    }
+    GdbRecordResult* sub_result = ConsumeResult();
+    if (error_) {
+      DCHECK(!sub_result);
+      break;
+    }
+    result->SetWithoutPathExpansion(
+        sub_result->variable(), sub_result->release_value());
+    if (*pos_ == ',')  // This is strictly unnecessary for parsing, so skip it.
+      ++pos_;
+  }
+  return NULL;
+}
+
+base::ListValue* GdbMiParser::ConsumeList() {
+  DCHECK(CanConsume(1));
+  DCHECK_EQ('[', *pos_);  // This is verified in ConsumeValue.
+  pos_++;
+  scoped_ptr<base::ListValue> result(new base::ListValue);
+  while (CanConsume(1)) {
+    if (*pos_ == ']') {
+      ++pos_;
+      return result.release();
+    }
+    // Can either be a list of "value" or a list of "result". This parse is
+    // slightly more loose than the docs in that we allow heterogeneous.
+    if (IsIdentifierChar(*pos_)) {
+      // We know it must be an identifier, so it's the beginning of an
+      // "identifier=value".
+      scoped_ptr<GdbRecordResult> sub_result(ConsumeResult());
+      // TODO(scottmg): Possibly get rid of GdbRecordResult and make it an
+      // untyped DictionaryValue?
+      scoped_ptr<base::DictionaryValue> converted(new base::DictionaryValue);
+      converted->Set(sub_result->variable(), sub_result->release_value());
+      result->Append(converted.release());
+    } else {
+      Value* value = ConsumeValue();
+      if (error_) {
+        DCHECK(!value);
+        break;
+      }
+      result->Append(value);
+    }
+    if (*pos_ == ',')  // This is strictly unnecessary for parsing, so skip it.
+      ++pos_;
+  }
+  return NULL;
+}
+
+bool GdbMiParser::IsIdentifierChar(int c) {
+  return c == '_' || c == '-' || isalpha(c);
 }

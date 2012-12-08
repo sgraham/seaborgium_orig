@@ -55,4 +55,39 @@ TEST(GdbMiParse, ResultErrorSimple) {
   EXPECT_EQ("Undefined info command: \"regs\".  Try \"help info\".", value);
 }
 
-// TODO(testing): results, errors
+TEST(GdbMiParse, ResultDoneTuple) {
+  GdbMiParser p;
+  scoped_ptr<GdbRecord> done(p.Parse(
+      "^done,stuff={a=\"stuff\",b=\"things\"}\r"));
+  EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
+  EXPECT_EQ("done", done->ResultClass());
+  EXPECT_EQ(1, done->results().size());
+  EXPECT_EQ("stuff", done->results()[0]->variable());
+  base::Value* stuff = done->results()[0]->value();
+  base::DictionaryValue* as_dict;
+  EXPECT_TRUE(stuff->GetAsDictionary(&as_dict));
+  std::string a_value, b_value;
+  EXPECT_TRUE(as_dict->GetString("a", &a_value));
+  EXPECT_TRUE(as_dict->GetString("b", &b_value));
+  EXPECT_EQ("stuff", a_value);
+  EXPECT_EQ("things", b_value);
+}
+
+TEST(GdbMiParse, ResultDoneListOfTuple) {
+  GdbMiParser p;
+  scoped_ptr<GdbRecord> done(p.Parse(
+      "^done,asm_insns=["
+      "{address=\"0x004013cb\","
+       "func-name=\"main(int, char**)\","
+       "offset=\"63\","
+       "inst=\"mov    DWORD PTR [esp+0x1c],0x0\""
+      "},"
+       "{address=\"0x004013d3\","
+        "func-name=\"main(int, char**)\","
+        "offset=\"71\","
+        "inst=\"jmp    0x4013fd <main(int, char**)+113>\""
+      "}]\r"));
+  EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
+}
+
+// TODO(testing): Error conditions.
