@@ -5,6 +5,7 @@
 #include "sg/debug_presenter.h"
 
 #include "base/bind.h"
+#include "base/command_line.h"
 #include "base/file_util.h"
 #include "sg/app_thread.h"
 #include "sg/debug_presenter_display.h"
@@ -13,6 +14,15 @@
 DebugPresenter::DebugPresenter(SourceFiles* source_files)
     : source_files_(source_files) {
   std::string* result = new std::string;
+  const CommandLine& command_line = *CommandLine::ForCurrentProcess();
+  // TODO(scottmg): Temporary obviously.
+  if (command_line.GetArgs().size() != 1)
+    binary_ = L"test_data\\test_binary.exe";
+  else
+    binary_ = command_line.GetArgs()[0];
+
+
+
   FilePath path(FILE_PATH_LITERAL("sample_source_code_file.cc"));
   // Lifetime OK (I think) because DebugPresenter's lifetime outlives the FILE
   // thread.

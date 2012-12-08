@@ -4,7 +4,7 @@
 
 #include "base/basictypes.h"
 
-#if defined(OS_WIN)
+#if defined(OS_WIN) && !defined(NDEBUG)
 #include <crtdbg.h>
 #endif
 
@@ -13,13 +13,13 @@
 class LeakCheckTest : public testing::Test {
  public:
   LeakCheckTest() {
-#if defined(OS_WIN)
+#if defined(OS_WIN) && !defined(NDEBUG)
     _CrtMemCheckpoint(&initial_memory_state_);
 #endif
   }
 
   virtual ~LeakCheckTest() {
-#if defined(OS_WIN)
+#if defined(OS_WIN) && !defined(NDEBUG)
     if (!HasFailure()) {
       _CrtMemState final_memory_state;
       _CrtMemState difference;
@@ -35,7 +35,7 @@ class LeakCheckTest : public testing::Test {
   }
 
  private:
-#if defined(OS_WIN)
+#if defined(OS_WIN) && !defined(NDEBUG)
   _CrtMemState initial_memory_state_;
 #endif
   void FailTest() {

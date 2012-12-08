@@ -29,6 +29,7 @@ class DebugPresenter : public DebugPresenterNotify {
   void ReadFileOnFILE(FilePath path, std::string* result);
   void FileLoadCompleted(FilePath path, std::string* result);
 
+  string16 binary_;
   DebugPresenterDisplay* display_;
   SourceFiles* source_files_;
 

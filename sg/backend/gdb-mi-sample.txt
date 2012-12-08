@@ -21,8 +21,18 @@ set disassembly-flavor intel
 ^done,asm_insns=[{address="0x004013cb",func-name="main(int, char**)",offset="63",inst="mov    DWORD PTR [esp+0x1c],0x0"},{address="0x004013d3",func-name="main(int, char**)",offset="71",inst="jmp    0x4013fd <main(int, char**)+113>"},{address="0x004013d5",func-name="main(int, char**)",offset="73",inst="mov    eax,DWORD PTR [esp+0x1c]"},{address="0x004013d9",func-name="main(int, char**)",offset="77",inst="shl    eax,0x2"},{address="0x004013dc",func-name="main(int, char**)",offset="80",inst="add    eax,DWORD PTR [ebp+0xc]"}]
 
 
-async mode doesn't seem to work on windows
+async mode doesn't seem to work on windows, maybe only on remote targets?
 
 
+-file-exec-and-symbols test_binary_mingw.exe
+-exec-arguments 3 5 1vfdas
+-break-insert -t main
+-exec-run
 
+-exec-next
+-exec-step
+-exec-finish -- I think this one sucks.
+-exec-until
 
+-gdb-set disassembly-flavor intel
+-data-disassemble -s $pc -e "$pc + 20" -- 0
