@@ -5,8 +5,12 @@
 #include <gtest/gtest.h>
 
 #include "sg/backend/gdb_mi_parse.h"
+#include "sg/test.h"
 
-TEST(GdbMiParse, Welcome) {
+class GdbMiParse : public LeakCheckTest {
+};
+
+TEST_F(GdbMiParse, Welcome) {
   GdbMiParser p;
 
   scoped_ptr<GdbRecord> welcome(p.Parse("~\"GNU gdb (GDB) 7.5\\n\"\r", NULL));
@@ -14,7 +18,7 @@ TEST(GdbMiParse, Welcome) {
   EXPECT_EQ("GNU gdb (GDB) 7.5\n", welcome->OutputString());
 }
 
-TEST(GdbMiParse, LogData) {
+TEST_F(GdbMiParse, LogData) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> diag(p.Parse("&\"set disassembly-flavor intel\\n\"\r",
                                      NULL));
@@ -22,7 +26,7 @@ TEST(GdbMiParse, LogData) {
   EXPECT_EQ("set disassembly-flavor intel\n", diag->OutputString());
 }
 
-TEST(GdbMiParse, ResultDone) {
+TEST_F(GdbMiParse, ResultDone) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse("^done\r", NULL));
   EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
@@ -30,7 +34,7 @@ TEST(GdbMiParse, ResultDone) {
   EXPECT_EQ(0, done->results().size());
 }
 
-TEST(GdbMiParse, ResultDoneSimple) {
+TEST_F(GdbMiParse, ResultDoneSimple) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse("^done,value=\"42.432000000000002\"\r",
                                      NULL));
@@ -43,7 +47,7 @@ TEST(GdbMiParse, ResultDoneSimple) {
   EXPECT_EQ("42.432000000000002", value);
 }
 
-TEST(GdbMiParse, ResultErrorSimple) {
+TEST_F(GdbMiParse, ResultErrorSimple) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse(
       "^error,msg=\"Undefined info command: \\\"regs\\\"."
@@ -58,7 +62,7 @@ TEST(GdbMiParse, ResultErrorSimple) {
   EXPECT_EQ("Undefined info command: \"regs\".  Try \"help info\".", value);
 }
 
-TEST(GdbMiParse, ResultDoneTuple) {
+TEST_F(GdbMiParse, ResultDoneTuple) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse(
       "^done,stuff={a=\"stuff\",b=\"things\"}\r", NULL));
@@ -76,7 +80,7 @@ TEST(GdbMiParse, ResultDoneTuple) {
   EXPECT_EQ("things", b_value);
 }
 
-TEST(GdbMiParse, ResultDoneListOfTuple) {
+TEST_F(GdbMiParse, ResultDoneListOfTuple) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse(
       "^done,asm_insns=["
@@ -93,7 +97,7 @@ TEST(GdbMiParse, ResultDoneListOfTuple) {
   EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
 }
 
-TEST(GdbMiParse, FullOutput) {
+TEST_F(GdbMiParse, FullOutput) {
   GdbMiReader reader;
   scoped_ptr<GdbOutput> output(reader.Parse(
       "=thread-group-added,id=\"i1\"\r"
