@@ -101,6 +101,8 @@ class GdbRecord {
   DISALLOW_COPY_AND_ASSIGN(GdbRecord);
 };
 
+// Parse one line (record) of gdb/mi output. GdbMiReader is the top-level that
+// reads one complete response.
 class GdbMiParser {
  public:
   GdbMiParser();
@@ -110,21 +112,14 @@ class GdbMiParser {
   GdbRecord* Parse(const base::StringPiece& input);
 
  private:
-  enum Token {
-    T_ID_TOKEN,
-    T_VARIABLE,         // Unquoted.
-    T_STRING,           // C-style quoted.
-    T_TUPLE_BEGIN,      // {
-    T_TUPLE_END,        // }
-    T_LIST_BEGIN,       // [
-    T_LIST_END,         // ]
-    T_SEPARATOR,        // ,
-    T_TERMINATOR,
-  };
-
+  // Construct the top-level GdbRecord based on the initial character in the
+  // input which determines the type.
   GdbRecord* DetermineTypeAndMakeRecord();
+
+  // If there's a leading set of digits, parse, advance past, and return them.
   std::string GetTokenIfAny();
 
+  // Record that we encountered an error.
   void ReportError();
 
   // A lightweight check for whether there's at least |count| bytes of input
@@ -180,5 +175,33 @@ class GdbMiParser {
 
   DISALLOW_COPY_AND_ASSIGN(GdbMiParser);
 };
+
+class GdbOutput {
+ public:
+  GdbOutput();
+  ~GdbOutput();
+
+  size_t size() const { return records_.size(); }
+  const GdbRecord* at(size_t i) const { return records_.at(i); }
+
+ private:
+  std::vector<GdbRecord*> records_;
+};
+
+class GdbMiReader {
+ public:
+  GdbMiReader();
+  ~GdbMiReader();
+
+  // Reads a complete "output" response, and returns the parsed
+  // representation. Caller owns.
+  GdbOutput* Parse(const base::StringPiece& input);
+
+ private:
+  GdbMiParser parser_;
+
+  DISALLOW_COPY_AND_ASSIGN(GdbMiReader);
+};
+
 
 #endif  // SG_BACKEND_GDB_MI_PARSE_H_

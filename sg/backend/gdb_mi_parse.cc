@@ -348,3 +348,22 @@ base::ListValue* GdbMiParser::ConsumeList() {
 bool GdbMiParser::IsIdentifierChar(int c) {
   return c == '_' || c == '-' || isalpha(c);
 }
+
+GdbOutput::GdbOutput() {
+}
+
+GdbOutput::~GdbOutput() {
+  for (size_t i = 0; i < records_.size(); ++i)
+    delete records_[i];
+}
+
+GdbMiReader::GdbMiReader() {
+}
+
+GdbMiReader::~GdbMiReader() {
+}
+
+GdbOutput* GdbMiReader::Parse(const base::StringPiece& input) {
+  base::StringPiece remaining(input);
+  return NULL;
+}

@@ -90,4 +90,14 @@ TEST(GdbMiParse, ResultDoneListOfTuple) {
   EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
 }
 
+TEST(GdbMiParse, FullOutput) {
+  GdbMiReader reader;
+  scoped_ptr<GdbOutput> output(reader.Parse(
+      "=thread-group-added,id=\"i1\"\r"
+      "~\"GNU gdb (GDB) 7.5\\n\"\r"
+      "~\"<http://www.gnu.org/software/gdb/bugs/>.\\n\"\r"
+      "(gdb)\r"));
+  EXPECT_EQ(3, output->size());
+}
+
 // TODO(testing): Error conditions.
