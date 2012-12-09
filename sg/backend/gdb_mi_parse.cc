@@ -379,18 +379,25 @@ GdbMiReader::GdbMiReader() {
 GdbMiReader::~GdbMiReader() {
 }
 
-GdbOutput* GdbMiReader::Parse(const base::StringPiece& input) {
+GdbOutput* GdbMiReader::Parse(
+    const base::StringPiece& input, int* bytes_consumed) {
   base::StringPiece remaining(input);
   scoped_ptr<GdbOutput> result(new GdbOutput);
   for (;;) {
     int consumed = 0;
     scoped_ptr<GdbRecord> record(parser_.Parse(remaining, &consumed));
-    if (!record.get())
+    if (!record.get()) {
+      if (bytes_consumed)
+        *bytes_consumed = 0;
       return NULL;
-    if (record->record_type() == GdbRecord::RT_TERMINATOR)
-      return result.release();
-    result->records_.push_back(record.release());
+    }
     remaining.set(remaining.data() + consumed, remaining.size() - consumed);
+    if (record->record_type() == GdbRecord::RT_TERMINATOR) {
+      if (bytes_consumed)
+        *bytes_consumed = remaining.data() - input.data();
+      return result.release();
+    }
+    result->records_.push_back(record.release());
   }
   return NULL;
 }

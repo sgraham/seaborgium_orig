@@ -217,8 +217,9 @@ class GdbMiReader {
   ~GdbMiReader();
 
   // Reads a complete "output" response, and returns the parsed
-  // representation. Caller owns.
-  GdbOutput* Parse(const base::StringPiece& input);
+  // representation. Caller owns. |bytes_consumed|, if provided will be fill
+  // with how many bytes of |input| were parsed.
+  GdbOutput* Parse(const base::StringPiece& input, int *bytes_consumed);
 
  private:
   GdbMiParser parser_;

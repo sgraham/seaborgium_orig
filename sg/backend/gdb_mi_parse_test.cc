@@ -10,7 +10,7 @@
 class GdbMiParse : public LeakCheckTest {
 };
 
-TEST_F(GdbMiParse, Welcome) {
+TEST(GdbMiParse, Welcome) {
   GdbMiParser p;
 
   scoped_ptr<GdbRecord> welcome(p.Parse("~\"GNU gdb (GDB) 7.5\\n\"\r", NULL));
@@ -18,7 +18,7 @@ TEST_F(GdbMiParse, Welcome) {
   EXPECT_EQ("GNU gdb (GDB) 7.5\n", welcome->OutputString());
 }
 
-TEST_F(GdbMiParse, LogData) {
+TEST(GdbMiParse, LogData) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> diag(p.Parse("&\"set disassembly-flavor intel\\n\"\r",
                                      NULL));
@@ -26,7 +26,7 @@ TEST_F(GdbMiParse, LogData) {
   EXPECT_EQ("set disassembly-flavor intel\n", diag->OutputString());
 }
 
-TEST_F(GdbMiParse, ResultDone) {
+TEST(GdbMiParse, ResultDone) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse("^done\r", NULL));
   EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
@@ -34,7 +34,7 @@ TEST_F(GdbMiParse, ResultDone) {
   EXPECT_EQ(0, done->results().size());
 }
 
-TEST_F(GdbMiParse, ResultDoneSimple) {
+TEST(GdbMiParse, ResultDoneSimple) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse("^done,value=\"42.432000000000002\"\r",
                                      NULL));
@@ -47,7 +47,7 @@ TEST_F(GdbMiParse, ResultDoneSimple) {
   EXPECT_EQ("42.432000000000002", value);
 }
 
-TEST_F(GdbMiParse, ResultErrorSimple) {
+TEST(GdbMiParse, ResultErrorSimple) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse(
       "^error,msg=\"Undefined info command: \\\"regs\\\"."
@@ -62,7 +62,7 @@ TEST_F(GdbMiParse, ResultErrorSimple) {
   EXPECT_EQ("Undefined info command: \"regs\".  Try \"help info\".", value);
 }
 
-TEST_F(GdbMiParse, ResultDoneTuple) {
+TEST(GdbMiParse, ResultDoneTuple) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse(
       "^done,stuff={a=\"stuff\",b=\"things\"}\r", NULL));
@@ -80,7 +80,7 @@ TEST_F(GdbMiParse, ResultDoneTuple) {
   EXPECT_EQ("things", b_value);
 }
 
-TEST_F(GdbMiParse, ResultDoneListOfTuple) {
+TEST(GdbMiParse, ResultDoneListOfTuple) {
   GdbMiParser p;
   scoped_ptr<GdbRecord> done(p.Parse(
       "^done,asm_insns=["
@@ -97,13 +97,13 @@ TEST_F(GdbMiParse, ResultDoneListOfTuple) {
   EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, done->record_type());
 }
 
-TEST_F(GdbMiParse, FullOutput) {
+TEST(GdbMiParse, FullOutput) {
   GdbMiReader reader;
   scoped_ptr<GdbOutput> output(reader.Parse(
       "=thread-group-added,id=\"i1\"\r"
       "~\"GNU gdb (GDB) 7.5\\n\"\r"
       "~\"<http blahblah\"\r"
-      "(gdb)\r"));
+      "(gdb)\r", NULL));
   EXPECT_EQ(3, output->size());
   EXPECT_EQ(GdbRecord::RT_NOTIFY_ASYNC_OUTPUT, output->at(0)->record_type());
   EXPECT_EQ("thread-group-added", output->at(0)->AsyncClass());
@@ -113,6 +113,57 @@ TEST_F(GdbMiParse, FullOutput) {
   EXPECT_EQ("GNU gdb (GDB) 7.5\n", output->at(1)->OutputString());
   EXPECT_EQ(GdbRecord::RT_CONSOLE_STREAM_OUTPUT, output->at(2)->record_type());
   EXPECT_EQ("<http blahblah", output->at(2)->OutputString());
+}
+
+TEST(GdbMiParse, Incremental) {
+  GdbMiReader reader;
+  int num_bytes;
+
+  std::string current = "=thread-group-added,id=\"";
+  scoped_ptr<GdbOutput> output(reader.Parse(current, &num_bytes));
+  EXPECT_EQ(NULL, output.get());
+  EXPECT_EQ(0, num_bytes);
+
+  current += "i1\"";
+  output.reset(reader.Parse(current, &num_bytes));
+  EXPECT_EQ(NULL, output.get());
+  EXPECT_EQ(0, num_bytes);
+
+  current += "\r";
+  output.reset(reader.Parse(current, &num_bytes));
+  EXPECT_EQ(NULL, output.get());
+  EXPECT_EQ(0, num_bytes);
+
+  current += "(gdb)\r";
+  output.reset(reader.Parse(current, &num_bytes));
+  EXPECT_EQ(34, num_bytes);
+  EXPECT_EQ(1, output->size());
+  EXPECT_EQ(GdbRecord::RT_NOTIFY_ASYNC_OUTPUT, output->at(0)->record_type());
+  EXPECT_EQ("thread-group-added", output->at(0)->AsyncClass());
+  EXPECT_EQ(1, output->at(0)->results().size());
+  EXPECT_EQ("id", output->at(0)->results()[0]->variable());
+}
+
+TEST(GdbMiParse, Multiple) {
+  GdbMiReader reader;
+  int num_bytes;
+
+  std::string full = "=thread-group-added,id=\"i1\"\r(gdb)\r"
+                     "~\"<http blahblah\"\r(gdb)\r";
+  base::StringPiece current(full);
+  scoped_ptr<GdbOutput> output(reader.Parse(current, &num_bytes));
+  EXPECT_EQ(34, num_bytes);
+  EXPECT_EQ(1, output->size());
+  EXPECT_EQ(GdbRecord::RT_NOTIFY_ASYNC_OUTPUT, output->at(0)->record_type());
+  EXPECT_EQ("thread-group-added", output->at(0)->AsyncClass());
+
+  current = base::StringPiece(
+      current.data() + num_bytes, current.size() - num_bytes);
+  output.reset(reader.Parse(current, &num_bytes));
+  EXPECT_EQ(24, num_bytes);
+  EXPECT_EQ(1, output->size());
+  EXPECT_EQ(GdbRecord::RT_CONSOLE_STREAM_OUTPUT, output->at(0)->record_type());
+  EXPECT_EQ("<http blahblah", output->at(0)->OutputString());
 }
 
 // TODO(testing): Bad/unexpected outputs.
