@@ -37,7 +37,7 @@ class DebugCoreNativeWinTest : public testing::Test {
   scoped_ptr<base::Thread> debug_thread_;
 };
 
-TEST_F(DebugCoreNativeWinTest, StartAndKillImmediately) {
+TEST_F(DebugCoreNativeWinTest, DISABLED_StartAndKillImmediately) {
   debug_core_->ProcessStart(
       L"test_data\\test_binary.exe", L"", std::vector<string16>(), L"");
 

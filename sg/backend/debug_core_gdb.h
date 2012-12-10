@@ -7,12 +7,16 @@
 
 #include <vector>
 
+#include "base/message_loop.h"
 #include "base/threading/non_thread_safe.h"
 #include "sg/backend/backend.h"
+#include "sg/backend/subprocess.h"
 
 // An implementation of a debugger backend using GDB/MI.
 
-class DebugCoreGdb : public base::NonThreadSafe /*, public DebugCore*/ {
+class DebugCoreGdb : public base::NonThreadSafe,
+                     public MessageLoopForIO::IOHandler
+                     /*, public DebugCore*/ {
  public:
   DebugCoreGdb();
   virtual ~DebugCoreGdb();
@@ -28,12 +32,24 @@ class DebugCoreGdb : public base::NonThreadSafe /*, public DebugCore*/ {
 
   virtual void Start();
 
-  virtual void BlockAndDispatchEvents();
+  // Implementation of MessageLoopForIO::IOHandler:
+  // TODO(scottmg): In a subobject probably.
+  virtual void OnIOCompleted(MessageLoopForIO::IOContext* context,
+                             DWORD bytes_transfered, DWORD error) OVERRIDE;
 
-  static DebugCoreGdb* CreateOnDBG();
+  static DebugCoreGdb* Create();
 
  private:
   DebugNotification* debug_notification_;
+  Subprocess gdb_;
+
+  void SendCommand(const string16& arg0, const string16& arg1);
+
+  void ReadUntilReady();
+
+  MessageLoopForIO::IOContext context_;
+  char send_buffer_[4 << 10];
+  char receive_buffer_[4 << 10];
 
   DISALLOW_COPY_AND_ASSIGN(DebugCoreGdb);
 };

@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "base/at_exit.h"
+#include "base/message_loop.h"
 #include "base/run_loop.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/task_runner_util.h"
@@ -33,16 +34,42 @@ class MockNotifier : public DebugNotification {
   std::string next_event_;
 };
 
-TEST(DebugCoreGdbTest, StartAndKillImmediately) {
-  scoped_ptr<DebugCoreGdb> debug_core(new DebugCoreGdb);
-  MockNotifier notifier;
-  debug_core->SetDebugNotification(&notifier);
+MessageLoop* g_dbg_thread_loop;
+DebugCoreGdb* g_instance;
+void StoreInstanceAndContinue(DebugCoreGdb* instance) {
+  g_instance = instance;
 
-  notifier.ExpectLoadProcess();
+  /*
+  g_dbg_thread_loop->PostTask(
+      FROM_HERE,
+      base::Bind(&DebugCoreGdb::LoadProcess,
+                 base::Unretained(g_instance),
+                 L"test_data\\test_binary_mingw.exe",
+                 L"", std::vector<string16>(), L""));
+                 */
+}
 
-  debug_core->LoadProcess(
-      L"test_data\\test_binary_mingw.exe", L"", std::vector<string16>(), L"");
-  debug_core->BlockAndDispatchEvents();
+void RunGdbTest_Start() {
+  base::PostTaskAndReplyWithResult(
+      g_dbg_thread_loop->message_loop_proxy(), FROM_HERE,
+      base::Bind(&DebugCoreGdb::Create),
+      base::Bind(&StoreInstanceAndContinue));
+}
+
+TEST(DebugCoreGdbTest, DISABLED_StartAndKillImmediately) {
+  base::Thread thread("IO test");
+  base::Thread::Options options;
+  options.message_loop_type = MessageLoop::TYPE_IO;
+  ASSERT_TRUE(thread.StartWithOptions(options));
+
+  g_dbg_thread_loop = thread.message_loop();
+  ASSERT_TRUE(NULL != g_dbg_thread_loop);
+
+  MessageLoopForUI ui_loop;
+  MessageLoopForUI::current()->PostTask(
+      FROM_HERE,
+      base::Bind(&RunGdbTest_Start));
+  ui_loop.Run();
 
   //notifier.ExpectStart();
   //debug_core_->Start();
