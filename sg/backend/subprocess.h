@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Copied from ninja and changed cosmetically.
+// Initially copied from ninja.
 
 #ifndef SG_BACKEND_SUBPROCESS_H_
 #define SG_BACKEND_SUBPROCESS_H_
@@ -26,38 +26,45 @@
 #include <vector>
 #include <queue>
 
+#include "base/platform_file.h"
 #include "base/string16.h"
 #include "sg/backend/exit_status.h"
 
-/// Subprocess wraps a single async subprocess.  It is entirely
-/// passive: it expects the caller to notify it when its fds are ready
-/// for reading, as well as call Finish() to reap the child once done()
-/// is true.
-struct Subprocess {
+// Subprocess wraps a single async subprocess.  It is entirely
+// passive: it expects the caller to notify it when its fds are ready
+// for reading, as well as call Finish() to reap the child once Done()
+// is true.
+class Subprocess {
+ public:
+  Subprocess();
   ~Subprocess();
 
-  /// Returns ExitSuccess on successful process exit, ExitInterrupted if
-  /// the process was interrupted, ExitFailure if it otherwise failed.
+  // Returns ExitSuccess on successful process exit, kExitInterrupted if
+  // the process was interrupted, ExitFailure if it otherwise failed.
   ExitStatus Finish();
 
   bool Done() const;
 
   const string16& GetOutput() const;
 
- private:
-  Subprocess();
-  bool Start(struct SubprocessSet* set, const string16& command);
+  base::PlatformFile GetOutputPipe() const { return output_pipe_; }
+  base::PlatformFile GetInputPipe() const { return input_pipe_; }
+
+  bool Start(const string16& application, const string16& command_line);
   void OnPipeReady();
 
+ private:
   string16 buf_;
 
+  void Init();
+
 #ifdef _WIN32
-  /// Set up pipe_ as the parent-side pipe of the subprocess; return the
-  /// other end of the pipe, usable in the child process.
-  HANDLE SetupPipe(HANDLE ioport);
 
   HANDLE child_;
-  HANDLE pipe_;
+  HANDLE input_pipe_;
+  HANDLE output_pipe_;
+  HANDLE child_input_pipe_;
+  HANDLE child_output_pipe_;
   OVERLAPPED overlapped_;
   char overlapped_buf_[4 << 10];
   bool is_reading_;
@@ -67,33 +74,6 @@ struct Subprocess {
 #endif
 
   friend struct SubprocessSet;
-};
-
-/// SubprocessSet runs a ppoll/pselect() loop around a set of Subprocesses.
-/// DoWork() waits for any state change in subprocesses; finished_
-/// is a queue of subprocesses as they finish.
-struct SubprocessSet {
-  SubprocessSet();
-  ~SubprocessSet();
-
-  Subprocess* Add(const string16& command);
-  bool DoWork();
-  Subprocess* NextFinished();
-  void Clear();
-
-  std::vector<Subprocess*> running_;
-  std::queue<Subprocess*> finished_;
-
-#ifdef _WIN32
-  static BOOL WINAPI NotifyInterrupted(DWORD dwCtrlType);
-  static HANDLE ioport_;
-#else
-  static void SetInterruptedFlag(int signum);
-  static bool interrupted_;
-
-  struct sigaction old_act_;
-  sigset_t old_mask_;
-#endif
 };
 
 #endif  // SG_BACKEND_SUBPROCESS_H_

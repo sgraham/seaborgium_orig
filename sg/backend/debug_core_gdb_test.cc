@@ -11,59 +11,42 @@
 #include "base/threading/thread.h"
 #include "sg/backend/debug_core_gdb.h"
 
-class DebugCoreGdbTest : public testing::Test {
- public:
-  DebugCoreGdbTest() {
-    MessageLoopForUI main_message_loop;
-    debug_thread_.reset(new base::Thread("DBG"));
-    debug_thread_->Start();
-    base::PostTaskAndReplyWithResult(
-        debug_thread_->message_loop_proxy(),
-        FROM_HERE,
-        base::Bind(&DebugCoreGdb::CreateOnDBG),
-        base::Bind(&DebugCoreGdbTest::OnCreate, base::Unretained(this)));
-    main_message_loop.Run();
-  }
-
-  void OnCreate(DebugCoreGdb* new_core) {
-    debug_core_ = new_core;
-    MessageLoopForUI::current()->Quit();
-  }
-
-  virtual ~DebugCoreGdbTest() {
-  }
-
-  DebugCoreGdb* debug_core_;
-  scoped_ptr<base::Thread> debug_thread_;
-};
-
 class MockNotifier : public DebugNotification {
  public:
   virtual ~MockNotifier() {}
 
   void ExpectLoadProcess() {
+    next_event_ = "loaded";
   }
-  void ExpectStart() {
+
+  // Implementation of DebugNotification:
+  virtual void OnProcessLoaded() {
+    Check("loaded");
   }
-  void Check() {
+
+ private:
+  void Check(const std::string& event) {
+    EXPECT_EQ(event, next_event_);
+    next_event_ = "";
   }
+
+  std::string next_event_;
 };
 
-TEST_F(DebugCoreGdbTest, StartAndKillImmediately) {
+TEST(DebugCoreGdbTest, StartAndKillImmediately) {
+  scoped_ptr<DebugCoreGdb> debug_core(new DebugCoreGdb);
   MockNotifier notifier;
-  debug_core_->SetDebugNotification(&notifier);
+  debug_core->SetDebugNotification(&notifier);
 
   notifier.ExpectLoadProcess();
 
-  debug_core_->LoadProcess(
+  debug_core->LoadProcess(
       L"test_data\\test_binary_mingw.exe", L"", std::vector<string16>(), L"");
-  debug_core_->BlockAndDispatchEvents();
+  debug_core->BlockAndDispatchEvents();
 
-  notifier.Check();
-
-  notifier.ExpectStart();
-  debug_core_->Start();
-  notifier.Check();
+  //notifier.ExpectStart();
+  //debug_core_->Start();
+  //notifier.Check();
 
 
   // XXX XXX XXX

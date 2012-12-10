@@ -16,9 +16,9 @@
 #define SG_BACKEND_EXIT_STATUS_H_
 
 enum ExitStatus {
-  ExitSuccess,
-  ExitFailure,
-  ExitInterrupted
+  kExitSuccess,
+  kExitFailure,
+  kExitInterrupted
 };
 
 #endif  // SG_BACKEND_EXIT_STATUS_H_

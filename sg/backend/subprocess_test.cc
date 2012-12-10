@@ -12,18 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Copied from ninja.
+// Initially copied from ninja.
 
 #include "sg/backend/subprocess.h"
 
 #include <gtest/gtest.h>
 
-#ifndef _WIN32
-// SetWithLots need setrlimit.
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <unistd.h>
-#endif
+#include "base/bind.h"
+#include "base/message_loop.h"
+#include "base/threading/thread.h"
+#include "base/time.h"
 
 namespace {
 
@@ -33,15 +31,109 @@ const wchar_t* kSimpleCommand = L"cmd /c dir \\";
 const char* kSimpleCommand = "ls /";
 #endif
 
-struct SubprocessTest : public testing::Test {
-  SubprocessSet subprocs_;
-};
-
 }  // anonymous namespace
 
+TEST(SubprocessTest, SpawnSuccessfully) {
+  Subprocess subproc;
+  subproc.Start(_wgetenv(L"COMSPEC"), L"/c dir \\");
+}
+
+/*
+TEST(SubprocessTest, StartupRace) {
+  Subprocess subproc;
+  subproc.Start(L"gdb_win_binaries/gdb-python27.exe",
+                L"--interpreter=mi2 --quiet");
+  char buffer[4096];
+  DWORD num_read;
+  Sleep(500);
+  bool result = ReadFile(
+      subproc.GetInputPipe(), buffer, sizeof(buffer), &num_read, NULL);
+  EXPECT_TRUE(result);
+  EXPECT_EQ("=thread-group-added,id=\"i1\"\r(gdb)\r", std::string(buffer));
+}
+*/
+
+class TestIOHandler : public MessageLoopForIO::IOHandler {
+ public:
+  TestIOHandler(HANDLE input, HANDLE signal, const std::string& expected_data);
+
+  virtual void OnIOCompleted(MessageLoopForIO::IOContext* context,
+                             DWORD bytes_transfered, DWORD error);
+
+  void Init();
+  OVERLAPPED* context() { return &context_.overlapped; }
+  DWORD size() { return sizeof(buffer_); }
+
+ private:
+  char buffer_[4 << 10];
+  MessageLoopForIO::IOContext context_;
+  HANDLE signal_;
+  HANDLE file_;
+  std::string expected_data_;
+};
+
+TestIOHandler::TestIOHandler(
+    HANDLE input, HANDLE signal, const std::string& expected_data)
+    : signal_(signal), expected_data_(expected_data) {
+  memset(buffer_, 0, sizeof(buffer_));
+  memset(&context_, 0, sizeof(context_));
+  context_.handler = this;
+
+  file_ = input;
+}
+
+void TestIOHandler::Init() {
+  MessageLoopForIO::current()->RegisterIOHandler(file_, this);
+
+  DWORD read;
+  EXPECT_FALSE(ReadFile(file_, buffer_, size(), &read, context()));
+  EXPECT_EQ(ERROR_IO_PENDING, GetLastError());
+}
+
+void TestIOHandler::OnIOCompleted(MessageLoopForIO::IOContext* context,
+                                  DWORD bytes_transfered, DWORD error) {
+  ASSERT_TRUE(context == &context_);
+  ASSERT_TRUE(SetEvent(signal_));
+  EXPECT_EQ(expected_data_, std::string(buffer_));
+}
+
+TEST(SubprocessTest, IOHandler) {
+  base::win::ScopedHandle callback_called(CreateEvent(NULL, TRUE, FALSE, NULL));
+  ASSERT_TRUE(callback_called.IsValid());
+
+  Subprocess subproc;
+
+  base::Thread thread("IOHandler test");
+  base::Thread::Options options;
+  options.message_loop_type = MessageLoop::TYPE_IO;
+  ASSERT_TRUE(thread.StartWithOptions(options));
+
+  MessageLoop* thread_loop = thread.message_loop();
+  ASSERT_TRUE(NULL != thread_loop);
+
+  TestIOHandler handler(
+      subproc.GetInputPipe(),
+      callback_called,
+      "=thread-group-added,id=\"i1\"\r\n");
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::Init,
+                                              base::Unretained(&handler)));
+  // Make sure the thread runs and sleeps for lack of work.
+  base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(100));
+
+  // Now, start the subprocess and make sure we get its initial output.
+  subproc.Start(L"gdb_win_binaries/gdb-python27.exe",
+                L"--interpreter=mi2 -ex quit");
+
+  DWORD result = WaitForSingleObject(callback_called, 1000);
+  EXPECT_EQ(WAIT_OBJECT_0, result);
+
+  thread.Stop();
+}
+/*
 // Run a command that fails and emits to stderr.
 TEST_F(SubprocessTest, BadCommandStderr) {
   Subprocess* subproc = subprocs_.Add(L"cmd /c ninja_no_such_command");
+  Subprocess* 
   ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
 
   while (!subproc->Done()) {
@@ -71,34 +163,6 @@ TEST_F(SubprocessTest, NoSuchCommand) {
       subproc->GetOutput());
 #endif
 }
-
-#ifndef _WIN32
-
-TEST_F(SubprocessTest, InterruptChild) {
-  Subprocess* subproc = subprocs_.Add("kill -INT $$");
-  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
-
-  while (!subproc->Done()) {
-    subprocs_.DoWork();
-  }
-
-  EXPECT_EQ(ExitInterrupted, subproc->Finish());
-}
-
-TEST_F(SubprocessTest, InterruptParent) {
-  Subprocess* subproc = subprocs_.Add("kill -INT $PPID ; sleep 1");
-  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
-
-  while (!subproc->Done()) {
-    bool interrupted = subprocs_.DoWork();
-    if (interrupted)
-      return;
-  }
-
-  ADD_FAILURE() << "We should have been interrupted";
-}
-
-#endif
 
 TEST_F(SubprocessTest, SetWithSingle) {
   Subprocess* subproc = subprocs_.Add(kSimpleCommand);
@@ -152,34 +216,4 @@ TEST_F(SubprocessTest, SetWithMulti) {
     delete processes[i];
   }
 }
-
-// OS X's process limit is less than 1025 by default
-// (|sysctl kern.maxprocperuid| is 709 on 10.7 and 10.8 and less prior to that).
-#ifdef linux
-TEST_F(SubprocessTest, SetWithLots) {
-  // Arbitrary big number; needs to be over 1024 to confirm we're no longer
-  // hostage to pselect.
-  const size_t kNumProcs = 1025;
-
-  // Make sure [ulimit -n] isn't going to stop us from working.
-  rlimit rlim;
-  ASSERT_EQ(0, getrlimit(RLIMIT_NOFILE, &rlim));
-  ASSERT_GT(rlim.rlim_cur, kNumProcs)
-      << "Raise [ulimit -n] well above " << kNumProcs
-      << " to make this test go";
-
-  vector<Subprocess*> procs;
-  for (size_t i = 0; i < kNumProcs; ++i) {
-    Subprocess* subproc = subprocs_.Add("/bin/echo");
-    ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
-    procs.push_back(subproc);
-  }
-  while (!subprocs_.running_.empty())
-    subprocs_.DoWork();
-  for (size_t i = 0; i < procs.size(); ++i) {
-    ASSERT_EQ(ExitSuccess, procs[i]->Finish());
-    ASSERT_NE("", procs[i]->GetOutput());
-  }
-  ASSERT_EQ(kNumProcs, subprocs_.finished_.size());
-}
-#endif  // linux
+*/

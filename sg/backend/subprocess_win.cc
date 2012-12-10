@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Copied from ninja and changed cosmetically.
+// Initially copied from ninja.
 
 #include "sg/backend/subprocess.h"
 
@@ -25,113 +25,90 @@
 #include "base/utf_string_conversions.h"
 
 Subprocess::Subprocess() : child_(NULL) , overlapped_(), is_reading_(false) {
+  Init();
 }
 
 Subprocess::~Subprocess() {
-  if (pipe_) {
-    CHECK(CloseHandle(pipe_)) << "CloseHandle";
-  }
+  if (input_pipe_)
+    CHECK(CloseHandle(input_pipe_)) << "CloseHandle input";
+  if (output_pipe_)
+  CHECK(CloseHandle(output_pipe_)) << "CloseHandle output";
   // Reap child if forgotten.
   if (child_)
     Finish();
 }
 
-HANDLE Subprocess::SetupPipe(HANDLE ioport) {
+void Subprocess::Init() {
   string16 pipe_name = base::StringPrintf(
-      L"\\\\.\\pipe\\sg_pid%lu_sp%p", GetCurrentProcessId(), this);
+      L"\\\\.\\pipe\\seaborgium_pid%lu_sp%p", GetCurrentProcessId(), this);
+  string16 pipe_name_input = pipe_name + L"_in";
+  string16 pipe_name_output = pipe_name + L"_out";
 
-  pipe_ = ::CreateNamedPipe(pipe_name.c_str(),
-                            PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED,
-                            PIPE_TYPE_BYTE,
-                            PIPE_UNLIMITED_INSTANCES,
-                            0, 0, INFINITE, NULL);
-  CHECK(pipe_ != INVALID_HANDLE_VALUE) << "CreateNamedPipe";
+  input_pipe_ = ::CreateNamedPipe(pipe_name_input.c_str(),
+                                  PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED,
+                                  PIPE_TYPE_BYTE,
+                                  PIPE_UNLIMITED_INSTANCES,
+                                  0, 0, INFINITE, NULL);
+  CHECK(input_pipe_ != INVALID_HANDLE_VALUE) << "CreateNamedPipe, input";
+  output_pipe_ = ::CreateNamedPipe(pipe_name_output.c_str(),
+                                   PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
+                                   PIPE_TYPE_BYTE,
+                                   PIPE_UNLIMITED_INSTANCES,
+                                   0, 0, INFINITE, NULL);
+  CHECK(output_pipe_ != INVALID_HANDLE_VALUE) << "CreateNamedPipe, output";
 
-  CHECK(CreateIoCompletionPort(pipe_, ioport, (ULONG_PTR)this, 0)) <<
-      "CreateIoCompletionPort";
-
-  memset(&overlapped_, 0, sizeof(overlapped_));
-  CHECK(ConnectNamedPipe(pipe_, &overlapped_) ||
-      GetLastError() == ERROR_IO_PENDING) << "ConnectNamedPipe";
-
-  // Get the write end of the pipe as a handle inheritable across processes.
-  HANDLE output_write_handle = CreateFile(pipe_name.c_str(), GENERIC_WRITE, 0,
-                                          NULL, OPEN_EXISTING, 0, NULL);
-  HANDLE output_write_child;
-  CHECK(DuplicateHandle(GetCurrentProcess(), output_write_handle,
-                        GetCurrentProcess(), &output_write_child,
-                        0, TRUE, DUPLICATE_SAME_ACCESS)) << "DuplicateHandle";
-
-  CloseHandle(output_write_handle);
-
-  return output_write_child;
-}
-
-bool Subprocess::Start(SubprocessSet* set, const string16& command) {
-  HANDLE child_pipe = SetupPipe(set->ioport_);
-
-  SECURITY_ATTRIBUTES security_attributes;
-  memset(&security_attributes, 0, sizeof(SECURITY_ATTRIBUTES));
+  // Get the opposite ends of the pipes as handles inheritable to the child
+  // process.
+  SECURITY_ATTRIBUTES security_attributes = {0};
   security_attributes.nLength = sizeof(SECURITY_ATTRIBUTES);
   security_attributes.bInheritHandle = TRUE;
-  // Must be inheritable so subprocesses can dup to children.
-  HANDLE nul = CreateFile(L"NUL", GENERIC_READ,
-      FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+  child_output_pipe_ = CreateFile(
+      pipe_name_input.c_str(), GENERIC_WRITE, 0,
       &security_attributes, OPEN_EXISTING, 0, NULL);
-  CHECK(nul != INVALID_HANDLE_VALUE);
+  child_input_pipe_ = CreateFile(
+      pipe_name_output.c_str(), GENERIC_READ, 0,
+      &security_attributes, OPEN_EXISTING, 0, NULL);
+}
 
-  STARTUPINFO startup_info;
-  memset(&startup_info, 0, sizeof(startup_info));
+bool Subprocess::Start(
+    const string16& application,
+    const string16& command_line) {
+  CHECK(input_pipe_ && output_pipe_ && child_input_pipe_ && child_output_pipe_);
+  STARTUPINFO startup_info = {0};
   startup_info.cb = sizeof(STARTUPINFO);
   startup_info.dwFlags = STARTF_USESTDHANDLES;
-  startup_info.hStdInput = nul;
-  startup_info.hStdOutput = child_pipe;
-  startup_info.hStdError = child_pipe;
+  startup_info.hStdInput = child_input_pipe_;
+  startup_info.hStdOutput = child_output_pipe_;
+  startup_info.hStdError = child_output_pipe_;
 
-  PROCESS_INFORMATION process_info;
-  memset(&process_info, 0, sizeof(process_info));
+  PROCESS_INFORMATION process_info = {0};
 
   // CreateProcessW can modify input buffer so we have to make a copy here.
-  scoped_array<char16> command_copy(new char16[command.size() + 1]);
-  command.copy(command_copy.get(), command.size());
-  command_copy[command.size()] = 0;
+  string16 combined = application + L" " + command_line;
+  scoped_array<char16> command_copy(new char16[combined.size() + 1]);
+  combined.copy(command_copy.get(), combined.size());
+  command_copy[combined.size()] = 0;
 
-  // Do not prepend 'cmd /c' on Windows, this breaks command
-  // lines greater than 8,191 chars.
-  if (!CreateProcess(NULL, command_copy.get(), NULL, NULL,
+  if (!CreateProcess(application.c_str(), command_copy.get(), NULL, NULL,
                      /* inherit handles */ TRUE, CREATE_NEW_PROCESS_GROUP,
                      NULL, NULL,
                      &startup_info, &process_info)) {
-    DWORD error = GetLastError();
-    if (error == ERROR_FILE_NOT_FOUND) {
-      // File (program) not found error is treated as a normal build action
-      // failure.
-      if (child_pipe)
-        CloseHandle(child_pipe);
-      CloseHandle(pipe_);
-      CloseHandle(nul);
-      pipe_ = NULL;
-      // child_ is already NULL;
-      buf_ = L"CreateProcess failed: " \
-             L"The system cannot find the file specified.\n";
-      return true;
-    } else {
-      NOTREACHED() << "CreateProcess";
-    }
+    CloseHandle(child_output_pipe_);
+    CloseHandle(child_input_pipe_);
+    return false;
   }
 
   // Close pipe channel only used by the child.
-  if (child_pipe)
-    CloseHandle(child_pipe);
-  CloseHandle(nul);
-
+  CloseHandle(child_output_pipe_);
+  CloseHandle(child_input_pipe_);
   CloseHandle(process_info.hThread);
   child_ = process_info.hProcess;
-
   return true;
 }
 
 void Subprocess::OnPipeReady() {
+  NOTREACHED();
+  /*
   DWORD bytes;
   if (!GetOverlappedResult(pipe_, &overlapped_, &bytes, TRUE)) {
     if (GetLastError() == ERROR_BROKEN_PIPE) {
@@ -158,6 +135,7 @@ void Subprocess::OnPipeReady() {
     if (GetLastError() != ERROR_IO_PENDING)
       NOTREACHED() << ("ReadFile");
   }
+  */
 
   // Even if we read any bytes in the readfile call, we'll enter this
   // function again later and get them at that point.
@@ -165,7 +143,7 @@ void Subprocess::OnPipeReady() {
 
 ExitStatus Subprocess::Finish() {
   if (!child_)
-    return ExitFailure;
+    return kExitFailure;
 
   // TODO(scottmg): add error handling for all of these.
   WaitForSingleObject(child_, INFINITE);
@@ -176,110 +154,15 @@ ExitStatus Subprocess::Finish() {
   CloseHandle(child_);
   child_ = NULL;
 
-  return exit_code == 0              ? ExitSuccess :
-         exit_code == CONTROL_C_EXIT ? ExitInterrupted :
-                                       ExitFailure;
+  return exit_code == 0              ? kExitSuccess :
+         exit_code == CONTROL_C_EXIT ? kExitInterrupted :
+                                       kExitFailure;
 }
 
 bool Subprocess::Done() const {
-  return pipe_ == NULL;
+  return input_pipe_ == NULL && output_pipe_ == NULL;
 }
 
 const string16& Subprocess::GetOutput() const {
   return buf_;
-}
-
-HANDLE SubprocessSet::ioport_;
-
-SubprocessSet::SubprocessSet() {
-  ioport_ = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 1);
-  if (!ioport_)
-    NOTREACHED() << ("CreateIoCompletionPort");
-  if (!SetConsoleCtrlHandler(NotifyInterrupted, TRUE))
-    NOTREACHED() << ("SetConsoleCtrlHandler");
-}
-
-SubprocessSet::~SubprocessSet() {
-  Clear();
-
-  SetConsoleCtrlHandler(NotifyInterrupted, FALSE);
-  CloseHandle(ioport_);
-}
-
-BOOL WINAPI SubprocessSet::NotifyInterrupted(DWORD dwCtrlType) {
-  if (dwCtrlType == CTRL_C_EVENT || dwCtrlType == CTRL_BREAK_EVENT) {
-    if (!PostQueuedCompletionStatus(ioport_, 0, 0, NULL))
-      NOTREACHED() << ("PostQueuedCompletionStatus");
-    return TRUE;
-  }
-
-  return FALSE;
-}
-
-Subprocess* SubprocessSet::Add(const string16& command) {
-  Subprocess* subprocess = new Subprocess;
-  if (!subprocess->Start(this, command)) {
-    delete subprocess;
-    return 0;
-  }
-  if (subprocess->child_)
-    running_.push_back(subprocess);
-  else
-    finished_.push(subprocess);
-  return subprocess;
-}
-
-bool SubprocessSet::DoWork() {
-  DWORD bytes_read;
-  Subprocess* subproc;
-  OVERLAPPED* overlapped;
-
-  if (!GetQueuedCompletionStatus(ioport_, &bytes_read, (PULONG_PTR)&subproc,
-                                 &overlapped, INFINITE)) {
-    if (GetLastError() != ERROR_BROKEN_PIPE)
-      NOTREACHED() << ("GetQueuedCompletionStatus");
-  }
-
-  if (!subproc) {
-    // A NULL subproc indicates that we were interrupted and is
-    // delivered by NotifyInterrupted above.
-    return true;
-  }
-
-  subproc->OnPipeReady();
-
-  if (subproc->Done()) {
-    std::vector<Subprocess*>::iterator end =
-        std::remove(running_.begin(), running_.end(), subproc);
-    if (running_.end() != end) {
-      finished_.push(subproc);
-      running_.resize(end - running_.begin());
-    }
-  }
-
-  return false;
-}
-
-Subprocess* SubprocessSet::NextFinished() {
-  if (finished_.empty())
-    return NULL;
-  Subprocess* subproc = finished_.front();
-  finished_.pop();
-  return subproc;
-}
-
-void SubprocessSet::Clear() {
-  for (std::vector<Subprocess*>::iterator i = running_.begin();
-       i != running_.end(); ++i) {
-    if ((*i)->child_) {
-      if (!GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,
-                                    GetProcessId((*i)->child_))) {
-        NOTREACHED() << ("GenerateConsoleCtrlEvent");
-      }
-    }
-  }
-  for (std::vector<Subprocess*>::iterator i = running_.begin();
-       i != running_.end(); ++i)
-    delete *i;
-  running_.clear();
 }

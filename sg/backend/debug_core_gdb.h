@@ -7,11 +7,12 @@
 
 #include <vector>
 
+#include "base/threading/non_thread_safe.h"
 #include "sg/backend/backend.h"
 
 // An implementation of a debugger backend using GDB/MI.
 
-class DebugCoreGdb /* : public DebugCore */ {
+class DebugCoreGdb : public base::NonThreadSafe /*, public DebugCore*/ {
  public:
   DebugCoreGdb();
   virtual ~DebugCoreGdb();
