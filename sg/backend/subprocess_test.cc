@@ -30,7 +30,7 @@ TEST(SubprocessTest, SpawnSuccessfully) {
 
 class TestIOHandler : public MessageLoopForIO::IOHandler {
  public:
-  TestIOHandler(HANDLE input, HANDLE signal, const std::string& expected_data);
+  TestIOHandler(HANDLE handle, HANDLE signal, const std::string& expected_data);
 
   virtual void OnIOCompleted(MessageLoopForIO::IOContext* context,
                              DWORD bytes_transfered, DWORD error);
@@ -39,22 +39,26 @@ class TestIOHandler : public MessageLoopForIO::IOHandler {
   OVERLAPPED* context() { return &context_.overlapped; }
   DWORD size() { return sizeof(buffer_); }
 
+  void WriteString();
+
  private:
   char buffer_[4 << 10];
   MessageLoopForIO::IOContext context_;
   HANDLE signal_;
   HANDLE file_;
   std::string expected_data_;
+  bool reading_;
 };
 
 TestIOHandler::TestIOHandler(
-    HANDLE input, HANDLE signal, const std::string& expected_data)
+    HANDLE handle, HANDLE signal, const std::string& expected_data)
     : signal_(signal), expected_data_(expected_data) {
   memset(buffer_, 0, sizeof(buffer_));
   memset(&context_, 0, sizeof(context_));
   context_.handler = this;
+  reading_ = true;
 
-  file_ = input;
+  file_ = handle;
 }
 
 void TestIOHandler::Init() {
@@ -64,16 +68,29 @@ void TestIOHandler::Init() {
   EXPECT_FALSE(ReadFile(file_, buffer_, size(), &read, context()));
   EXPECT_TRUE(ERROR_IO_PENDING == GetLastError() ||
               ERROR_BROKEN_PIPE == GetLastError()); // Pipe closed already.
+  reading_ = true;
+}
+
+void TestIOHandler::WriteString() {
+  MessageLoopForIO::current()->RegisterIOHandler(file_, this);
+
+  DWORD written;
+  EXPECT_FALSE(
+      ::WriteFile(file_, expected_data_.data(),
+                  expected_data_.size(), &written, context()));
+  EXPECT_EQ(ERROR_IO_PENDING, GetLastError());
+  reading_ = false;
 }
 
 void TestIOHandler::OnIOCompleted(MessageLoopForIO::IOContext* context,
                                   DWORD bytes_transfered, DWORD error) {
   ASSERT_TRUE(context == &context_);
   ASSERT_TRUE(SetEvent(signal_));
-  EXPECT_EQ(expected_data_, std::string(buffer_));
+  if (reading_)
+    EXPECT_EQ(expected_data_, std::string(buffer_));
 }
 
-TEST(SubprocessTest, IOHandler) {
+TEST(SubprocessTest, ReadViaIOHandler) {
   base::win::ScopedHandle callback_called(CreateEvent(NULL, TRUE, FALSE, NULL));
   ASSERT_TRUE(callback_called.IsValid());
 
@@ -94,11 +111,55 @@ TEST(SubprocessTest, IOHandler) {
   thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::Init,
                                               base::Unretained(&handler)));
 
-  // Now, start the subprocess and make sure we get its initial output.
+  // Now, start the subprocess and make sure we get its initial output (have
+  // it quit immediately).
   subproc.Start(L"gdb_win_binaries/gdb-python27.exe",
-                L"--interpreter=mi2 -ex quit");
+                L"--interpreter=mi2 -ex q");
 
   DWORD result = WaitForSingleObject(callback_called, 1000);
+  EXPECT_EQ(WAIT_OBJECT_0, result);
+
+  thread.Stop();
+}
+
+TEST(SubprocessTest, DISABLED_ReadAndWrite) {
+  base::win::ScopedHandle read_finished(CreateEvent(NULL, TRUE, FALSE, NULL));
+  ASSERT_TRUE(read_finished.IsValid());
+  base::win::ScopedHandle write_finished(CreateEvent(NULL, TRUE, FALSE, NULL));
+  ASSERT_TRUE(write_finished.IsValid());
+
+  Subprocess subproc;
+
+  base::Thread thread("IOHandler test");
+  base::Thread::Options options;
+  options.message_loop_type = MessageLoop::TYPE_IO;
+  ASSERT_TRUE(thread.StartWithOptions(options));
+
+  MessageLoop* thread_loop = thread.message_loop();
+  ASSERT_TRUE(NULL != thread_loop);
+
+  TestIOHandler handler(
+      subproc.GetInputPipe(),
+      read_finished,
+      "=thread-group-added,id=\"i1\"\r\n");
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::Init,
+                                              base::Unretained(&handler)));
+
+  // Now, start the subprocess.
+  subproc.Start(L"gdb_win_binaries/gdb-python27.exe",
+                L"--interpreter=mi2");
+
+  base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(100));
+
+  TestIOHandler handler2(
+      subproc.GetOutputPipe(),
+      write_finished,
+      "quit\r\n");
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::WriteString,
+                                              base::Unretained(&handler)));
+
+  HANDLE handles[] = { read_finished, write_finished };
+  DWORD result = WaitForMultipleObjects(2, handles, TRUE, INFINITE);
   EXPECT_EQ(WAIT_OBJECT_0, result);
 
   thread.Stop();

@@ -65,9 +65,13 @@ void Subprocess::Init() {
   child_output_pipe_ = CreateFile(
       pipe_name_input.c_str(), GENERIC_WRITE, 0,
       &security_attributes, OPEN_EXISTING, 0, NULL);
+  CHECK(child_output_pipe_ != INVALID_HANDLE_VALUE) <<
+      "CreateFile, child_output";
   child_input_pipe_ = CreateFile(
       pipe_name_output.c_str(), GENERIC_READ, 0,
       &security_attributes, OPEN_EXISTING, 0, NULL);
+  CHECK(child_input_pipe_ != INVALID_HANDLE_VALUE) <<
+      "CreateFile, child_input";
 }
 
 bool Subprocess::Start(
@@ -90,7 +94,8 @@ bool Subprocess::Start(
   command_copy[combined.size()] = 0;
 
   if (!CreateProcess(application.c_str(), command_copy.get(), NULL, NULL,
-                     /* inherit handles */ TRUE, CREATE_NEW_PROCESS_GROUP,
+                     /* inherit handles */ TRUE,
+                     CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS,
                      NULL, NULL,
                      &startup_info, &process_info)) {
     CloseHandle(child_output_pipe_);
@@ -100,7 +105,9 @@ bool Subprocess::Start(
 
   // Close pipe channel only used by the child.
   CloseHandle(child_output_pipe_);
+  child_output_pipe_ = NULL;
   CloseHandle(child_input_pipe_);
+  child_input_pipe_ = NULL;
   CloseHandle(process_info.hThread);
   child_ = process_info.hProcess;
   return true;
