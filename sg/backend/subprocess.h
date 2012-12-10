@@ -65,6 +65,7 @@ class Subprocess {
   HANDLE output_pipe_;
   HANDLE child_input_pipe_;
   HANDLE child_output_pipe_;
+  HANDLE child_error_pipe_;
   OVERLAPPED overlapped_;
   char overlapped_buf_[4 << 10];
   bool is_reading_;

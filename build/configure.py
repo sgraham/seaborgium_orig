@@ -427,9 +427,16 @@ def main():
                     order_only=sg_binary,
                     variables=[('ldflags', test_ldflags),
                                ('libs', test_libs)])
-  n.newline()
   all_targets += sg_test
+  n.newline()
 
+  reader_writer_objs = []
+  reader_writer_objs += cxx('backend\\reader_writer_test')
+  reader_writer_test = n.build(binary('reader_writer_test'), 'link',
+                               inputs=reader_writer_objs,
+                               variables=[('ldflags', test_ldflags)])
+  all_targets += reader_writer_test
+  n.newline()
 
   n.comment('Regenerate build files if build script changes.')
   n.rule('configure',

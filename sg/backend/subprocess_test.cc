@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Initially copied from ninja.
-
 #include "sg/backend/subprocess.h"
 
 #include <gtest/gtest.h>
@@ -35,11 +33,11 @@ class TestIOHandler : public MessageLoopForIO::IOHandler {
   virtual void OnIOCompleted(MessageLoopForIO::IOContext* context,
                              DWORD bytes_transfered, DWORD error);
 
-  void Init();
+  void DoRead();
   OVERLAPPED* context() { return &context_.overlapped; }
   DWORD size() { return sizeof(buffer_); }
 
-  void WriteString();
+  void DoWrite();
 
  private:
   char buffer_[4 << 10];
@@ -49,6 +47,10 @@ class TestIOHandler : public MessageLoopForIO::IOHandler {
   std::string expected_data_;
   bool reading_;
 };
+
+// Can't use GDB for these tests because it expects a rigid
+// read-then-write-then-read (or whatever), so we use a helper binary that
+// does controllable reads and writes corresponding to the test.
 
 TestIOHandler::TestIOHandler(
     HANDLE handle, HANDLE signal, const std::string& expected_data)
@@ -61,7 +63,7 @@ TestIOHandler::TestIOHandler(
   file_ = handle;
 }
 
-void TestIOHandler::Init() {
+void TestIOHandler::DoRead() {
   MessageLoopForIO::current()->RegisterIOHandler(file_, this);
 
   DWORD read;
@@ -71,7 +73,7 @@ void TestIOHandler::Init() {
   reading_ = true;
 }
 
-void TestIOHandler::WriteString() {
+void TestIOHandler::DoWrite() {
   MessageLoopForIO::current()->RegisterIOHandler(file_, this);
 
   DWORD written;
@@ -88,6 +90,7 @@ void TestIOHandler::OnIOCompleted(MessageLoopForIO::IOContext* context,
   ASSERT_TRUE(SetEvent(signal_));
   if (reading_)
     EXPECT_EQ(expected_data_, std::string(buffer_));
+  EXPECT_EQ(0, error);
 }
 
 TEST(SubprocessTest, ReadViaIOHandler) {
@@ -107,14 +110,13 @@ TEST(SubprocessTest, ReadViaIOHandler) {
   TestIOHandler handler(
       subproc.GetInputPipe(),
       callback_called,
-      "=thread-group-added,id=\"i1\"\r\n");
-  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::Init,
+      "some stuff\r\n");
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::DoRead,
                                               base::Unretained(&handler)));
-
   // Now, start the subprocess and make sure we get its initial output (have
   // it quit immediately).
-  subproc.Start(L"gdb_win_binaries/gdb-python27.exe",
-                L"--interpreter=mi2 -ex q");
+  subproc.Start(L"out/reader_writer_test.exe",
+                L"w");
 
   DWORD result = WaitForSingleObject(callback_called, 1000);
   EXPECT_EQ(WAIT_OBJECT_0, result);
@@ -122,7 +124,36 @@ TEST(SubprocessTest, ReadViaIOHandler) {
   thread.Stop();
 }
 
-TEST(SubprocessTest, DISABLED_ReadAndWrite) {
+TEST(SubprocessTest, WriteViaIOHandler) {
+  base::win::ScopedHandle callback_called(CreateEvent(NULL, TRUE, FALSE, NULL));
+  ASSERT_TRUE(callback_called.IsValid());
+
+  Subprocess subproc;
+
+  base::Thread thread("IOHandler test");
+  base::Thread::Options options;
+  options.message_loop_type = MessageLoop::TYPE_IO;
+  ASSERT_TRUE(thread.StartWithOptions(options));
+
+  MessageLoop* thread_loop = thread.message_loop();
+  ASSERT_TRUE(NULL != thread_loop);
+
+  TestIOHandler handler(
+      subproc.GetOutputPipe(),
+      callback_called,
+      "quit\r\n");
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::DoWrite,
+                                              base::Unretained(&handler)));
+
+  CHECK(subproc.Start(L"out/reader_writer_test.exe", L"r"));
+
+  DWORD result = WaitForSingleObject(callback_called, INFINITE);
+  EXPECT_EQ(WAIT_OBJECT_0, result);
+
+  thread.Stop();
+}
+
+TEST(SubprocessTest, ReadAndWrite) {
   base::win::ScopedHandle read_finished(CreateEvent(NULL, TRUE, FALSE, NULL));
   ASSERT_TRUE(read_finished.IsValid());
   base::win::ScopedHandle write_finished(CreateEvent(NULL, TRUE, FALSE, NULL));
@@ -141,22 +172,18 @@ TEST(SubprocessTest, DISABLED_ReadAndWrite) {
   TestIOHandler handler(
       subproc.GetInputPipe(),
       read_finished,
-      "=thread-group-added,id=\"i1\"\r\n");
-  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::Init,
+      "some stuff\r\n");
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::DoRead,
                                               base::Unretained(&handler)));
-
-  // Now, start the subprocess.
-  subproc.Start(L"gdb_win_binaries/gdb-python27.exe",
-                L"--interpreter=mi2");
-
-  base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(100));
 
   TestIOHandler handler2(
       subproc.GetOutputPipe(),
       write_finished,
       "quit\r\n");
-  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::WriteString,
-                                              base::Unretained(&handler)));
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::DoWrite,
+                                              base::Unretained(&handler2)));
+
+  CHECK(subproc.Start(L"out/reader_writer_test.exe", L"wr"));
 
   HANDLE handles[] = { read_finished, write_finished };
   DWORD result = WaitForMultipleObjects(2, handles, TRUE, INFINITE);
