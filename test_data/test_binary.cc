@@ -5,6 +5,7 @@
 // Hopefully this will be first binary we can load successfully.
 
 #include <stdio.h>
+#include <windows.h>
 
 int main(int argc, char** argv) {
   printf("This is the test binary!\n");
@@ -14,7 +15,7 @@ int main(int argc, char** argv) {
     printf("argv[%d]: %s\n", i, argv[i]);
   }
   printf("f: %f\n", f);
-  for (;;) {
-  }
+  Sleep(10000);
+  printf("after sleep\n");
   return 0;
 }
