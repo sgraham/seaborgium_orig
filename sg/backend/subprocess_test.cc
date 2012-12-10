@@ -23,35 +23,10 @@
 #include "base/threading/thread.h"
 #include "base/time.h"
 
-namespace {
-
-#ifdef _WIN32
-const wchar_t* kSimpleCommand = L"cmd /c dir \\";
-#else
-const char* kSimpleCommand = "ls /";
-#endif
-
-}  // anonymous namespace
-
 TEST(SubprocessTest, SpawnSuccessfully) {
   Subprocess subproc;
-  subproc.Start(_wgetenv(L"COMSPEC"), L"/c dir \\");
+  EXPECT_EQ(true, subproc.Start(_wgetenv(L"COMSPEC"), L"/c dir \\"));
 }
-
-/*
-TEST(SubprocessTest, StartupRace) {
-  Subprocess subproc;
-  subproc.Start(L"gdb_win_binaries/gdb-python27.exe",
-                L"--interpreter=mi2 --quiet");
-  char buffer[4096];
-  DWORD num_read;
-  Sleep(500);
-  bool result = ReadFile(
-      subproc.GetInputPipe(), buffer, sizeof(buffer), &num_read, NULL);
-  EXPECT_TRUE(result);
-  EXPECT_EQ("=thread-group-added,id=\"i1\"\r(gdb)\r", std::string(buffer));
-}
-*/
 
 class TestIOHandler : public MessageLoopForIO::IOHandler {
  public:
@@ -87,7 +62,8 @@ void TestIOHandler::Init() {
 
   DWORD read;
   EXPECT_FALSE(ReadFile(file_, buffer_, size(), &read, context()));
-  EXPECT_EQ(ERROR_IO_PENDING, GetLastError());
+  EXPECT_TRUE(ERROR_IO_PENDING == GetLastError() ||
+              ERROR_BROKEN_PIPE == GetLastError()); // Pipe closed already.
 }
 
 void TestIOHandler::OnIOCompleted(MessageLoopForIO::IOContext* context,
@@ -117,8 +93,6 @@ TEST(SubprocessTest, IOHandler) {
       "=thread-group-added,id=\"i1\"\r\n");
   thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::Init,
                                               base::Unretained(&handler)));
-  // Make sure the thread runs and sleeps for lack of work.
-  base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(100));
 
   // Now, start the subprocess and make sure we get its initial output.
   subproc.Start(L"gdb_win_binaries/gdb-python27.exe",
@@ -129,91 +103,3 @@ TEST(SubprocessTest, IOHandler) {
 
   thread.Stop();
 }
-/*
-// Run a command that fails and emits to stderr.
-TEST_F(SubprocessTest, BadCommandStderr) {
-  Subprocess* subproc = subprocs_.Add(L"cmd /c ninja_no_such_command");
-  Subprocess* 
-  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
-
-  while (!subproc->Done()) {
-    // Pretend we discovered that stderr was ready for writing.
-    subprocs_.DoWork();
-  }
-
-  EXPECT_EQ(ExitFailure, subproc->Finish());
-  EXPECT_NE(L"", subproc->GetOutput());
-}
-
-// Run a command that does not exist
-TEST_F(SubprocessTest, NoSuchCommand) {
-  Subprocess* subproc = subprocs_.Add(L"ninja_no_such_command");
-  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
-
-  while (!subproc->Done()) {
-    // Pretend we discovered that stderr was ready for writing.
-    subprocs_.DoWork();
-  }
-
-  EXPECT_EQ(ExitFailure, subproc->Finish());
-  EXPECT_NE(L"", subproc->GetOutput());
-#ifdef _WIN32
-  ASSERT_EQ(L"CreateProcess failed: " \
-      L"The system cannot find the file specified.\n",
-      subproc->GetOutput());
-#endif
-}
-
-TEST_F(SubprocessTest, SetWithSingle) {
-  Subprocess* subproc = subprocs_.Add(kSimpleCommand);
-  ASSERT_NE(static_cast<Subprocess*>(NULL), subproc);
-
-  while (!subproc->Done()) {
-    subprocs_.DoWork();
-  }
-  ASSERT_EQ(ExitSuccess, subproc->Finish());
-  ASSERT_NE(L"", subproc->GetOutput());
-
-  ASSERT_EQ(1u, subprocs_.finished_.size());
-}
-
-TEST_F(SubprocessTest, SetWithMulti) {
-  Subprocess* processes[3];
-  const wchar_t* kCommands[3] = {
-    kSimpleCommand,
-#ifdef _WIN32
-    L"cmd /c echo hi",
-    L"cmd /c time /t",
-#else
-    "whoami",
-    "pwd",
-#endif
-  };
-
-  for (int i = 0; i < 3; ++i) {
-    processes[i] = subprocs_.Add(kCommands[i]);
-    ASSERT_NE(static_cast<Subprocess*>(NULL), processes[i]);
-  }
-
-  ASSERT_EQ(3u, subprocs_.running_.size());
-  for (int i = 0; i < 3; ++i) {
-    ASSERT_FALSE(processes[i]->Done());
-    ASSERT_EQ(L"", processes[i]->GetOutput());
-  }
-
-  while (!processes[0]->Done() || !processes[1]->Done() ||
-         !processes[2]->Done()) {
-    ASSERT_GT(subprocs_.running_.size(), 0u);
-    subprocs_.DoWork();
-  }
-
-  ASSERT_EQ(0u, subprocs_.running_.size());
-  ASSERT_EQ(3u, subprocs_.finished_.size());
-
-  for (int i = 0; i < 3; ++i) {
-    ASSERT_EQ(ExitSuccess, processes[i]->Finish());
-    ASSERT_NE(L"", processes[i]->GetOutput());
-    delete processes[i];
-  }
-}
-*/
