@@ -39,13 +39,15 @@ class TestIOHandler : public MessageLoopForIO::IOHandler {
 
   void DoWrite();
 
+  std::string expected_data_;
+
  private:
   char buffer_[4 << 10];
   MessageLoopForIO::IOContext context_;
   HANDLE signal_;
   HANDLE file_;
-  std::string expected_data_;
   bool reading_;
+  bool registered_;
 };
 
 // Can't use GDB for these tests because it expects a rigid
@@ -55,27 +57,34 @@ class TestIOHandler : public MessageLoopForIO::IOHandler {
 TestIOHandler::TestIOHandler(
     HANDLE handle, HANDLE signal, const std::string& expected_data)
     : signal_(signal), expected_data_(expected_data) {
-  memset(buffer_, 0, sizeof(buffer_));
   memset(&context_, 0, sizeof(context_));
   context_.handler = this;
   reading_ = true;
+  registered_ = false;
 
   file_ = handle;
 }
 
 void TestIOHandler::DoRead() {
-  MessageLoopForIO::current()->RegisterIOHandler(file_, this);
-
+  if (!registered_) {
+    MessageLoopForIO::current()->RegisterIOHandler(file_, this);
+    registered_ = true;
+  }
   DWORD read;
-  EXPECT_FALSE(ReadFile(file_, buffer_, size(), &read, context()));
-  EXPECT_TRUE(ERROR_IO_PENDING == GetLastError() ||
-              ERROR_BROKEN_PIPE == GetLastError()); // Pipe closed already.
+  memset(buffer_, 0, sizeof(buffer_));
+  BOOL result = ReadFile(file_, buffer_, size(), &read, context());
+  if (!result) {
+    EXPECT_TRUE(ERROR_IO_PENDING == GetLastError() ||
+                ERROR_BROKEN_PIPE == GetLastError()); // Pipe closed already.
+  }
   reading_ = true;
 }
 
 void TestIOHandler::DoWrite() {
-  MessageLoopForIO::current()->RegisterIOHandler(file_, this);
-
+  if (!registered_) {
+    MessageLoopForIO::current()->RegisterIOHandler(file_, this);
+    registered_ = true;
+  }
   DWORD written;
   EXPECT_FALSE(
       ::WriteFile(file_, expected_data_.data(),
@@ -87,10 +96,10 @@ void TestIOHandler::DoWrite() {
 void TestIOHandler::OnIOCompleted(MessageLoopForIO::IOContext* context,
                                   DWORD bytes_transfered, DWORD error) {
   ASSERT_TRUE(context == &context_);
-  ASSERT_TRUE(SetEvent(signal_));
   if (reading_)
     EXPECT_EQ(expected_data_, std::string(buffer_));
   EXPECT_EQ(0, error);
+  ASSERT_TRUE(SetEvent(signal_));
 }
 
 TEST(SubprocessTest, ReadViaIOHandler) {
@@ -187,6 +196,53 @@ TEST(SubprocessTest, ReadAndWrite) {
 
   HANDLE handles[] = { read_finished, write_finished };
   DWORD result = WaitForMultipleObjects(2, handles, TRUE, INFINITE);
+  EXPECT_EQ(WAIT_OBJECT_0, result);
+
+  thread.Stop();
+}
+
+TEST(SubprocessTest, ReadThenWriteSequential) {
+  base::win::ScopedHandle read_finished(CreateEvent(NULL, TRUE, FALSE, NULL));
+  ASSERT_TRUE(read_finished.IsValid());
+  base::win::ScopedHandle write_finished(CreateEvent(NULL, TRUE, FALSE, NULL));
+  ASSERT_TRUE(write_finished.IsValid());
+
+  Subprocess subproc;
+
+  base::Thread thread("IOHandler test");
+  base::Thread::Options options;
+  options.message_loop_type = MessageLoop::TYPE_IO;
+  ASSERT_TRUE(thread.StartWithOptions(options));
+
+  MessageLoop* thread_loop = thread.message_loop();
+  ASSERT_TRUE(NULL != thread_loop);
+
+  CHECK(subproc.Start(L"gdb_win_binaries/gdb-python27.exe",
+                      L"--fullname -nx --interpreter=mi2 --quiet"));
+
+  TestIOHandler handler(
+      subproc.GetInputPipe(),
+      read_finished,
+      "=thread-group-added,id=\"i1\"\r\n");
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::DoRead,
+                                              base::Unretained(&handler)));
+  DWORD result = WaitForSingleObject(read_finished, INFINITE);
+  EXPECT_EQ(WAIT_OBJECT_0, result);
+
+  ResetEvent(&read_finished);
+  handler.expected_data_ = "(gdb) \r\n";
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::DoRead,
+                                              base::Unretained(&handler)));
+  result = WaitForSingleObject(read_finished, INFINITE);
+  EXPECT_EQ(WAIT_OBJECT_0, result);
+
+  TestIOHandler handler2(
+      subproc.GetOutputPipe(),
+      write_finished,
+      "quit\r\n");
+  thread_loop->PostTask(FROM_HERE, base::Bind(&TestIOHandler::DoWrite,
+                                              base::Unretained(&handler2)));
+  result = WaitForSingleObject(write_finished, INFINITE);
   EXPECT_EQ(WAIT_OBJECT_0, result);
 
   thread.Stop();
