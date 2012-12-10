@@ -382,6 +382,10 @@ GdbMiReader::~GdbMiReader() {
 GdbOutput* GdbMiReader::Parse(
     const base::StringPiece& input, int* bytes_consumed) {
   base::StringPiece remaining(input);
+  if (remaining[0] == '\n') {
+    // See test GdbMiParse.IncrementalWithMultibyteLineEnding.
+    remaining = base::StringPiece(remaining.data() + 1, remaining.size() - 1);
+  }
   scoped_ptr<GdbOutput> result(new GdbOutput);
   for (;;) {
     int consumed = 0;

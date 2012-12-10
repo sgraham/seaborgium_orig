@@ -166,4 +166,39 @@ TEST(GdbMiParse, Multiple) {
   EXPECT_EQ("<http blahblah", output->at(0)->OutputString());
 }
 
+TEST(GdbMiParse, LineEndings) {
+  GdbMiReader reader;
+  int num_bytes;
+
+  std::string full = "=thread-group-added,id=\"i1\"\r(gdb)\r\n";
+  base::StringPiece current(full);
+  scoped_ptr<GdbOutput> output(reader.Parse(current, &num_bytes));
+  EXPECT_EQ(35, num_bytes);
+  EXPECT_EQ(1, output->size());
+  EXPECT_EQ(GdbRecord::RT_NOTIFY_ASYNC_OUTPUT, output->at(0)->record_type());
+  EXPECT_EQ("thread-group-added", output->at(0)->AsyncClass());
+}
+
+TEST(GdbMiParse, IncrementalWithMultibyteLineEnding) {
+  GdbMiReader reader;
+  int num_bytes;
+
+  std::string initial = "=thread-group-added,id=\"i1\"\r(gdb)\r";
+  base::StringPiece current(initial);
+  scoped_ptr<GdbOutput> output(reader.Parse(current, &num_bytes));
+  EXPECT_EQ(34, num_bytes);
+  EXPECT_EQ(1, output->size());
+  EXPECT_EQ(GdbRecord::RT_NOTIFY_ASYNC_OUTPUT, output->at(0)->record_type());
+  EXPECT_EQ("thread-group-added", output->at(0)->AsyncClass());
+
+  // Note \n from previous output is ambiguous because newline can be either
+  // style. So, make sure we skip it in that position.
+  std::string rest = "\n~\"<http blahblah\"\r(gdb)\r\n";
+  output.reset(reader.Parse(rest, &num_bytes));
+  EXPECT_EQ(26, num_bytes);
+  EXPECT_EQ(1, output->size());
+  EXPECT_EQ(GdbRecord::RT_CONSOLE_STREAM_OUTPUT, output->at(0)->record_type());
+  EXPECT_EQ("<http blahblah", output->at(0)->OutputString());
+}
+
 // TODO(testing): Bad/unexpected outputs.
