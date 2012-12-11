@@ -100,6 +100,14 @@ class AppThread : public base::Thread {
   static scoped_refptr<base::MessageLoopProxy> GetMessageLoopProxyForThread(
       ID identifier);
 
+  template <class T>
+    static bool DeleteSoon(ID identifier,
+                           const tracked_objects::Location& from_here,
+                           const T* object) {
+      return GetMessageLoopProxyForThread(identifier)->DeleteSoon(
+          from_here, object);
+    }
+
  protected:
   virtual void Run(MessageLoop* message_loop) OVERRIDE;
 

@@ -31,7 +31,7 @@ class TestIOHandler : public MessageLoopForIO::IOHandler {
   TestIOHandler(HANDLE handle, HANDLE signal, const std::string& expected_data);
 
   virtual void OnIOCompleted(MessageLoopForIO::IOContext* context,
-                             DWORD bytes_transfered, DWORD error);
+                             DWORD bytes_transferred, DWORD error);
 
   void DoRead();
   OVERLAPPED* context() { return &context_.overlapped; }
@@ -94,7 +94,7 @@ void TestIOHandler::DoWrite() {
 }
 
 void TestIOHandler::OnIOCompleted(MessageLoopForIO::IOContext* context,
-                                  DWORD bytes_transfered, DWORD error) {
+                                  DWORD bytes_transferred, DWORD error) {
   ASSERT_TRUE(context == &context_);
   if (reading_)
     EXPECT_EQ(expected_data_, std::string(buffer_));

@@ -197,6 +197,13 @@ void Subprocess::OnPipeReady() {
   // function again later and get them at that point.
 }
 
+void Subprocess::Terminate() {
+  TerminateProcess(child_, 0xffffffff);
+  WaitForSingleObject(child_, INFINITE);
+  CloseHandle(child_);
+  child_ = NULL;
+}
+
 ExitStatus Subprocess::Finish() {
   if (!child_)
     return kExitFailure;

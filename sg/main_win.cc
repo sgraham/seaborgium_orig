@@ -13,10 +13,10 @@ int RunMain(HINSTANCE instance) {
   main_loop->Init();
   main_loop->MainMessageLoopStart();
   main_loop->CreateThreads();
-  scoped_ptr<Application> app_window(new Application);
+  scoped_ptr<Application> app(new Application);
   main_loop->MainMessageLoopRun();
   main_loop->ShutdownThreadsAndCleanUp();
-  app_window.reset();
+  app.reset();
   return main_loop->GetResultCode();
 }
 

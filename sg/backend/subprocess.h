@@ -43,6 +43,8 @@ class Subprocess {
   // the process was interrupted, ExitFailure if it otherwise failed.
   ExitStatus Finish();
 
+  void Terminate();
+
   bool Done() const;
 
   const string16& GetOutput() const;

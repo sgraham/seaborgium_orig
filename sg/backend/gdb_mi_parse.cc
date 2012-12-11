@@ -354,15 +354,16 @@ void GdbMiParser::ConsumeNewline() {
 void GdbMiParser::ConsumeTerminator() {
   // Note that we treat the value as the remainder: "gdb)" to make handling
   // the same as the other record types that have a leading indictor.
-  if (!CanConsume(4) ||
+  if (!CanConsume(5) ||
       pos_[0] != 'g' ||
       pos_[1] != 'd' ||
       pos_[2] != 'b' ||
-      pos_[3] != ')') {
+      pos_[3] != ')' ||
+      pos_[4] != ' ') {
     ReportError();
     return;
   }
-  pos_ += 4;
+  pos_ += 5;
 }
 
 GdbOutput::GdbOutput() {

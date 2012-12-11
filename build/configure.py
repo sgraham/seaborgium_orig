@@ -322,6 +322,7 @@ def main():
                'debug_presenter_display',
                'lexer',
                'lexer_state',
+               'main_loop',
                'source_files',
                'source_view',
                'status_bar',
@@ -378,7 +379,6 @@ def main():
   main_objs += cxx('application')
   main_objs += cxx('application_window_win')
   main_objs += cxx('gpu_win')
-  main_objs += cxx('main_loop')
   main_objs += cxx('main_win')
   main_objs += rc('sg', implicit=['art\\sg.ico'])
   # No .libs for /incremental to work.

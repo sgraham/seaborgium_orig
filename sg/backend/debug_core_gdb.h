@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "base/memory/weak_ptr.h"
 #include "base/message_loop.h"
 #include "base/threading/non_thread_safe.h"
 #include "sg/backend/backend.h"
@@ -14,8 +15,17 @@
 
 // An implementation of a debugger backend using GDB/MI.
 
+// GDB does not read any input when it wishes to send output, and it does not
+// do any buffering. So, we keep an async read always queued on its output
+// stream, and process the records as it sends them. And, design the visible
+// interface from this level to be async, so when we write commands to gdb we
+// can assume there's no need to coordinate with the output it's giving us.
+
+class OutputReader;
+class InputSender;
+
 class DebugCoreGdb : public base::NonThreadSafe,
-                     public MessageLoopForIO::IOHandler
+                     public base::SupportsWeakPtr<DebugCoreGdb>
                      /*, public DebugCore*/ {
  public:
   DebugCoreGdb();
@@ -30,26 +40,25 @@ class DebugCoreGdb : public base::NonThreadSafe,
       const std::vector<string16> environment,
       const string16& working_directory);
 
+  virtual void StopDebugging();
+
   virtual void Start();
 
-  // Implementation of MessageLoopForIO::IOHandler:
-  // TODO(scottmg): In a subobject probably.
-  virtual void OnIOCompleted(MessageLoopForIO::IOContext* context,
-                             DWORD bytes_transfered, DWORD error) OVERRIDE;
+  void DeleteSelf();
 
-  static DebugCoreGdb* Create();
+  static base::WeakPtr<DebugCoreGdb> Create();
+
 
  private:
   DebugNotification* debug_notification_;
   Subprocess gdb_;
+  scoped_ptr<InputSender> input_sender_;
+  scoped_ptr<OutputReader> output_reader_;
 
+  void SendCommand(const string16& arg0);
   void SendCommand(const string16& arg0, const string16& arg1);
-
-  void ReadUntilReady();
-
-  MessageLoopForIO::IOContext context_;
-  char send_buffer_[4 << 10];
-  char receive_buffer_[4 << 10];
+  void SendCommand(
+      const string16& arg0, const string16& arg1, const string16& arg2);
 
   DISALLOW_COPY_AND_ASSIGN(DebugCoreGdb);
 };
