@@ -10,7 +10,9 @@
 #include "base/message_loop.h"
 #include "base/string16.h"
 #include "base/utf_string_conversions.h"
+#include "sg/app_thread.h"
 #include "sg/backend/gdb_mi_parse.h"
+#include "sg/backend/gdb_to_generic_converter.h"
 
 // Handles async reads and writes to subprocess. Read and write on the same
 // object to simplify blocking on shutdown.
@@ -84,7 +86,31 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
   }
 
   void SendNotifications(GdbOutput* output) {
-    NOTIMPLEMENTED() << "todo";
+    // TODO(scottmg): It'd be nice to not have AppThread here.
+    for (size_t i = 0; i < output->size(); ++i) {
+      const GdbRecord* record = output->at(i);
+      switch (record->record_type()) {
+        case GdbRecord::RT_EXEC_ASYNC_OUTPUT:
+          if (record->AsyncClass() == "stopped") {
+            if (FindStringValue("reason", record->results()) ==
+                "breakpoint-hit") {
+              StoppedAtBreakpointData data =
+                  StoppedAtBreakpointDataFromRecordResults(record->results());
+              AppThread::PostTask(AppThread::UI, FROM_HERE,
+                  base::Bind(&DebugNotification::OnStoppedAtBreakpoint,
+                            base::Unretained(debug_notification_), data));
+              continue;
+            }
+          }
+          // Fallthrough to see unhandled sub-types.
+        default:
+          ;
+          /*
+          NOTIMPLEMENTED() << ", " << record->record_type() << ": " <<
+            record->primary_identifier();
+            */
+      }
+    }
   }
 
   void StartRead() {
@@ -197,10 +223,6 @@ void DebugCoreGdb::StopDebugging() {
 void DebugCoreGdb::SetDebugNotification(DebugNotification* debug_notification) {
   reader_writer_->SetDebugNotification(debug_notification);
 }
-
-void DebugCoreGdb::Start() {
-}
-
 
 base::WeakPtr<DebugCoreGdb> DebugCoreGdb::Create() {
   DebugCoreGdb* result = new DebugCoreGdb;

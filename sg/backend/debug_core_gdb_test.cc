@@ -11,6 +11,7 @@
 #include "base/synchronization/waitable_event.h"
 #include "base/task_runner_util.h"
 #include "base/threading/thread.h"
+#include "base/threading/thread_restrictions.h"
 #include "sg/app_thread.h"
 #include "sg/backend/debug_core_gdb.h"
 #include "sg/main_loop.h"
@@ -75,5 +76,51 @@ TEST_F(DebugCoreGdbWithAppThreads, StartAndStopImmediately) {
       AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::Create),
       base::Bind(&StartAndStopImmediately));
+  Run();
+}
+
+void RunUntilMainShutdown(base::WeakPtr<DebugCoreGdb> debug_core) {
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::StopDebugging, debug_core));
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::DeleteSelf, debug_core));
+  MessageLoopForUI::current()->Quit();
+}
+
+class RunUntilMainNotifier : public DebugNotification {
+ public:
+  RunUntilMainNotifier() {}
+  virtual ~RunUntilMainNotifier() {}
+  virtual void OnStoppedAtBreakpoint(const StoppedAtBreakpointData& data) {
+    EXPECT_EQ(L"main", data.frame.function);
+    EXPECT_EQ(L"test_binary.cc", data.frame.filename);
+    AppThread::PostTask(AppThread::UI, FROM_HERE,
+        base::Bind(&RunUntilMainShutdown, debug_core));
+  }
+  base::WeakPtr<DebugCoreGdb> debug_core;
+};
+
+void StartAndRunUntilMain(
+    RunUntilMainNotifier* notifier,
+    base::WeakPtr<DebugCoreGdb> debug_core) {
+  notifier->debug_core = debug_core;
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::SetDebugNotification,
+                 debug_core,
+                 notifier));
+
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::LoadProcess,
+                 debug_core,
+                 L"test_data/test_binary_mingw.exe",
+                 L"", std::vector<string16>(), L""));
+}
+
+TEST_F(DebugCoreGdbWithAppThreads, StartAndRunUntilMain) {
+  RunUntilMainNotifier notifier;
+  AppThread::PostTaskAndReplyWithResult(
+      AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::Create),
+      base::Bind(&StartAndRunUntilMain, &notifier));
   Run();
 }

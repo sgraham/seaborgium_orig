@@ -9,11 +9,25 @@
 
 #include "base/string16.h"
 
+class FrameData {
+ public:
+  uintptr_t address;
+  string16 function;
+  string16 filename;
+  int line_number;
+};
+
+class StoppedAtBreakpointData {
+ public:
+  FrameData frame;
+};
+
 class DebugNotification {
  public:
   virtual ~DebugNotification() {}
 
   virtual void OnProcessLoaded() {}
+  virtual void OnStoppedAtBreakpoint(const StoppedAtBreakpointData& data) {}
   //virtual void OnProcessContinue() {}
 };
 

@@ -41,8 +41,6 @@ class DebugCoreGdb : public base::NonThreadSafe,
 
   virtual void StopDebugging();
 
-  virtual void Start();
-
   void DeleteSelf();
 
   static base::WeakPtr<DebugCoreGdb> Create();

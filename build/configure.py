@@ -315,6 +315,7 @@ def main():
                'backend\\debug_core_gdb',
                'backend\\debug_core_native_win',
                'backend\\gdb_mi_parse',
+               'backend\\gdb_to_generic_converter',
                'backend\\process_native_win',
                'backend\\subprocess_win',
                'cpp_lexer',
