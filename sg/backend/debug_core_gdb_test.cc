@@ -70,7 +70,7 @@ void StartAndStopImmediately(base::WeakPtr<DebugCoreGdb> debug_core) {
   MessageLoopForUI::current()->Quit();
 }
 
-TEST_F(DebugCoreGdbWithAppThreads, DISABLED_StartAndStopImmediately) {
+TEST_F(DebugCoreGdbWithAppThreads, StartAndStopImmediately) {
   AppThread::PostTaskAndReplyWithResult(
       AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::Create),

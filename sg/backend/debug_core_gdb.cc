@@ -12,38 +12,71 @@
 #include "base/utf_string_conversions.h"
 #include "sg/backend/gdb_mi_parse.h"
 
-// Read output from gdb, and notify upstream.
-class OutputReader : public MessageLoopForIO::IOHandler {
+// Handles async reads and writes to subprocess. Read and write on the same
+// object to simplify blocking on shutdown.
+class ReaderWriter : public MessageLoopForIO::IOHandler {
  public:
-  OutputReader(HANDLE file) : file_(file), terminating_(false) {
-    memset(&context_, 0, sizeof(context_));
-    context_.handler = this;
-    MessageLoopForIO::current()->RegisterIOHandler(file, this);
-    read_is_pending_ = false;
-    ReadOutput();
+  ReaderWriter(HANDLE input, HANDLE output)
+      : read_state_(input),
+        write_state_(output),
+        terminating_(false),
+        debug_notification_(NULL) {
+    MessageLoopForIO::current()->RegisterIOHandler(input, this);
+    MessageLoopForIO::current()->RegisterIOHandler(output, this);
+    read_state_.context.handler = this;
+    write_state_.context.handler = this;
+    StartRead();
   }
 
-  virtual ~OutputReader() {
+  virtual ~ReaderWriter() {
+    // Prevent read from restarting.
+    terminating_ = true;
+    pending_writes_.clear();
+    CancelIo(read_state_.file);
+    CancelIo(write_state_.file);
+    while (read_state_.is_pending || write_state_.is_pending)
+      MessageLoopForIO::current()->WaitForIOCompletion(INFINITE, this);
   }
 
   // Implementation of IOHandler:
   virtual void OnIOCompleted(MessageLoopForIO::IOContext* context,
                              DWORD bytes_transferred, DWORD error) {
-    read_is_pending_ = false;
-    unused_data_ = unused_data_ + std::string(buffer_, bytes_transferred);
+    if (context == &read_state_.context) {
+      read_state_.is_pending = false;
+      CompleteRead(bytes_transferred);
+    } else {
+      CHECK(context == &write_state_.context);
+      write_state_.is_pending = false;
+      CompleteWrite(bytes_transferred);
+    }
+  }
+
+  void CompleteRead(DWORD bytes_transferred) {
+    unused_read_data_ += std::string(read_state_.buffer, bytes_transferred);
 #ifndef NDEBUG
-    memset(buffer_, 0xcc, sizeof(buffer_));
+    memset(read_state_.buffer, 0xcc, sizeof(read_state_.buffer));
 #endif
     int bytes_consumed;
     scoped_ptr<GdbOutput> output(
-        gdb_mi_reader_.Parse(unused_data_, &bytes_consumed));
+        gdb_mi_reader_.Parse(unused_read_data_, &bytes_consumed));
     if (output.get()) {
-      unused_data_ = unused_data_.substr(bytes_consumed);
+      unused_read_data_ = unused_read_data_.substr(bytes_consumed);
       SendNotifications(output.get());
     }
     // TODO(scottmg): PostTask?
     if (!terminating_)
-      ReadOutput();
+      StartRead();
+  }
+
+  void CompleteWrite(DWORD bytes_transferred) {
+#ifndef NDEBUG
+    memset(write_state_.buffer, 0xcc, sizeof(write_state_.buffer));
+#endif
+    if (!pending_writes_.empty()) {
+      string16 to_send = pending_writes_.front();
+      pending_writes_.pop_front();
+      SendString(to_send);
+    }
   }
 
   void SetDebugNotification(DebugNotification* debug_notification) {
@@ -54,152 +87,92 @@ class OutputReader : public MessageLoopForIO::IOHandler {
     NOTIMPLEMENTED() << "todo";
   }
 
-  void ReadOutput() {
+  void StartRead() {
+    read_state_.is_pending = true;
     DWORD bytes_read;
-    fprintf(stderr, "Starting Read\n");
-    read_is_pending_ = true;
     BOOL result = ReadFile(
-        file_, buffer_, sizeof(buffer_), &bytes_read, &context_.overlapped);
+        read_state_.file, read_state_.buffer, sizeof(read_state_.buffer),
+        &bytes_read, &read_state_.context.overlapped);
     if (!result)
       CHECK(ERROR_IO_PENDING == GetLastError());
   }
 
-  void StopReading() {
-    terminating_ = true;
-  }
-  bool ReadIsPending() {
-    return read_is_pending_;
-  }
-
- private:
-  char buffer_[4 << 10];
-  MessageLoopForIO::IOContext context_;
-  HANDLE file_;
-  DebugNotification* debug_notification_;
-  GdbMiReader gdb_mi_reader_;
-  std::string unused_data_;
-  bool terminating_;
-  bool read_is_pending_;
-};
-
-// Write commands to gdb.
-class InputSender : public MessageLoopForIO::IOHandler {
- public:
-  InputSender(HANDLE file)
-      : file_(file), write_in_progress_(false), bytes_to_send_(0) {
-    memset(&context_, 0, sizeof(context_));
-    context_.handler = this;
-    MessageLoopForIO::current()->RegisterIOHandler(file, this);
-  }
-
-  virtual ~InputSender() {
-  }
-
-  void CancelOutstandingAndSendString(const string16& string) {
-    if (write_in_progress_) {
-      MessageLoopForIO::current()->WaitForIOCompletion(INFINITE, this);
-      write_in_progress_ = false;
-    }
-    pending_.clear();
-    SendString(string);
-  }
-
   void SendString(const string16& string) {
-    if (write_in_progress_) {
-      pending_.push_back(string);
+    if (write_state_.is_pending) {
+      pending_writes_.push_back(string);
     } else {
       std::string narrow = UTF16ToUTF8(string);
-      CHECK(narrow.size() <= sizeof(buffer_));
+      CHECK(narrow.size() <= sizeof(write_state_.buffer));
 #ifndef NDEBUG
-      memset(buffer_, 0xcc, sizeof(buffer_));
+      memset(write_state_.buffer, 0xcc, sizeof(write_state_.buffer));
 #endif
-      memcpy(buffer_, narrow.data(), narrow.size());
-      write_in_progress_ = true;
+      memcpy(write_state_.buffer, narrow.data(), narrow.size());
+      write_state_.is_pending = true;
       DWORD bytes_written;
-      fprintf(stderr, "Starting Write\n");
       BOOL result = WriteFile(
-          file_, buffer_, narrow.size(), &bytes_written, &context_.overlapped);
-      bytes_to_send_ = narrow.size();
+          write_state_.file, write_state_.buffer, narrow.size(),
+          &bytes_written, &write_state_.context.overlapped);
       if (!result)
         CHECK(GetLastError() == ERROR_IO_PENDING);
     }
   }
 
-  virtual void OnIOCompleted(MessageLoopForIO::IOContext* context,
-                             DWORD bytes_transferred, DWORD error) {
-    // Write failed, probably terminating. 
-    if (error != 0)
-      return;
-    CHECK(bytes_transferred == bytes_to_send_);
-#ifndef NDEBUG
-    memset(buffer_, 0xcc, sizeof(buffer_));
-#endif
-    write_in_progress_ = false;
-    if (!pending_.empty()) {
-      string16 to_send = pending_.front();
-      pending_.pop_front();
-      SendString(to_send);
-    }
-  }
-
-  bool WriteIsPending() {
-    return write_in_progress_;
-  }
-
  private:
-  char buffer_[4 << 10];
-  MessageLoopForIO::IOContext context_;
-  HANDLE file_;
-  std::list<string16> pending_;
-  bool write_in_progress_;
-  int bytes_to_send_;
+  struct State {
+    explicit State(HANDLE file) : is_pending(false), file(file) {
+      memset(&context, 0, sizeof(context));
+    }
+    MessageLoopForIO::IOContext context;
+    char buffer[4 << 10];
+    bool is_pending;
+    HANDLE file;
+  };
+
+  State read_state_;
+  State write_state_;
+
+  GdbMiReader gdb_mi_reader_;
+  std::string unused_read_data_;
+
+  std::list<string16> pending_writes_;
+
+  bool terminating_;
+
+  DebugNotification* debug_notification_;
 };
 
 DebugCoreGdb::DebugCoreGdb() {
   CHECK(gdb_.Start(L"gdb_win_binaries/gdb-python27.exe",
                    L"--fullname -nx --interpreter=mi2 --quiet"));
-  output_reader_.reset(new OutputReader(gdb_.GetInputPipe()));
-  input_sender_.reset(new InputSender(gdb_.GetOutputPipe()));
+  reader_writer_.reset(new ReaderWriter(
+        gdb_.GetInputPipe(), gdb_.GetOutputPipe()));
 }
 
 DebugCoreGdb::~DebugCoreGdb() {
-  output_reader_->StopReading();
-  // TODO(scottmg): Need to move reader and writer into same completion so we
-  // can block cleanly here on shutdown. see e.g. ipc/ipc_channel_win.cc
-  /*
-  while (output_reader_->ReadIsPending() || input_sender_->WriteIsPending()) {
-    MessageLoopForIO::current()->WaitForIOCompletion(
-        INFINITE, output_reader_.get());
-    MessageLoopForIO::current()->WaitForIOCompletion(
-        INFINITE, input_sender_.get());
-  }
-  */
+  reader_writer_.reset();
+  // TODO(scottmg): Send a -gdb-quit and Finish() cleanly instead.
   gdb_.Terminate();
-  input_sender_.reset();
-  output_reader_.reset();
 }
 
 void DebugCoreGdb::DeleteSelf() {
-  fprintf(stderr, "deleting\n");
   delete this;
-  fprintf(stderr, "done deleting\n");
 }
 
 void DebugCoreGdb::SendCommand(const string16& arg0) {
   string16 command = arg0 + L"\r\n";
-  input_sender_->SendString(command);
+  reader_writer_->SendString(command);
 }
 
 void DebugCoreGdb::SendCommand(const string16& arg0, const string16& arg1) {
   string16 command = arg0 + L" " + arg1 + L"\r\n";
-  input_sender_->SendString(command);
+  reader_writer_->SendString(command);
 }
 
 void DebugCoreGdb::SendCommand(const string16& arg0,
                                const string16& arg1,
                                const string16& arg2) {
   string16 command = arg0 + L" " + arg1 + L" " + arg2 + L"\r\n";
-  input_sender_->SendString(command);
+  reader_writer_->SendString(command);
 }
 
 void DebugCoreGdb::LoadProcess(
@@ -222,7 +195,7 @@ void DebugCoreGdb::StopDebugging() {
 }
 
 void DebugCoreGdb::SetDebugNotification(DebugNotification* debug_notification) {
-  output_reader_->SetDebugNotification(debug_notification);
+  reader_writer_->SetDebugNotification(debug_notification);
 }
 
 void DebugCoreGdb::Start() {

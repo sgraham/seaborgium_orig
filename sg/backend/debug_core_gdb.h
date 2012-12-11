@@ -21,8 +21,7 @@
 // interface from this level to be async, so when we write commands to gdb we
 // can assume there's no need to coordinate with the output it's giving us.
 
-class OutputReader;
-class InputSender;
+class ReaderWriter;
 
 class DebugCoreGdb : public base::NonThreadSafe,
                      public base::SupportsWeakPtr<DebugCoreGdb>
@@ -52,8 +51,7 @@ class DebugCoreGdb : public base::NonThreadSafe,
  private:
   DebugNotification* debug_notification_;
   Subprocess gdb_;
-  scoped_ptr<InputSender> input_sender_;
-  scoped_ptr<OutputReader> output_reader_;
+  scoped_ptr<ReaderWriter> reader_writer_;
 
   void SendCommand(const string16& arg0);
   void SendCommand(const string16& arg0, const string16& arg1);
