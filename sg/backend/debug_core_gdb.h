@@ -39,6 +39,9 @@ class DebugCoreGdb : public base::NonThreadSafe,
       const std::vector<string16> environment,
       const string16& working_directory);
 
+  virtual void StepOver();
+  virtual void StepIn();
+
   virtual void StopDebugging();
 
   void DeleteSelf();

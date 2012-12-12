@@ -22,12 +22,18 @@ class StoppedAtBreakpointData {
   FrameData frame;
 };
 
+class StoppedAfterSteppingData {
+ public:
+  FrameData frame;
+};
+
 class DebugNotification {
  public:
   virtual ~DebugNotification() {}
 
   virtual void OnProcessLoaded() {}
   virtual void OnStoppedAtBreakpoint(const StoppedAtBreakpointData& data) {}
+  virtual void OnStoppedAfterStepping(const StoppedAfterSteppingData& data) {}
   //virtual void OnProcessContinue() {}
 };
 

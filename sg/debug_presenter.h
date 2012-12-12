@@ -27,10 +27,15 @@ class DebugPresenter : public DebugPresenterNotify,
   virtual void SetDebugCore(base::WeakPtr<DebugCoreGdb> debug_core);
 
   // Implementation of DebugPresenterNotify.
-  virtual void NotifyFramePainted(double frame_time_in_ms);
+  virtual void NotifyFramePainted(double frame_time_in_ms) OVERRIDE;
+  virtual bool NotifyKey(
+      InputKey key, bool down, const InputModifiers& modifiers) OVERRIDE;
 
   // Implementation of DebugNotification
-  virtual void OnStoppedAtBreakpoint(const StoppedAtBreakpointData& data);
+  virtual void OnStoppedAtBreakpoint(
+      const StoppedAtBreakpointData& data) OVERRIDE;
+  virtual void OnStoppedAfterStepping(
+      const StoppedAfterSteppingData& data) OVERRIDE;
 
  private:
   void ReadFileOnFILE(FilePath path, std::string* result);

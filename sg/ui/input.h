@@ -22,6 +22,18 @@ enum InputKey {
   kRight,
   kPageUp,
   kPageDown,
+  kF1,
+  kF2,
+  kF3,
+  kF4,
+  kF5,
+  kF6,
+  kF7,
+  kF8,
+  kF9,
+  kF10,
+  kF11,
+  kF12,
 };
 
 class InputModifiers {
@@ -40,6 +52,10 @@ class InputModifiers {
   bool ControlPressed() const { return l_control_ || r_control_; }
   bool ShiftPressed() const { return l_shift_ || r_shift_; }
   bool AltPressed() const { return l_alt_ || r_alt_; }
+  bool None() const {
+    return !l_alt_ && !l_control_ && !l_shift_ &&
+           !r_alt_ && !r_control_ && !r_shift_;
+  }
 
  private:
   bool l_control_;

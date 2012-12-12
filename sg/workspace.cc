@@ -7,6 +7,7 @@
 #include "base/bind.h"
 #include "sg/app_thread.h"
 #include "sg/application_window.h"
+#include "sg/debug_presenter_notify.h"
 #include "sg/source_view.h"
 #include "sg/status_bar.h"
 #include "sg/ui/container.h"
@@ -122,6 +123,10 @@ void Workspace::SetDelegate(ApplicationWindow* delegate) {
   delegate_ = delegate;
 }
 
+void Workspace::SetDebugPresenterNotify(DebugPresenterNotify* debug_presenter) {
+  debug_presenter_notify_ = debug_presenter;
+}
+
 void Workspace::SetScreenRect(const Rect& rect) {
   set_screen_rect(rect);
   if (!main_area_)
@@ -187,5 +192,7 @@ bool Workspace::NotifyKey(
   Contents* focused = GetFocusedContents();
   if (!focused || !focused->WantKeyEvents())
     return false;
-  return focused->NotifyKey(key, down, modifiers);
+  if (focused->NotifyKey(key, down, modifiers))
+    return true;
+  return debug_presenter_notify_->NotifyKey(key, down, modifiers);
 }

@@ -14,6 +14,7 @@
 
 class ApplicationWindow;
 class Container;
+class DebugPresenterNotify;
 class SourceView;
 class StatusBar;
 
@@ -25,6 +26,7 @@ class Workspace : public Container,
 
   virtual void Init();
   virtual void SetDelegate(ApplicationWindow* delegate);
+  virtual void SetDebugPresenterNotify(DebugPresenterNotify* debug_presenter);
 
   virtual void SetScreenRect(const Rect& rect) OVERRIDE;
   virtual void Invalidate() OVERRIDE;
@@ -55,6 +57,7 @@ class Workspace : public Container,
   SourceView* source_view_;
   Container* source_view_container_;
   ApplicationWindow* delegate_;
+  DebugPresenterNotify* debug_presenter_notify_;
 };
 
 #endif  // SG_WORKSPACE_H_

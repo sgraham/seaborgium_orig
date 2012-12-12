@@ -132,9 +132,11 @@ class ApplicationWindowWin : public ApplicationWindow {
             GetInputModifiers());
         break;
 
+      case WM_SYSKEYDOWN:
+      case WM_SYSKEYUP:
       case WM_KEYDOWN:
       case WM_KEYUP: {
-        bool down = msg == WM_KEYDOWN;
+        bool down = msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN;
         InputKey key;
         switch (w_param) {
           case VK_SHIFT: key = kShift; break;
@@ -152,6 +154,18 @@ class ApplicationWindowWin : public ApplicationWindow {
           case VK_RIGHT: key = kRight; break;
           case VK_PRIOR: key = kPageUp; break;
           case VK_NEXT: key = kPageDown; break;
+          case VK_F1: key = kF1; break;
+          case VK_F2: key = kF2; break;
+          case VK_F3: key = kF3; break;
+          case VK_F4: key = kF4; break;
+          case VK_F5: key = kF5; break;
+          case VK_F6: key = kF6; break;
+          case VK_F7: key = kF7; break;
+          case VK_F8: key = kF8; break;
+          case VK_F9: key = kF9; break;
+          case VK_F10: key = kF10; break;
+          case VK_F11: key = kF11; break;
+          case VK_F12: key = kF12; break;
           default: key = kNone; break;
         }
 

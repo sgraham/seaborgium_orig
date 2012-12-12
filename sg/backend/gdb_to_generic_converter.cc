@@ -60,3 +60,11 @@ StoppedAtBreakpointData StoppedAtBreakpointDataFromRecordResults(
       FindDictionaryValue("frame", results));
   return data;
 }
+
+StoppedAfterSteppingData StoppedAfterSteppingDataFromRecordResults(
+    const std::vector<GdbRecordResult*>& results) {
+  StoppedAfterSteppingData data;
+  data.frame = FrameDataFromDictionaryValue(
+      FindDictionaryValue("frame", results));
+  return data;
+}

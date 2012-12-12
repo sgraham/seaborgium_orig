@@ -23,6 +23,7 @@ Application::Application() {
   presenter_.reset(new DebugPresenter(source_files_.get()));
   presenter_->SetDisplay(workspace_.get());
   main_window_->SetDebugPresenterNotify(presenter_.get());
+  workspace_->SetDebugPresenterNotify(presenter_.get());
   AppThread::PostTaskAndReplyWithResult(
       AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::Create),

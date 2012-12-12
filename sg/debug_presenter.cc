@@ -38,6 +38,23 @@ void DebugPresenter::ReadFileOnFILE(FilePath path, std::string* result) {
   file_util::ReadFileToString(path, result);
 }
 
+bool DebugPresenter::NotifyKey(
+    InputKey key, bool down, const InputModifiers& modifiers) {
+  if (key == kF10 && down && modifiers.None()) {
+    AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+        base::Bind(&DebugCoreGdb::StepOver,
+                   debug_core_));
+    return true;
+  }
+  else if (key == kF11 && down && modifiers.None()) {
+    AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+        base::Bind(&DebugCoreGdb::StepIn,
+                   debug_core_));
+    return true;
+  }
+  return false;
+}
+
 void DebugPresenter::FileLoadCompleted(
     FilePath path, std::string* result) {
   // TODO(scottmg): mtime.
@@ -71,5 +88,11 @@ void DebugPresenter::OnStoppedAtBreakpoint(
                base::Unretained(this), path, result),
     base::Bind(&DebugPresenter::FileLoadCompleted,
                base::Unretained(this), path, result));
+  display_->SetProgramCounterLine(data.frame.line_number);
+}
+
+void DebugPresenter::OnStoppedAfterStepping(
+    const StoppedAfterSteppingData& data) {
+  // TODO(scottmg): File change reload, etc.
   display_->SetProgramCounterLine(data.frame.line_number);
 }

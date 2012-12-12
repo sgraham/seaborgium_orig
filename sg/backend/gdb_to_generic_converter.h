@@ -19,4 +19,7 @@ const base::DictionaryValue* FindDictionaryValue(
 StoppedAtBreakpointData StoppedAtBreakpointDataFromRecordResults(
     const std::vector<GdbRecordResult*>& results);
 
+StoppedAfterSteppingData StoppedAfterSteppingDataFromRecordResults(
+    const std::vector<GdbRecordResult*>& results);
+
 #endif  // SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_H

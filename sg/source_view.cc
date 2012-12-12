@@ -91,6 +91,7 @@ void SourceView::SetData(const std::string& utf8_text) {
 
 void SourceView::SetProgramCounterLine(int line_number) {
   program_counter_line_ = line_number - 1;
+  Invalidate();
 }
 
 void SourceView::CommitAfterHighlight(std::vector<Line> lines) {
@@ -197,20 +198,29 @@ bool SourceView::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
   if (!down)
     return false;
-  if (key == kDown)
+  bool handled = false;
+  if (key == kDown) {
     ScrollView(-1);
-  else if (key == kUp)
+    handled = true;
+  } else if (key == kUp) {
     ScrollView(1);
-  else if (key == kPageUp || (key == kSpace && modifiers.ShiftPressed()))
+    handled = true;
+  } else if (key == kPageUp || (key == kSpace && modifiers.ShiftPressed())) {
     ScrollView(-(Height() / g_line_height - 1));
-  else if (key == kPageDown || (key == kSpace && !modifiers.ShiftPressed()))
+    handled = true;
+  } else if (key == kPageDown || (key == kSpace && !modifiers.ShiftPressed())) {
     ScrollView(Height() / g_line_height - 1);
-  else if (key == kHome)
+    handled = true;
+  } else if (key == kHome) {
     y_pixel_scroll_target_ = 0.f;
-  else if (key == kEnd)
+    handled = true;
+  } else if (key == kEnd) {
     y_pixel_scroll_target_ = GetLargestScrollLocation();
-  Invalidate();
-  return true;
+    handled = true;
+  }
+  if (handled)
+    Invalidate();
+  return handled;
 }
 
 void SourceView::ScrollView(int number_of_lines) {

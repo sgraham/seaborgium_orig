@@ -92,23 +92,27 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
       switch (record->record_type()) {
         case GdbRecord::RT_EXEC_ASYNC_OUTPUT:
           if (record->AsyncClass() == "stopped") {
-            if (FindStringValue("reason", record->results()) ==
-                "breakpoint-hit") {
+            std::string reason = FindStringValue("reason", record->results());
+            if (reason == "breakpoint-hit") {
               StoppedAtBreakpointData data =
                   StoppedAtBreakpointDataFromRecordResults(record->results());
               AppThread::PostTask(AppThread::UI, FROM_HERE,
                   base::Bind(&DebugNotification::OnStoppedAtBreakpoint,
                             base::Unretained(debug_notification_), data));
               continue;
+            } else if (reason == "end-stepping-range") {
+              StoppedAfterSteppingData data =
+                  StoppedAfterSteppingDataFromRecordResults(record->results());
+              AppThread::PostTask(AppThread::UI, FROM_HERE,
+                  base::Bind(&DebugNotification::OnStoppedAfterStepping,
+                            base::Unretained(debug_notification_), data));
+              continue;
             }
           }
           // Fallthrough to see unhandled sub-types.
         default:
-          ;
-          /*
           NOTIMPLEMENTED() << ", " << record->record_type() << ": " <<
             record->primary_identifier();
-            */
       }
     }
   }
@@ -213,6 +217,14 @@ void DebugCoreGdb::LoadProcess(
   SendCommand(L"-file-exec-and-symbols", application);
   SendCommand(L"-break-insert", L"-t", L"main");
   SendCommand(L"-exec-run");
+}
+
+void DebugCoreGdb::StepOver() {
+  SendCommand(L"-exec-next");
+}
+
+void DebugCoreGdb::StepIn() {
+  SendCommand(L"-exec-step");
 }
 
 void DebugCoreGdb::StopDebugging() {
