@@ -166,7 +166,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
 
   if (LineInView(program_counter_line_)) {
     renderer->SetDrawColor(Gwen::Colors::Yellow);
-    int y = program_counter_line_ * g_line_height;
+    int y = program_counter_line_ * g_line_height - y_pixel_scroll_;
     renderer->DrawFilledRect(
         Gwen::Rect(largest_numbers_width + left_margin, y, 16, 16));
   }
