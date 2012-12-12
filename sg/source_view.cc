@@ -141,10 +141,15 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
       &font_,
       base::IntToString16(lines_.size()).c_str()).x;
   static const int left_margin = 5;
-  static const int right_margin = 15;
+  static const int right_margin = 10;
+  static const int indicator_width = g_line_height;
+  static const int indicator_height = g_line_height;
+  static const int indicator_and_margin = indicator_width + 5;
   renderer->SetDrawColor(skin.GetColorScheme().margin());
   renderer->DrawFilledRect(Gwen::Rect(
-      0, 0, left_margin + largest_numbers_width + right_margin, Height()));
+      0, 0,
+      left_margin + largest_numbers_width + right_margin + indicator_and_margin,
+      Height()));
 
   for (size_t i = start_line; i < lines_.size(); ++i) {
     // Extra |g_line_height| added to height so that a full line is drawn at
@@ -158,7 +163,8 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
         &font_,
         Gwen::Point(left_margin, i * g_line_height - y_pixel_scroll_),
         base::IntToString16(i + 1).c_str());
-    size_t x = left_margin + largest_numbers_width + right_margin;
+    size_t x = left_margin + largest_numbers_width + right_margin +
+               indicator_and_margin;
 
     // Source.
     for (size_t j = 0; j < lines_[i].size(); ++j) {
@@ -179,7 +185,8 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
     renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
     renderer->DrawTexturedRect(
         &g_pc_indicator_texture,
-        Gwen::Rect(largest_numbers_width + left_margin, y, 16, 16),
+        Gwen::Rect(left_margin + largest_numbers_width + right_margin, y,
+                   indicator_width, indicator_height),
         0, 0, 1, 1);
   }
 }
