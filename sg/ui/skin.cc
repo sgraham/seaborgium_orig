@@ -44,7 +44,8 @@ ColorScheme::ColorScheme()
     klass_(kBlue),
     op_(kGreen),
     margin_(kBase02),
-    margin_text_(kBase0) {
+    margin_text_(kBase0),
+    pc_indicator_(kYellow) {
 }
 
 Skin::Skin() : title_bar_size_(19), border_size_(3), status_bar_size_(26) {

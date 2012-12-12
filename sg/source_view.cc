@@ -6,13 +6,14 @@
 
 #include <algorithm>
 
-#include "Gwen/Gwen.h"
 #include "base/bind.h"
 #include "base/file_util.h"
 #include "base/logging.h"
 #include "base/string_number_conversions.h"
 #include "base/string_piece.h"
 #include "base/utf_string_conversions.h"
+#include "Gwen/Gwen.h"
+#include "Gwen/Texture.h"
 #include "sg/app_thread.h"
 #include "sg/cpp_lexer.h"
 #include "sg/lexer.h"
@@ -23,6 +24,8 @@ namespace {
 // TODO(config):
 // TODO(rendering): Font line height.
 const int g_line_height = 16;
+Gwen::Texture g_pc_indicator_texture;
+
 
 // TODO(scottmg): Losing last line if doesn't end in \n.
 void SyntaxHighlight(const std::string& input, std::vector<Line>* lines) {
@@ -65,6 +68,7 @@ SourceView::SourceView(const Skin& skin)
   y_pixel_scroll_target_ = 0.f;
   font_.facename = L"Consolas";
   font_.size = 13.f;
+  g_pc_indicator_texture.name = "art/pc-location.png";
 }
 
 void SourceView::SetData(const std::string& utf8_text) {
@@ -115,6 +119,11 @@ bool SourceView::LineInView(int line_number) {
 // TODO(rendering): Brutal efficiency.
 void SourceView::Render(Gwen::Renderer::Base* renderer) {
   const Skin& skin = Contents::GetSkin();
+
+  // TODO(rendering): Hacky.
+  if (!g_pc_indicator_texture.data) {
+    renderer->LoadTexture(&g_pc_indicator_texture);
+  }
 
   // Ease to target.
   y_pixel_scroll_ += (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.2f;
@@ -167,8 +176,11 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   if (LineInView(program_counter_line_)) {
     renderer->SetDrawColor(Gwen::Colors::Yellow);
     int y = program_counter_line_ * g_line_height - y_pixel_scroll_;
-    renderer->DrawFilledRect(
-        Gwen::Rect(largest_numbers_width + left_margin, y, 16, 16));
+    renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
+    renderer->DrawTexturedRect(
+        &g_pc_indicator_texture,
+        Gwen::Rect(largest_numbers_width + left_margin, y, 16, 16),
+        0, 0, 1, 1);
   }
 }
 

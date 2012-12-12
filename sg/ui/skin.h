@@ -38,6 +38,8 @@ class ColorScheme {
   const Gwen::Color& margin() const { return margin_; }
   const Gwen::Color& margin_text() const { return margin_text_; }
 
+  const Gwen::Color& pc_indicator() const { return pc_indicator_; }
+
  private:
   Gwen::Color border_;
   Gwen::Color background_;
@@ -59,6 +61,8 @@ class ColorScheme {
 
   Gwen::Color margin_;
   Gwen::Color margin_text_;
+
+  Gwen::Color pc_indicator_;
 };
 
 class Skin {
