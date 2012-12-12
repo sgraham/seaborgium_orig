@@ -16,6 +16,7 @@ class DebugPresenterDisplay {
 
   virtual void SetFileName(const FilePath& filename) = 0;
   virtual void SetFileData(const std::string& utf8_text) = 0;
+  virtual void SetProgramCounterLine(int line_number) = 0;
   virtual void SetDebugState(const string16& debug_state) = 0;
   virtual void SetRenderTime(double ms_per_frame) = 0;
 };

@@ -42,6 +42,7 @@ class Workspace : public Container,
   // Implementation of DebugPresenterDisplay.
   virtual void SetFileName(const FilePath& filename) OVERRIDE;
   virtual void SetFileData(const std::string& utf8_text) OVERRIDE;
+  virtual void SetProgramCounterLine(int line_number) OVERRIDE;
   virtual void SetDebugState(const string16& debug_state) OVERRIDE;
   virtual void SetRenderTime(double ms_per_frame) OVERRIDE;
 

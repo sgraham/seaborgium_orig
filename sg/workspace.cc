@@ -151,6 +151,10 @@ void Workspace::SetFileName(const FilePath& filename) {
   source_view_container_->SetTitle(source_view_, filename.LossyDisplayName());
 }
 
+void Workspace::SetProgramCounterLine(int line_number) {
+  source_view_->SetProgramCounterLine(line_number);
+}
+
 void Workspace::SetFileData(const std::string& utf8_text) {
   source_view_->SetData(utf8_text);
 }

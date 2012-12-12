@@ -31,6 +31,8 @@ class SourceView : public Contents {
   virtual void Render(Gwen::Renderer::Base* renderer);
 
   virtual void SetData(const std::string& utf8_text);
+  // TODO(scottmg): Probably some sort of "margin indicator" abstraction.
+  virtual void SetProgramCounterLine(int line_number);
 
   // Implementation of InputHandler.
   virtual bool NotifyMouseMoved(
@@ -48,12 +50,16 @@ class SourceView : public Contents {
   void ClampScrollTarget();
   void ScrollView(int number_of_lines);
   void CommitAfterHighlight(std::vector<Line> lines);
+  bool LineInView(int line_number);
+  int GetFirstLineInView();
 
   float y_pixel_scroll_;
   float y_pixel_scroll_target_;
 
   std::vector<Line> lines_;
   Gwen::Font font_;
+
+  int program_counter_line_;
 };
 
 #endif  // SG_SOURCE_VIEW_H_

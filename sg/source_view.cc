@@ -59,7 +59,8 @@ std::vector<Line> HighlightOnFILE(std::string utf8_text) {
 }  // namespace
 
 SourceView::SourceView(const Skin& skin)
-    : Contents(skin) {
+    : Contents(skin),
+      program_counter_line_(-1) {
   y_pixel_scroll_ = 0.f;
   y_pixel_scroll_target_ = 0.f;
   font_.facename = L"Consolas";
@@ -88,9 +89,26 @@ void SourceView::SetData(const std::string& utf8_text) {
   Invalidate();
 }
 
+void SourceView::SetProgramCounterLine(int line_number) {
+  program_counter_line_ = line_number - 1;
+}
+
 void SourceView::CommitAfterHighlight(std::vector<Line> lines) {
   lines_ = lines;
   Invalidate();
+}
+
+int SourceView::GetFirstLineInView() {
+  return std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
+}
+
+bool SourceView::LineInView(int line_number) {
+  int start_line = GetFirstLineInView();
+  if (line_number < start_line)
+    return false;
+  if ((line_number - start_line) * g_line_height > Height() + g_line_height)
+    return false;
+  return true;
 }
 
 // TODO(rendering): Brutal efficiency.
@@ -106,8 +124,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
 
   renderer->SetDrawColor(skin.GetColorScheme().background());
   renderer->DrawFilledRect(Gwen::Rect(0, 0, Width(), Height()));
-  size_t start_line =
-      std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
+  int start_line = GetFirstLineInView();
 
   // Not quite right, but probably close enough.
   int largest_numbers_width = renderer->MeasureText(
@@ -122,7 +139,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   for (size_t i = start_line; i < lines_.size(); ++i) {
     // Extra |g_line_height| added to height so that a full line is drawn at
     // the bottom when partial-line pixel scrolled.
-    if ((i - start_line) * g_line_height > Height() + g_line_height)
+    if (!LineInView(i))
       break;
 
     // Line numbers.
@@ -144,6 +161,13 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
           &font_,
           lines_[i][j].text.c_str()).x;
     }
+  }
+
+  if (LineInView(program_counter_line_)) {
+    renderer->SetDrawColor(Gwen::Colors::Yellow);
+    int y = program_counter_line_ * g_line_height;
+    renderer->DrawFilledRect(
+        Gwen::Rect(largest_numbers_width + left_margin, y, 16, 16));
   }
 }
 

@@ -71,4 +71,5 @@ void DebugPresenter::OnStoppedAtBreakpoint(
                base::Unretained(this), path, result),
     base::Bind(&DebugPresenter::FileLoadCompleted,
                base::Unretained(this), path, result));
+  display_->SetProgramCounterLine(data.frame.line_number);
 }
