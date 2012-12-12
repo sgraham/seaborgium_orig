@@ -11,6 +11,7 @@
 
 #define _INTSAFE_H_INCLUDED_  // What a cluster.
 
+#ifdef __cplusplus
 #include <algorithm>
 #include <functional>
 #include <iosfwd>
@@ -21,6 +22,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#endif
 
 #include <crtdbg.h>  // NOLINT(build/include_order)
 #include <stdio.h>  // NOLINT(build/include_order)

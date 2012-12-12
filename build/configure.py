@@ -173,6 +173,50 @@ def GetRe2FileList():
   return [os.path.normpath(p) for p in files]
 
 
+def GetFreetypeFileList():
+  files = [
+    'src/autofit/autofit',
+    'src/base/ftbase',
+    'src/base/ftbbox',
+    'src/base/ftbitmap',
+    'src/base/ftdebug',
+    'src/base/ftfstype',
+    'src/base/ftgasp',
+    'src/base/ftglyph',
+    'src/base/ftgxval',
+    'src/base/ftinit',
+    'src/base/ftlcdfil',
+    'src/base/ftmm',
+    'src/base/ftpatent',
+    'src/base/ftpfr',
+    'src/base/ftstroke',
+    'src/base/ftsynth',
+    'src/base/ftsystem',
+    'src/base/fttype1',
+    'src/base/ftwinfnt',
+    'src/base/ftxf86',
+    'src/bdf/bdf',
+    'src/cache/ftcache',
+    'src/cff/cff',
+    'src/cid/type1cid',
+    'src/gzip/ftgzip',
+    'src/lzw/ftlzw',
+    'src/pcf/pcf',
+    'src/pfr/pfr',
+    'src/psaux/psaux',
+    'src/pshinter/pshinter',
+    'src/psnames/psmodule',
+    'src/raster/raster',
+    'src/sfnt/sfnt',
+    'src/smooth/smooth',
+    'src/truetype/truetype',
+    'src/type1/type1',
+    'src/type42/type42',
+    'src/winfonts/winfnt',
+  ]
+  return [os.path.normpath(p) for p in files]
+
+
 
 def main():
   if not os.path.exists(os.path.join(ninja_dir, 'ninja.exe')):
@@ -208,6 +252,8 @@ def main():
     return os.path.join('third_party', 'base', filename)
   def gwen_src(filename):
     return os.path.join('third_party', 'gwen', filename)
+  def ft2_src(filename):
+    return os.path.join('third_party', 'freetype', filename)
   def re2_src(filename):
     return os.path.join('third_party', 're2', filename)
   def built(filename):
@@ -218,6 +264,10 @@ def main():
   if options.debug:
     pch_implicit = pch_name
     pch_compile = '/Fp' + pch_name + ' /Yusg/global.h'
+  def cc(name, src=src, **kwargs):
+    # No pch on cc because it's only ft2, and it doesn't like pch anyway (and
+    # also, we have to build a separate pch so it's a bit of a mess).
+    return n.build(built(name + objext), 'cc', src(name + '.c'), **kwargs)
   def cxx(name, src=src, **kwargs):
     return n.build(built(name + objext), 'cxx', src(name + '.cc'),
                    implicit=pch_implicit, **kwargs)
@@ -235,6 +285,7 @@ def main():
     os.makedirs('out')
   n.variable('builddir', 'out')
   n.variable('cxx', CXX)
+  n.variable('cc', CXX)
 
   cflags = ['/nologo',  # Don't print startup banner.
             '/Zi',  # Create pdb with debug info.
@@ -250,9 +301,9 @@ def main():
             '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
             '/D_WIN32_WINNT=0x0601', '/D_VARIADIC_MAX=10',
             '/DDYNAMIC_ANNOTATIONS_ENABLED=0',
-            '/Fd$builddir\\sg_intermediate.pdb',
             '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
             '-Ithird_party/re2',
+            '-Ibuild', '-Ithird_party/freetype/include',
             '-FIsg/global.h']
   if options.debug:
     cflags += ['/D_DEBUG', '/MTd']
@@ -265,19 +316,35 @@ def main():
   else:
     ldflags += ['/INCREMENTAL']
   libs = []
+  cxxflags = [
+      '/Fd$builddir\\sg_intermediate.pdb',
+      ]
+  ccflags = [
+      '/DFT2_BUILD_LIBRARY', '/wd4146',
+      ]
 
   n.newline()
 
   n.variable('cflags', ' '.join(cflags))
+  n.variable('ccflags', ' '.join(ccflags))
+  n.variable('cxxflags', ' '.join(cxxflags))
   n.variable('ldflags', ' '.join(ldflags))
   n.newline()
 
   compiler = 'ninja -t msvc -o $out -- $cxx /showIncludes'
   n.rule('cxx',
-    command=('%s $cflags %s '
+    command=('%s $cflags $cxxflags %s '
              '-c $in /Fo$out' % (compiler, pch_compile)),
     depfile='$out.d',
     description='CXX $out')
+  n.newline()
+
+  compiler = 'ninja -t msvc -o $out -- $cc /showIncludes'
+  n.rule('cc',
+    command=('%s $cflags $ccflags '
+             '-c $in /Fo$out' % compiler),
+    depfile='$out.d',
+    description='CC $out')
   n.newline()
 
   n.rule('link',
@@ -294,7 +361,7 @@ def main():
   if options.debug:
     compiler = 'ninja -t msvc -o $objname -- $cxx /showIncludes'
     n.rule('cxx_pch',
-      command=('%s $cflags /Ycsg/global.h %s '
+      command=('%s $cflags $cxxflags /Ycsg/global.h %s '
               '-c $in /Fo$objname' % (compiler, pch_compile)),
       depfile=built('sg_pch.obj.d'),
       description='CXX $out')
@@ -348,6 +415,12 @@ def main():
     re2_objs += cxx(base, src=re2_src)
   n.newline()
 
+  ft2_objs = []
+  n.comment('Freetype.')
+  for base in GetFreetypeFileList():
+    ft2_objs += cc(base, src=ft2_src)
+  n.newline()
+
   n.comment('Chromium base.')
   crfiles = GetChromiumBaseFileList('third_party/base')
   base_objs = []
@@ -373,7 +446,7 @@ def main():
 
   all_targets = []
 
-  app_objs = sg_objs + base_objs + gwen_objs + re2_objs + pch_objs
+  app_objs = sg_objs + base_objs + gwen_objs + re2_objs + ft2_objs + pch_objs
 
   n.comment('Main executable is library plus main() and some startup goop.')
   main_objs = []
@@ -435,6 +508,7 @@ def main():
   reader_writer_objs += cxx('backend\\reader_writer_test')
   reader_writer_test = n.build(binary('reader_writer_test'), 'link',
                                inputs=reader_writer_objs,
+                               implicit=built('sg.pch'),
                                variables=[('ldflags', test_ldflags)])
   all_targets += reader_writer_test
   n.newline()
