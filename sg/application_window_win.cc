@@ -171,8 +171,8 @@ class ApplicationWindowWin : public ApplicationWindow {
 
         if (key != kNone) {
           DCHECK(workspace_->WantKeyEvents());
-          workspace_->NotifyKey(key, down, GetInputModifiers());
-          return 0;
+          if (workspace_->NotifyKey(key, down, GetInputModifiers()))
+            return 0;
         }
         break;
       }
