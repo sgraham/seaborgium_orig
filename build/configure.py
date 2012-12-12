@@ -509,6 +509,7 @@ def main():
   reader_writer_test = n.build(binary('reader_writer_test'), 'link',
                                inputs=reader_writer_objs,
                                implicit=built('sg.pch'),
+                               order_only=sg_binary,
                                variables=[('ldflags', test_ldflags)])
   all_targets += reader_writer_test
   n.newline()
