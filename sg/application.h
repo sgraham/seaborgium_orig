@@ -7,10 +7,11 @@
 
 #include "base/basictypes.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/memory/weak_ptr.h"
 #include "sg/backend/backend.h"
 
 class ApplicationWindow;
-class DebugConnection;
+class DebugCoreGdb;
 class DebugPresenter;
 class SourceFiles;
 class Workspace;
@@ -28,7 +29,9 @@ class Application {
   scoped_ptr<ApplicationWindow> main_window_;
   scoped_ptr<Workspace> workspace_;
   scoped_ptr<DebugPresenter> presenter_;
-  scoped_ptr<DebugConnection> debug_connection_;
+  base::WeakPtr<DebugCoreGdb> debug_core_;
+
+  void ConnectDebugCore(base::WeakPtr<DebugCoreGdb> debug_core);
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

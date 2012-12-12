@@ -8,29 +8,18 @@
 #include "base/command_line.h"
 #include "base/file_util.h"
 #include "sg/app_thread.h"
+#include "sg/backend/debug_core_gdb.h"
 #include "sg/debug_presenter_display.h"
 #include "sg/source_files.h"
 
 DebugPresenter::DebugPresenter(SourceFiles* source_files)
     : source_files_(source_files) {
-  std::string* result = new std::string;
   const CommandLine& command_line = *CommandLine::ForCurrentProcess();
   // TODO(scottmg): Temporary obviously.
   if (command_line.GetArgs().size() != 1)
-    binary_ = L"test_data\\test_binary.exe";
+    binary_ = L"test_data/test_binary_mingw.exe";
   else
     binary_ = command_line.GetArgs()[0];
-
-
-
-  FilePath path(FILE_PATH_LITERAL("sample_source_code_file.cc"));
-  // Lifetime OK (I think) because DebugPresenter's lifetime outlives the FILE
-  // thread.
-  AppThread::PostTaskAndReply(AppThread::FILE, FROM_HERE,
-      base::Bind(&DebugPresenter::ReadFileOnFILE,
-                 base::Unretained(this), path, result),
-      base::Bind(&DebugPresenter::FileLoadCompleted,
-                 base::Unretained(this), path, result));
 }
 
 DebugPresenter::~DebugPresenter() {
@@ -45,10 +34,6 @@ void DebugPresenter::NotifyFramePainted(double frame_time_in_ms) {
   display_->SetRenderTime(frame_time_in_ms);
 }
 
-void DebugPresenter::NotifyDebugStateChanged(const string16& state) {
-  display_->SetDebugState(state);
-}
-
 void DebugPresenter::ReadFileOnFILE(FilePath path, std::string* result) {
   file_util::ReadFileToString(path, result);
 }
@@ -60,4 +45,30 @@ void DebugPresenter::FileLoadCompleted(
   display_->SetFileName(path);
   display_->SetFileData(*result);
   delete result;
+}
+
+void DebugPresenter::SetDebugCore(base::WeakPtr<DebugCoreGdb> debug_core) {
+  debug_core_ = debug_core;
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::SetDebugNotification,
+                 debug_core_,
+                 this));
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::LoadProcess,
+                 debug_core,
+                 binary_,
+                 L"", std::vector<string16>(), L""));
+}
+
+void DebugPresenter::OnStoppedAtBreakpoint(
+    const StoppedAtBreakpointData& data) {
+  std::string* result = new std::string;
+  // TODO(scottmg): Need to relativize to binary location (or search in some
+  // reasonable way anyway).
+  FilePath path(string16(L"test_data/") + data.frame.filename);
+  AppThread::PostTaskAndReply(AppThread::FILE, FROM_HERE,
+    base::Bind(&DebugPresenter::ReadFileOnFILE,
+               base::Unretained(this), path, result),
+    base::Bind(&DebugPresenter::FileLoadCompleted,
+               base::Unretained(this), path, result));
 }

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "base/logging.h"
+#include "sg/app_thread.h"
 #include "sg/application_window.h"
 #include "sg/backend/debug_core_gdb.h"
 #include "sg/debug_presenter.h"
@@ -22,19 +23,15 @@ Application::Application() {
   presenter_.reset(new DebugPresenter(source_files_.get()));
   presenter_->SetDisplay(workspace_.get());
   main_window_->SetDebugPresenterNotify(presenter_.get());
-  /*
-  debug_connection_.reset(new DebugConnectionNativeWin(presenter_.get()));
-  std::vector<string16> empty_environment;
-  string16 error;
-  Process* p = debug_connection_->ProcessCreate(
-      L"test_data\\test_binary.exe",
-      L"this is stuff",
-      empty_environment,
-      L"test_data",
-      &error);
-  DCHECK(p) << "couldn't launch test_binary.exe";
-  */
+  AppThread::PostTaskAndReplyWithResult(
+      AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::Create),
+      base::Bind(&Application::ConnectDebugCore, base::Unretained(this)));
 }
 
 Application::~Application() {
+}
+
+void Application::ConnectDebugCore(base::WeakPtr<DebugCoreGdb> debug_core) {
+  presenter_->SetDebugCore(debug_core);
 }
