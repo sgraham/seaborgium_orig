@@ -7,6 +7,7 @@
 #include "base/bind.h"
 #include "base/command_line.h"
 #include "base/file_util.h"
+#include "base/string_util.h"
 #include "sg/app_thread.h"
 #include "sg/backend/debug_core_gdb.h"
 #include "sg/debug_presenter_display.h"
@@ -19,7 +20,7 @@ DebugPresenter::DebugPresenter(SourceFiles* source_files)
   if (command_line.GetArgs().size() != 1)
     binary_ = L"test_data/test_binary_mingw.exe";
   else
-    binary_ = command_line.GetArgs()[0];
+    ReplaceChars(command_line.GetArgs()[0], L"\\", L"/", &binary_);
 }
 
 DebugPresenter::~DebugPresenter() {
