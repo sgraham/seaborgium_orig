@@ -25,6 +25,7 @@ namespace {
 // TODO(rendering): Font line height.
 const int g_line_height = 16;
 Gwen::Texture g_pc_indicator_texture;
+Gwen::Texture g_breakpoint_texture;
 
 
 // TODO(scottmg): Losing last line if doesn't end in \n.
@@ -69,6 +70,7 @@ SourceView::SourceView(const Skin& skin)
   font_.facename = L"Consolas";
   font_.size = 13.f;
   g_pc_indicator_texture.name = "art/pc-location.png";
+  g_breakpoint_texture.name = "art/breakpoint.png";
 }
 
 void SourceView::SetData(const std::string& utf8_text) {
@@ -123,6 +125,9 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   // TODO(rendering): Hacky.
   if (!g_pc_indicator_texture.data) {
     renderer->LoadTexture(&g_pc_indicator_texture);
+  }
+  if (!g_breakpoint_texture.data) {
+    renderer->LoadTexture(&g_breakpoint_texture);
   }
 
   // Ease to target.

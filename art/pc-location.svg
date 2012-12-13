@@ -60,7 +60,7 @@
     </linearGradient>
     <radialGradient
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.046729,0,0,1.55761,-19.51799,3.452086)"
+       gradientTransform="matrix(2.046729,-3.749427e-16,2.853404e-16,1.557610,-19.51799,3.452086)"
        r="17.171415"
        fy="2.8969381"
        fx="19.701141"
@@ -89,68 +89,8 @@
        fx="22.291636"
        fy="32.797512"
        r="16.9562"
-       gradientTransform="matrix(0.843022,0,0,1.020168,4.499298,1.381992)"
+       gradientTransform="matrix(0.843022,1.871885e-16,-2.265228e-16,1.020168,4.499298,1.381992)"
        gradientUnits="userSpaceOnUse" />
-    <filter
-       id="filter3987"
-       inkscape:label="Desaturate"
-       x="0"
-       y="0"
-       width="1"
-       height="1"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Render in shades of gray by reducing saturation to zero"
-       color-interpolation-filters="sRGB">
-      <feColorMatrix
-         id="feColorMatrix3989"
-         type="saturate"
-         values="0" />
-    </filter>
-    <filter
-       id="filter3991"
-       inkscape:label="Desaturate"
-       x="0"
-       y="0"
-       width="1"
-       height="1"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Render in shades of gray by reducing saturation to zero"
-       color-interpolation-filters="sRGB">
-      <feColorMatrix
-         id="feColorMatrix3993"
-         type="saturate"
-         values="0" />
-    </filter>
-    <filter
-       id="filter3995"
-       inkscape:label="Desaturate"
-       x="0"
-       y="0"
-       width="1"
-       height="1"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Render in shades of gray by reducing saturation to zero"
-       color-interpolation-filters="sRGB">
-      <feColorMatrix
-         id="feColorMatrix3997"
-         type="saturate"
-         values="0" />
-    </filter>
-    <filter
-       id="filter3999"
-       inkscape:label="Desaturate"
-       x="0"
-       y="0"
-       width="1"
-       height="1"
-       inkscape:menu="Color"
-       inkscape:menu-tooltip="Render in shades of gray by reducing saturation to zero"
-       color-interpolation-filters="sRGB">
-      <feColorMatrix
-         id="feColorMatrix4001"
-         type="saturate"
-         values="0" />
-    </filter>
   </defs>
   <sodipodi:namedview
      inkscape:window-y="-8"
@@ -162,9 +102,9 @@
      inkscape:grid-bbox="true"
      showgrid="false"
      inkscape:current-layer="layer1"
-     inkscape:cy="-76.580836"
-     inkscape:cx="55.097891"
-     inkscape:zoom="5.656854"
+     inkscape:cy="27.398876"
+     inkscape:cx="34.827552"
+     inkscape:zoom="11.313708"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="0.25490196"
@@ -226,32 +166,17 @@
     <path
        sodipodi:nodetypes="cccccccc"
        id="path8643"
-       d="m 8.5541875,15.517348 0,16.99442 12.9838125,0 0,8.545038 L 41.497835,24.150365 21.41919,7.1251168 l 0,8.3975352 -12.8650025,-0.0053 z"
-       style="color:#000000;fill:url(#radialGradient2597);fill-opacity:1;fill-rule:evenodd;stroke:#3a7304;stroke-width:1.00000036;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3995)"
-       inkscape:export-filename="D:\src\seaborgium\art\pc-location.png"
-       inkscape:export-xdpi="169.82001"
-       inkscape:export-ydpi="169.82001"
-       inkscape:connector-curvature="0"
-       transform="matrix(1,0,0,0.97087352,0,0.20752958)" />
+       d="M 8.5541875,15.517348 L 8.5541875,32.511768 L 21.538,32.511768 L 21.538,41.056806 L 41.497835,24.150365 L 21.41919,7.1251168 L 21.41919,15.522652 L 8.5541875,15.517348 z "
+       style="opacity:1;color:#000000;fill:url(#radialGradient2597);fill-opacity:1;fill-rule:evenodd;stroke:#3a7304;stroke-width:1.00000036;stroke-linecap:round;stroke-linejoin:round;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible" />
     <path
        sodipodi:nodetypes="cccccc"
        id="path8645"
-       d="m 21.962385,8.2485033 0,7.8064747 -12.8171699,0 0,9.040713 c 17.7499999,2 16.6335369,-7.455288 31.3835369,-0.955288 L 21.962385,8.2485033 z"
-       style="opacity:0.5080214;color:#000000;fill:url(#radialGradient8656);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3991)"
-       inkscape:export-filename="D:\src\seaborgium\art\pc-location.png"
-       inkscape:export-xdpi="169.82001"
-       inkscape:export-ydpi="169.82001"
-       inkscape:connector-curvature="0"
-       transform="matrix(1,0,0,0.97087352,0,0.20752958)" />
+       d="M 21.962385,8.2485033 L 21.962385,16.054978 L 9.1452151,16.054978 L 9.1452151,25.095691 C 26.895215,27.095691 25.778752,17.640403 40.528752,24.140403 L 21.962385,8.2485033 z "
+       style="opacity:0.5080214;color:#000000;fill:url(#radialGradient8656);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible" />
     <path
-       style="opacity:0.48128339;color:#000000;fill:none;stroke:#ffffff;stroke-width:1.00000036;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3987)"
-       d="m 9.537702,16.561892 0,14.98444 12.985367,0 0,7.395166 17.478014,-14.795691 -17.493975,-14.7804004 0,7.2013824 -12.969406,-0.0049 z"
+       style="opacity:0.48128339;color:#000000;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:1.00000036;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible"
+       d="M 9.537702,16.561892 L 9.537702,31.546332 L 22.523069,31.546332 L 22.523069,38.941498 L 40.001083,24.145807 L 22.507108,9.3654066 L 22.507108,16.566789 L 9.537702,16.561892 z "
        id="path8658"
-       sodipodi:nodetypes="cccccccc"
-       inkscape:export-filename="D:\src\seaborgium\art\pc-location.png"
-       inkscape:export-xdpi="169.82001"
-       inkscape:export-ydpi="169.82001"
-       inkscape:connector-curvature="0"
-       transform="matrix(1,0,0,0.97087352,0,0.20752958)" />
+       sodipodi:nodetypes="cccccccc" />
   </g>
 </svg>
