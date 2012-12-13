@@ -1,0 +1,15 @@
+To build:
+
+In a VS2010 prompt (cl, link, etc. in the PATH):
+
+  build\env.bat             :: or otherwise get Win8 SDK set in LIB and INCLUDE
+  python build\configure.py --debug
+  third_party\ninja\ninja       :: build\env.bat also puts this dir in the PATH
+  out\sg_test
+  out\sg
+
+Currently, you'll have to also have Python 2.7 (x86) installed. Available:
+
+  http://www.python.org/download/releases/2.7.3/
+
+or some tests and the main binary will fail.
