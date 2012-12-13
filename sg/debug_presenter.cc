@@ -4,6 +4,8 @@
 
 #include "sg/debug_presenter.h"
 
+#include <vector>
+
 #include "base/bind.h"
 #include "base/command_line.h"
 #include "base/file_util.h"
@@ -46,8 +48,7 @@ bool DebugPresenter::NotifyKey(
         base::Bind(&DebugCoreGdb::StepOver,
                    debug_core_));
     return true;
-  }
-  else if (key == kF11 && down && modifiers.None()) {
+  } else if (key == kF11 && down && modifiers.None()) {
     AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
         base::Bind(&DebugCoreGdb::StepIn,
                    debug_core_));

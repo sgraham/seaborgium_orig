@@ -6,6 +6,7 @@
 #define SG_DEBUG_PRESENTER_DISPLAY_H_
 
 #include <string>
+#include <vector>
 
 #include "base/file_util.h"
 

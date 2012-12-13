@@ -4,6 +4,8 @@
 
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "base/at_exit.h"
 #include "base/memory/weak_ptr.h"
 #include "base/message_loop.h"

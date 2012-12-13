@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_H
-#define SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_H
+#ifndef SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_
+#define SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_
+
+#include <string>
+#include <vector>
 
 #include "sg/backend/backend.h"
 #include "sg/backend/gdb_mi_parse.h"
@@ -24,4 +27,4 @@ StoppedAfterSteppingData StoppedAfterSteppingDataFromRecordResults(
 
 RetrievedStackData RetrievedStackDataFromList(base::Value* list_value);
 
-#endif  // SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_H
+#endif  // SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_

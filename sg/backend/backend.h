@@ -45,7 +45,6 @@ class DebugNotification {
   virtual void OnStoppedAfterStepping(const StoppedAfterSteppingData& data) {}
   virtual void OnRetrievedStack(const RetrievedStackData& data) {}
   virtual void OnRetrievedLocals(const RetrievedLocalsData& data) {}
-  //virtual void OnProcessContinue() {}
 };
 
 class ThreadCallStack {

@@ -20,7 +20,7 @@ namespace {
 const int g_line_height = 17;
 Gwen::Texture g_pc_indicator_texture;
 
-}
+}  // namespace
 
 StackView::StackView(const Skin& skin) : Contents(skin), active_(-1) {
   // TODO(rendering): Share with source view.

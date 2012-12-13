@@ -102,11 +102,11 @@ void Subprocess::Init() {
 
   CHECK(DuplicateHandle(GetCurrentProcess(), input_temp,
                         GetCurrentProcess(), &input_pipe_,
-                        0, FALSE, // Uninheritable.
+                        0, FALSE,  // Uninheritable.
                         DUPLICATE_SAME_ACCESS));
   CHECK(DuplicateHandle(GetCurrentProcess(), output_temp,
                         GetCurrentProcess(), &output_pipe_,
-                        0, FALSE, // Uninheritable.
+                        0, FALSE,  // Uninheritable.
                         DUPLICATE_SAME_ACCESS));
   CHECK(CloseHandle(input_temp));
   CHECK(CloseHandle(output_temp));

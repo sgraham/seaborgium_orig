@@ -24,8 +24,8 @@
 class ReaderWriter;
 
 class DebugCoreGdb : public base::NonThreadSafe,
-                     public base::SupportsWeakPtr<DebugCoreGdb>
-                     /*, public DebugCore*/ {
+                     public base::SupportsWeakPtr<DebugCoreGdb> {
+                     /*, public DebugCore*/
  public:
   DebugCoreGdb();
   virtual ~DebugCoreGdb();

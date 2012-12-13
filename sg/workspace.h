@@ -6,6 +6,7 @@
 #define SG_WORKSPACE_H_
 
 #include <string>
+#include <vector>
 
 #include "sg/debug_presenter_display.h"
 #include "sg/ui/container.h"

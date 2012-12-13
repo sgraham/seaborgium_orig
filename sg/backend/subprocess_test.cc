@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "base/bind.h"
 #include "base/message_loop.h"
 #include "base/threading/thread.h"
@@ -75,7 +77,7 @@ void TestIOHandler::DoRead() {
   BOOL result = ReadFile(file_, buffer_, size(), &read, context());
   if (!result) {
     EXPECT_TRUE(ERROR_IO_PENDING == GetLastError() ||
-                ERROR_BROKEN_PIPE == GetLastError()); // Pipe closed already.
+                ERROR_BROKEN_PIPE == GetLastError());  // Pipe closed already.
   }
   reading_ = true;
 }

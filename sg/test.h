@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef SG_TEST_H_
+#define SG_TEST_H_
+
+#include <gtest/gtest.h>
+
 #include "base/basictypes.h"
 
 #if defined(OS_WIN) && !defined(NDEBUG)
-#include <crtdbg.h>
+#include <crtdbg.h>  // NOLINT
 #endif
-
-#include <gtest/gtest.h>
 
 class LeakCheckTest : public testing::Test {
  public:
@@ -42,3 +45,5 @@ class LeakCheckTest : public testing::Test {
     FAIL() << "Memory leaks detected.";
   }
 };
+
+#endif  // SG_TEST_H_

@@ -4,6 +4,9 @@
 
 #include "sg/backend/debug_core_gdb.h"
 
+#include <list>
+#include <string>
+
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
