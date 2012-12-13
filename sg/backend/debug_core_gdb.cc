@@ -8,6 +8,7 @@
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop.h"
+#include "base/string_number_conversions.h"
 #include "base/string16.h"
 #include "base/utf_string_conversions.h"
 #include "sg/app_thread.h"
@@ -90,6 +91,19 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
     for (size_t i = 0; i < output->size(); ++i) {
       const GdbRecord* record = output->at(i);
       switch (record->record_type()) {
+        case GdbRecord::RT_RESULT_RECORD:
+          if (record->ResultClass() == "done") {
+            if (record->results().size() == 1 &&
+                record->results()[0]->variable() == "stack") {
+              RetrievedStackData data =
+                  RetrievedStackDataFromList(record->results()[0]->value());
+              AppThread::PostTask(AppThread::UI, FROM_HERE,
+                  base::Bind(&DebugNotification::OnRetrievedStack,
+                             base::Unretained(debug_notification_), data));
+              continue;
+            }
+          }
+          goto notimplemented;
         case GdbRecord::RT_EXEC_ASYNC_OUTPUT:
           if (record->AsyncClass() == "stopped") {
             std::string reason = FindStringValue("reason", record->results());
@@ -109,8 +123,9 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
               continue;
             }
           }
-          // Fallthrough to see unhandled sub-types.
+          goto notimplemented;
         default:
+        notimplemented:
           NOTIMPLEMENTED() << ", " << record->record_type() << ": " <<
             record->primary_identifier();
       }
@@ -171,7 +186,7 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
   DebugNotification* debug_notification_;
 };
 
-DebugCoreGdb::DebugCoreGdb() {
+DebugCoreGdb::DebugCoreGdb() : token_(0) {
   CHECK(gdb_.Start(L"gdb_win_binaries/gdb-python27.exe",
                    L"--fullname -nx --interpreter=mi2 --quiet"));
   reader_writer_.reset(new ReaderWriter(
@@ -205,6 +220,28 @@ void DebugCoreGdb::SendCommand(const string16& arg0,
   reader_writer_->SendString(command);
 }
 
+void DebugCoreGdb::SendCommand(int64 token, const string16& arg0) {
+  string16 command = base::Int64ToString16(token) + arg0 + L"\r\n";
+  reader_writer_->SendString(command);
+}
+
+void DebugCoreGdb::SendCommand(int64 token,
+                               const string16& arg0,
+                               const string16& arg1) {
+  string16 command = base::Int64ToString16(token) +
+                     arg0 + L" " + arg1 + L"\r\n";
+  reader_writer_->SendString(command);
+}
+
+void DebugCoreGdb::SendCommand(int64 token,
+                               const string16& arg0,
+                               const string16& arg1,
+                               const string16& arg2) {
+  string16 command = base::Int64ToString16(token) +
+                     arg0 + L" " + arg1 + L" " + arg2 + L"\r\n";
+  reader_writer_->SendString(command);
+}
+
 void DebugCoreGdb::LoadProcess(
     const string16& application,
     const string16& command_line,
@@ -225,6 +262,16 @@ void DebugCoreGdb::StepOver() {
 
 void DebugCoreGdb::StepIn() {
   SendCommand(L"-exec-step");
+}
+
+void DebugCoreGdb::GetStack() {
+  SendCommand(token_, L"-stack-list-frames");
+  // return token_++;
+}
+
+void DebugCoreGdb::GetLocals() {
+  SendCommand(token_++, L"-stack-list-variables", L"--simple-values");
+  // return token_++;
 }
 
 void DebugCoreGdb::StopDebugging() {

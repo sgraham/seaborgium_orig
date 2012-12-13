@@ -36,10 +36,14 @@ class DebugPresenter : public DebugPresenterNotify,
       const StoppedAtBreakpointData& data) OVERRIDE;
   virtual void OnStoppedAfterStepping(
       const StoppedAfterSteppingData& data) OVERRIDE;
+  virtual void OnRetrievedStack(const RetrievedStackData& data) OVERRIDE;
 
  private:
   void ReadFileOnFILE(FilePath path, std::string* result);
   void FileLoadCompleted(FilePath path, std::string* result);
+
+  // On stopping, starts requests for stack, values of locals, etc.
+  void UpdatePassiveDisplays();
 
   string16 binary_;
   DebugPresenterDisplay* display_;

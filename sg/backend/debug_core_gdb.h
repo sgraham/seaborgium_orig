@@ -44,6 +44,9 @@ class DebugCoreGdb : public base::NonThreadSafe,
 
   virtual void StopDebugging();
 
+  virtual void GetStack();
+  virtual void GetLocals();
+
   void DeleteSelf();
 
   static base::WeakPtr<DebugCoreGdb> Create();
@@ -58,6 +61,14 @@ class DebugCoreGdb : public base::NonThreadSafe,
   void SendCommand(const string16& arg0, const string16& arg1);
   void SendCommand(
       const string16& arg0, const string16& arg1, const string16& arg2);
+
+  void SendCommand(int64 token, const string16& arg0);
+  void SendCommand(int64 token, const string16& arg0, const string16& arg1);
+  void SendCommand(
+      int64 token, const string16& arg0, const string16& arg1,
+      const string16& arg2);
+
+  int64 token_;
 
   DISALLOW_COPY_AND_ASSIGN(DebugCoreGdb);
 };

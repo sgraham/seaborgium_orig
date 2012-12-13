@@ -36,3 +36,62 @@ async mode doesn't seem to work on windows, maybe only on remote targets?
 
 -gdb-set disassembly-flavor intel
 -data-disassemble -s $pc -e "$pc + 20" -- 0
+
+
+-thread-info
+^done,threads=[{id="1",target-id="Thread 11652.0x2c",frame={level="0",addr="0x004013a3",func="Function",args=[],file="test_binary.cc",line="15"},state="stopped"}],current-thread-id="1"
+(gdb)
+s
+&"s\n"
+^running
+*running,thread-id="all"
+(gdb)
+~"SubFunction (input=44) at test_binary.cc:11\n"
+~"11\tin test_binary.cc\n"
+*stopped,frame={addr="0x0040138f",func="SubFunction",args=[{name="input",value="44"}],file="test_binary.cc",line="11"},thread-id="1",stopped-threads="all"
+(gdb)
+-thread-inf
+^error,msg="Undefined MI command: thread-inf"
+(gdb)
+-thread-info
+^done,threads=[{id="1",target-id="Thread 11652.0x2c",frame={level="0",addr="0x0040138f",func="SubFunction",args=[{name="input",value="44"}],file="test_binary.cc",line="11"},state="stopped"}],current-thread-id="1"
+(gdb)
+n
+&"n\n"
+^running
+*running,thread-id="all"
+(gdb)
+~"12\tin test_binary.cc\n"
+*stopped,frame={addr="0x0040139b",func="SubFunction",args=[{name="input",value="44"}],file="test_binary.cc",line="12"},thread-id="1",stopped-threads="all"
+(gdb)
+-thread-info
+^done,threads=[{id="1",target-id="Thread 11652.0x2c",frame={level="0",addr="0x0040139b",func="SubFunction",args=[{name="input",value="44"}],file="test_binary.cc",line="12"},state="stopped"}],current-thread-id="1"
+(gdb)
+-stack-info-frame
+^done,frame={level="0",addr="0x0040139b",func="SubFunction",file="test_binary.cc",line="12"}
+(gdb)
+-stack-info-depth
+^done,depth="3"
+(gdb)
+-stack-list-arguments
+^error,msg="-stack-list-arguments: Usage: PRINT_VALUES [FRAME_LOW FRAME_HIGH]"
+(gdb)
+-stack-list-arguments 0
+^done,stack-args=[frame={level="0",args=[name="input"]},frame={level="1",args=[]},frame={level="2",args=[name="argc",name="argv"]}]
+(gdb)
+-stack-list-arguments 1
+^done,stack-args=[frame={level="0",args=[{name="input",value="44"}]},frame={level="1",args=[]},frame={level="2",args=[{name="argc",value="1"},{name="argv",value="0x352e00"}]}]
+(gdb)
+-stack-list-arguments 2
+^done,stack-args=[frame={level="0",args=[{name="input",type="int",value="44"}]},frame={level="1",args=[]},frame={level="2",args=[{name="argc",type="int",value="1"},{name="argv",type="char **",value="0x352e00"}]}]
+(gdb)
+-stack-list-frames
+^done,stack=[frame={level="0",addr="0x0040139b",func="SubFunction",file="test_binary.cc",line="12"},frame={level="1",addr="0x004013af",func="Function",file="test_binary.cc",line="15"},frame={level="2",addr="0x00401457",func="main",file="test_binary.cc",line="27"}]
+(gdb)
+-stack-list-locals
+^error,msg="-stack-list-locals: Usage: PRINT_VALUES"
+(gdb)
+-stack-list-locals 1
+^done,locals=[]
+(gdb)
+

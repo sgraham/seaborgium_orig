@@ -22,4 +22,6 @@ StoppedAtBreakpointData StoppedAtBreakpointDataFromRecordResults(
 StoppedAfterSteppingData StoppedAfterSteppingDataFromRecordResults(
     const std::vector<GdbRecordResult*>& results);
 
+RetrievedStackData RetrievedStackDataFromList(base::Value* list_value);
+
 #endif  // SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_H

@@ -68,14 +68,10 @@ void DebugPresenter::FileLoadCompleted(
 void DebugPresenter::SetDebugCore(base::WeakPtr<DebugCoreGdb> debug_core) {
   debug_core_ = debug_core;
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
-      base::Bind(&DebugCoreGdb::SetDebugNotification,
-                 debug_core_,
-                 this));
+      base::Bind(&DebugCoreGdb::SetDebugNotification, debug_core_, this));
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::LoadProcess,
-                 debug_core,
-                 binary_,
-                 L"", std::vector<string16>(), L""));
+                 debug_core, binary_, L"", std::vector<string16>(), L""));
 }
 
 void DebugPresenter::OnStoppedAtBreakpoint(
@@ -90,10 +86,22 @@ void DebugPresenter::OnStoppedAtBreakpoint(
     base::Bind(&DebugPresenter::FileLoadCompleted,
                base::Unretained(this), path, result));
   display_->SetProgramCounterLine(data.frame.line_number);
+  UpdatePassiveDisplays();
+}
+
+void DebugPresenter::OnRetrievedStack(const RetrievedStackData& data) {
 }
 
 void DebugPresenter::OnStoppedAfterStepping(
     const StoppedAfterSteppingData& data) {
   // TODO(scottmg): File change reload, etc.
   display_->SetProgramCounterLine(data.frame.line_number);
+  UpdatePassiveDisplays();
+}
+
+void DebugPresenter::UpdatePassiveDisplays() {
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::GetStack, debug_core_));
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::GetLocals, debug_core_));
 }

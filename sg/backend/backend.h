@@ -27,6 +27,15 @@ class StoppedAfterSteppingData {
   FrameData frame;
 };
 
+class RetrievedStackData {
+ public:
+  std::vector<FrameData> frames;
+};
+
+class RetrievedLocalsData {
+ public:
+};
+
 class DebugNotification {
  public:
   virtual ~DebugNotification() {}
@@ -34,6 +43,8 @@ class DebugNotification {
   virtual void OnProcessLoaded() {}
   virtual void OnStoppedAtBreakpoint(const StoppedAtBreakpointData& data) {}
   virtual void OnStoppedAfterStepping(const StoppedAfterSteppingData& data) {}
+  virtual void OnRetrievedStack(const RetrievedStackData& data) {}
+  virtual void OnRetrievedLocals(const RetrievedLocalsData& data) {}
   //virtual void OnProcessContinue() {}
 };
 

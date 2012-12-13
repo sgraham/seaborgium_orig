@@ -127,7 +127,7 @@ class GpuSystem {
           default_params->GetEnhancedContrast(),
           default_params->GetClearTypeLevel(),
           default_params->GetPixelGeometry(),
-          DWRITE_RENDERING_MODE_GDI_NATURAL,
+          DWRITE_RENDERING_MODE_NATURAL,
           &custom_params);
       if (FAILED(hr))
         return hr;

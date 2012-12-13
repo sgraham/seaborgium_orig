@@ -68,3 +68,17 @@ StoppedAfterSteppingData StoppedAfterSteppingDataFromRecordResults(
       FindDictionaryValue("frame", results));
   return data;
 }
+
+RetrievedStackData RetrievedStackDataFromList(base::Value* value) {
+  base::ListValue* list_value;
+  CHECK(value->GetAsList(&list_value));
+  RetrievedStackData data;
+  for (size_t i = 0; i < list_value->GetSize(); ++i) {
+    base::DictionaryValue* dict_value;
+    CHECK(list_value->GetDictionary(i, &dict_value));
+    base::DictionaryValue* frame_dict_value;
+    CHECK(dict_value->GetDictionary("frame", &frame_dict_value));
+    data.frames.push_back(FrameDataFromDictionaryValue(frame_dict_value));
+  }
+  return data;
+}
