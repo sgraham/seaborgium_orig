@@ -317,10 +317,11 @@ def main():
     ldflags += ['/INCREMENTAL']
   libs = []
   cxxflags = [
-      '/Fd$builddir\\sg_intermediate.pdb',
+      '/Fd$builddir\\sg_cxx_intermediate.pdb',
       ]
   ccflags = [
       '/DFT2_BUILD_LIBRARY', '/wd4146',
+      '/Fd$builddir\\sg_cc_intermediate.pdb',
       ]
 
   n.newline()
