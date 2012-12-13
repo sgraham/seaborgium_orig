@@ -90,6 +90,8 @@ void DebugPresenter::OnStoppedAtBreakpoint(
 }
 
 void DebugPresenter::OnRetrievedStack(const RetrievedStackData& data) {
+  // TODO(scottmg): Stack frame selection. Where should that live?
+  display_->SetStackData(data.frames, 0);
 }
 
 void DebugPresenter::OnStoppedAfterStepping(

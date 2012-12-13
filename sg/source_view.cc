@@ -23,7 +23,7 @@ namespace {
 
 // TODO(config):
 // TODO(rendering): Font line height.
-const int g_line_height = 16;
+const int g_line_height = 17;
 Gwen::Texture g_pc_indicator_texture;
 Gwen::Texture g_breakpoint_texture;
 

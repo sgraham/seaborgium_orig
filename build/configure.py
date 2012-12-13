@@ -394,6 +394,7 @@ def main():
                'source_files',
                'source_view',
                'status_bar',
+               'stack_view',
                'ui\\container',
                'ui\\contents',
                'ui\\focus',

@@ -10,6 +10,7 @@
 #include "sg/debug_presenter_notify.h"
 #include "sg/source_view.h"
 #include "sg/status_bar.h"
+#include "sg/stack_view.h"
 #include "sg/ui/container.h"
 #include "sg/ui/focus.h"
 #include "sg/ui/solid_color.h"
@@ -46,11 +47,14 @@ void Workspace::Init() {
   source_view_container_ = new Container(skin_);
   source_view_container_->AddChild(source_view_);
 
+  stack_view_ = new StackView(skin_);
+  stack_view_container_ = new Container(skin_);
+  stack_view_container_->AddChild(stack_view_, L"Stack");
+
   Contents* output = Placeholder(skin_, L"Output");
   Contents* log = Placeholder(skin_, L"Log");
   Contents* watch = Placeholder(skin_, L"Watch");
   Contents* locals = Placeholder(skin_, L"Locals");
-  Contents* stack = Placeholder(skin_, L"Stack");
   Contents* breakpoints = Placeholder(skin_, L"Breakpoints");
 
   bool is_landscape = GetClientRect().w > GetClientRect().h;
@@ -76,9 +80,9 @@ void Workspace::Init() {
     top->SetFraction(source_view_container_, .4);
     top->SetFraction(middle, .65);
 
-    middle->AddChild(stack);
+    middle->AddChild(stack_view_container_);
     middle->AddChild(breakpoints);
-    middle->SetFraction(stack, .75);
+    middle->SetFraction(stack_view_container_, .75);
 
     views->AddChild(watch);
     views->AddChild(locals);
@@ -96,7 +100,7 @@ void Workspace::Init() {
 
     Container* top_right = new Container(skin_);
     top_right->SetMode(Container::SplitVertical);
-    top_right->AddChild(stack);
+    top_right->AddChild(stack_view_container_);
     top_right->AddChild(breakpoints);
     first_row->AddChild(source_view_container_);
     first_row->AddChild(top_right);
@@ -170,6 +174,11 @@ void Workspace::SetDebugState(const string16& debug_state) {
 
 void Workspace::SetRenderTime(double frame_time_in_ms) {
   status_bar_->SetRenderTime(frame_time_in_ms);
+}
+
+void Workspace::SetStackData(
+    const std::vector<FrameData>& frame_data, int active) {
+  stack_view_->SetData(frame_data, active);
 }
 
 bool Workspace::NotifyMouseMoved(

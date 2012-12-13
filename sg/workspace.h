@@ -16,6 +16,7 @@ class ApplicationWindow;
 class Container;
 class DebugPresenterNotify;
 class SourceView;
+class StackView;
 class StatusBar;
 
 class Workspace : public Container,
@@ -45,6 +46,8 @@ class Workspace : public Container,
   virtual void SetFileName(const FilePath& filename) OVERRIDE;
   virtual void SetFileData(const std::string& utf8_text) OVERRIDE;
   virtual void SetProgramCounterLine(int line_number) OVERRIDE;
+  virtual void SetStackData(
+      const std::vector<FrameData>& frame_data, int active) OVERRIDE;
   virtual void SetDebugState(const string16& debug_state) OVERRIDE;
   virtual void SetRenderTime(double ms_per_frame) OVERRIDE;
 
@@ -56,6 +59,8 @@ class Workspace : public Container,
 
   SourceView* source_view_;
   Container* source_view_container_;
+  StackView* stack_view_;
+  Container* stack_view_container_;
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;
 };
