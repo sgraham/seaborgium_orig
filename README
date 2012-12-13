@@ -4,7 +4,7 @@ In a VS2010 prompt (cl, link, etc. in the PATH):
 
   build\env.bat             :: or otherwise get Win8 SDK set in LIB and INCLUDE
   python build\configure.py --debug
-  third_party\ninja\ninja       :: build\env.bat also puts this dir in the PATH
+  third_party\ninja\ninja   :: build\env.bat also puts this dir in the PATH
   out\sg_test
   out\sg
 
