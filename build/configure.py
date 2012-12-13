@@ -476,11 +476,11 @@ def main():
   gtest_cflags = cflags + gtest_all_incs
   test_objs += n.build(built('gtest-all' + objext), 'cxx',
                        inputs=os.path.join(path, 'src', 'gtest-all.cc'),
-                       implicit=built('sg.pch'),
+                       implicit=pch_implicit,
                        variables=[('cflags', gtest_cflags)])
   test_objs += n.build(built('gtest_main' + objext), 'cxx',
                        inputs='sg/main_test.cc',
-                       implicit=built('sg.pch'),
+                       implicit=pch_implicit,
                        variables=[('cflags', gtest_cflags)])
 
   test_cflags = cflags + ['-DGTEST_HAS_RTTI=0',
@@ -509,7 +509,7 @@ def main():
   reader_writer_objs += cxx('backend\\reader_writer_test')
   reader_writer_test = n.build(binary('reader_writer_test'), 'link',
                                inputs=reader_writer_objs,
-                               implicit=built('sg.pch'),
+                               implicit=pch_implicit,
                                order_only=sg_binary,
                                variables=[('ldflags', test_ldflags)])
   all_targets += reader_writer_test
