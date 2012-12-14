@@ -40,24 +40,23 @@
 #include "sg/render/texture.h"
 
 struct FontData {
-  IDWriteTextFormat*pTextFormat;
+  IDWriteTextFormat* text_format;
 };
 
 struct TextureData {
-  ID2D1Bitmap* pBitmap;  // device-specific
-  IWICBitmapSource* pWICBitmap;
+  ID2D1Bitmap* bitmap;  // device-specific
+  IWICBitmapSource* wic_bitmap;
 };
 
 
 Direct2DRenderer::Direct2DRenderer(
-    ID2D1RenderTarget* pRT,
-    IDWriteFactory* pDWriteFactory,
-    IWICImagingFactory* pWICFactory)
-    : color_(D2D1::ColorF::White) {
-  DeviceAcquired(pRT);
-
-  dwrite_factory_ = pDWriteFactory;
-  wic_factory_ = pWICFactory;
+    ID2D1RenderTarget* rt,
+    IDWriteFactory* dwrite_factory,
+    IWICImagingFactory* wic_factory)
+    : dwrite_factory_(dwrite_factory),
+      wic_factory_(wic_factory),
+      color_(D2D1::ColorF::White) {
+  DeviceAcquired(rt);
 }
 
 Direct2DRenderer::~Direct2DRenderer() {
@@ -66,97 +65,97 @@ Direct2DRenderer::~Direct2DRenderer() {
 void Direct2DRenderer::DrawFilledRect(Rect rect) {
   TranslateByRenderOffset(&rect);
   if (solid_color_brush_)
-    rt_->FillRectangle(D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h), solid_color_brush_);
+    rt_->FillRectangle(
+        D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h),
+        solid_color_brush_);
 }
 
 void Direct2DRenderer::SetDrawColor(Color color) {
-  color_ = D2D1::ColorF(color.r / 255.0f , color.g / 255.0f , color.b / 255.0f , color.a / 255.0f);
+  color_ = D2D1::ColorF(
+      color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
   solid_color_brush_->SetColor(color_);
 }
 
-bool Direct2DRenderer::InternalLoadFont(Font* pFont) {
-  IDWriteTextFormat* pTextFormat = NULL;
+bool Direct2DRenderer::InternalLoadFont(Font* font) {
+  IDWriteTextFormat* text_format = NULL;
 
   HRESULT hr = dwrite_factory_->CreateTextFormat(
-      pFont->facename.c_str(),
+      font->facename.c_str(),
       NULL,
-      pFont->bold ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
+      font->bold ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
       DWRITE_FONT_STYLE_NORMAL,
       DWRITE_FONT_STRETCH_NORMAL,
-      pFont->size,
+      font->size,
       L"",
-      &pTextFormat
-     );
+      &text_format);
 
-  if (SUCCEEDED(hr))
-  {
-    FontData* pFontData = new FontData();
-
-    pFontData->pTextFormat = pTextFormat;
-
-    pFont->data = pFontData;
+  if (SUCCEEDED(hr)) {
+    FontData* fontData = new FontData();
+    fontData->text_format = text_format;
+    font->data = fontData;
     return true;
   }
 
   return false;
 }
 
-void Direct2DRenderer::LoadFont(Font* pFont) {
-  if (InternalLoadFont(pFont))
-    font_list_.push_back(pFont);
+void Direct2DRenderer::LoadFont(Font* font) {
+  if (InternalLoadFont(font))
+    font_list_.push_back(font);
 }
 
-void Direct2DRenderer::InternalFreeFont(Font* pFont, bool bRemove) {
+void Direct2DRenderer::InternalFreeFont(Font* font, bool bRemove) {
   if (bRemove)
-    font_list_.remove(pFont);
+    font_list_.remove(font);
 
-  if (!pFont->data) return;
+  if (!font->data)
+    return;
 
-  FontData* pFontData = (FontData*) pFont->data;
-
-  pFontData->pTextFormat->Release();
-
-  delete pFontData;
-  pFont->data = NULL;
+  FontData* fontData = (FontData*) font->data;
+  fontData->text_format->Release();
+  delete fontData;
+  font->data = NULL;
 }
 
-void Direct2DRenderer::FreeFont(Font* pFont) {
-  InternalFreeFont(pFont);
+void Direct2DRenderer::FreeFont(Font* font) {
+  InternalFreeFont(font);
 }
 
-void Direct2DRenderer::RenderText(Font* pFont, Point pos, const string16& text) {
+void Direct2DRenderer::RenderText(Font* font, Point pos, const string16& text) {
   // If the font doesn't exist, or the font size should be changed
-  if (!pFont->data)
-  {
-    InternalFreeFont(pFont, false);
-    InternalLoadFont(pFont);
+  if (!font->data) {
+    InternalFreeFont(font, false);
+    InternalLoadFont(font);
   }
 
-  FontData* pFontData = (FontData*) pFont->data;
+  FontData* fontData = (FontData*) font->data;
 
   TranslateByRenderOffset(&pos.x, &pos.y);
 
-  if (solid_color_brush_)
-  {
-    rt_->DrawTextW(text.c_str(), text.length(), pFontData->pTextFormat, D2D1::RectF(pos.x, pos.y, pos.x + 50000, pos.y + 50000), solid_color_brush_);
+  if (solid_color_brush_) {
+    rt_->DrawTextW(
+        text.c_str(),
+        text.length(),
+        fontData->text_format,
+        D2D1::RectF(pos.x, pos.y, pos.x + 50000, pos.y + 50000),
+        solid_color_brush_);
   }
 }
 
-Point Direct2DRenderer::MeasureText(Font* pFont, const string16& text) {
-  // If the font doesn't exist, or the font size should be changed
-  if (!pFont->data)
-  {
-    InternalFreeFont(pFont, false);
-    InternalLoadFont(pFont);
+Point Direct2DRenderer::MeasureText(Font* font, const string16& text) {
+  // If the font doesn't exist.
+  if (!font->data) {
+    InternalFreeFont(font, false);
+    InternalLoadFont(font);
   }
 
-  FontData* pFontData = (FontData*) pFont->data;
+  FontData* fontData = (FontData*) font->data;
 
   Point size;
   IDWriteTextLayout* pLayout;
   DWRITE_TEXT_METRICS metrics;
 
-  dwrite_factory_->CreateTextLayout(text.c_str(), text.length(), pFontData->pTextFormat, 50000, 50000, &pLayout);
+  dwrite_factory_->CreateTextLayout(text.c_str(), text.length(), fontData->text_format, 50000, 50000, &pLayout);
 
   pLayout->GetMetrics(&metrics);
 
@@ -167,26 +166,25 @@ Point Direct2DRenderer::MeasureText(Font* pFont, const string16& text) {
 }
 
 void Direct2DRenderer::DeviceLost() {
-  if (solid_color_brush_ != NULL)
-  {
+  if (solid_color_brush_ != NULL) {
     solid_color_brush_->Release();
     solid_color_brush_ = NULL;
   }
 
-  for (std::list<Texture*>::const_iterator tex_it = texture_list_.begin(); tex_it != texture_list_.end(); ++tex_it)
-  {
+  for (std::list<Texture*>::const_iterator tex_it = texture_list_.begin();
+       tex_it != texture_list_.end(); ++tex_it) {
     InternalFreeTexture(*tex_it, false);
   }
 }
 
-void Direct2DRenderer::DeviceAcquired(ID2D1RenderTarget* pRT) {
-  rt_ = pRT;
+void Direct2DRenderer::DeviceAcquired(ID2D1RenderTarget* rt) {
+  rt_ = rt;
 
   HRESULT hr = rt_->CreateSolidColorBrush(color_, &solid_color_brush_);
   (void)hr;
 
-  for (std::list<Texture*>::const_iterator tex_it = texture_list_.begin(); tex_it != texture_list_.end(); ++tex_it)
-  {
+  for (std::list<Texture*>::const_iterator tex_it = texture_list_.begin();
+       tex_it != texture_list_.end(); ++tex_it) {
     InternalLoadTexture(*tex_it);
   }
 }
@@ -194,7 +192,8 @@ void Direct2DRenderer::DeviceAcquired(ID2D1RenderTarget* pRT) {
 void Direct2DRenderer::StartClip() {
   Rect rect = ClipRegion();
 
-  D2D1_RECT_F r = D2D1::RectF(rect.x, rect.y, (rect.x + rect.w), (rect.y + rect.h));
+  D2D1_RECT_F r =
+      D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
 
   rt_->PushAxisAlignedClip(r, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
 }
@@ -203,30 +202,34 @@ void Direct2DRenderer::EndClip() {
   rt_->PopAxisAlignedClip();
 }
 
-void Direct2DRenderer::DrawTexturedRectAlpha(Texture* texture, Rect rect, float alpha, float u1, float v1, float u2, float v2) {
-  TextureData* pTexData = (TextureData*) texture->data;
+void Direct2DRenderer::DrawTexturedRectAlpha(
+    Texture* texture,
+    Rect rect,
+    float alpha,
+    float u1, float v1, float u2, float v2) {
+  TextureData* tex_data = (TextureData*) texture->data;
 
   // Missing image, not loaded properly?
-  if (!pTexData || pTexData->pBitmap == NULL) 
+  if (!texture || tex_data->bitmap == NULL)
     return DrawMissingImage(rect);
 
   TranslateByRenderOffset(&rect);
 
-  rt_->DrawBitmap(pTexData->pBitmap,
-      D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h), 
+  rt_->DrawBitmap(tex_data->bitmap,
+      D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h),
       alpha, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
       D2D1::RectF(u1 * texture->width, v1 * texture->height, u2 * texture->width, v2 * texture->height)
      );
 }
 
-bool Direct2DRenderer::InternalLoadTexture(Texture* pTexture) {
+bool Direct2DRenderer::InternalLoadTexture(Texture* texture) {
   IWICBitmapDecoder *pDecoder = NULL;
   IWICBitmapFrameDecode *pSource = NULL;
   IWICFormatConverter *pConverter = NULL;
   ID2D1Bitmap     *pD2DBitmap = NULL;
 
   HRESULT hr = wic_factory_->CreateDecoderFromFilename(
-      pTexture->name.c_str(),
+      texture->name.c_str(),
       NULL,
       GENERIC_READ,
       WICDecodeMetadataCacheOnLoad,
@@ -270,20 +273,20 @@ bool Direct2DRenderer::InternalLoadTexture(Texture* pTexture) {
   {
     TextureData* texdata = new TextureData();
 
-    texdata->pWICBitmap = pSource;
-    texdata->pBitmap = pD2DBitmap;
+    texdata->wic_bitmap = pSource;
+    texdata->bitmap = pD2DBitmap;
 
-    pTexture->data = texdata;
+    texture->data = texdata;
 
-    D2D1_SIZE_F size = texdata->pBitmap->GetSize();
+    D2D1_SIZE_F size = texdata->bitmap->GetSize();
 
-    pTexture->width = size.width;
-    pTexture->height = size.height;
-    pTexture->failed = false;
+    texture->width = size.width;
+    texture->height = size.height;
+    texture->failed = false;
   }
   else
   {
-    pTexture->failed = true;
+    texture->failed = true;
   }
 
   if (pDecoder != NULL)
@@ -295,50 +298,39 @@ bool Direct2DRenderer::InternalLoadTexture(Texture* pTexture) {
   return SUCCEEDED(hr);
 }
 
-void Direct2DRenderer::LoadTexture(Texture* pTexture) {
-  if (InternalLoadTexture(pTexture))
-    texture_list_.push_back(pTexture);
+void Direct2DRenderer::LoadTexture(Texture* texture) {
+  if (InternalLoadTexture(texture))
+    texture_list_.push_back(texture);
 }
 
-void Direct2DRenderer::InternalFreeTexture(Texture* pTexture, bool bRemove) {
+void Direct2DRenderer::InternalFreeTexture(Texture* texture, bool bRemove) {
   if (bRemove)
-    texture_list_.remove(pTexture);
+    texture_list_.remove(texture);
 
-  if (pTexture->data != NULL)
-  {
-    TextureData* texdata = (TextureData*)pTexture->data;
-
-    if (texdata->pWICBitmap != NULL)
-      texdata->pWICBitmap->Release();
-
-    if (texdata->pBitmap != NULL)
-      texdata->pBitmap->Release();
-
-    delete texdata;
+  if (texture->data != NULL) {
+    TextureData* tex_data = (TextureData*)texture->data;
+    if (tex_data->wic_bitmap != NULL)
+      tex_data->wic_bitmap->Release();
+    if (tex_data->bitmap != NULL)
+      tex_data->bitmap->Release();
+    delete tex_data;
   }
 
-  pTexture->data = NULL;
+  texture->data = NULL;
 }
 
-void Direct2DRenderer::FreeTexture(Texture* pTexture)
-{
-  InternalFreeTexture(pTexture);
+void Direct2DRenderer::FreeTexture(Texture* texture) {
+  InternalFreeTexture(texture);
 }
 
 void Direct2DRenderer::Release() {
-  std::list<Texture*>::iterator tex_it = texture_list_.begin();
-
-  while (tex_it != texture_list_.end())
-  {
-    FreeTexture(*tex_it);
-    tex_it = texture_list_.begin();
+  while (!texture_list_.empty()) {
+    FreeTexture(texture_list_.front());
+    texture_list_.pop_front();
   }
 
-  std::list<Font*>::iterator it = font_list_.begin();
-
-  while (it != font_list_.end())
-  {
-    FreeFont(*it);
-    it = font_list_.begin();
+  while (!font_list_.empty()) {
+    FreeFont(font_list_.front());
+    font_list_.pop_front();
   }
 }

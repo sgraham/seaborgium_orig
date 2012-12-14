@@ -47,9 +47,9 @@ class Texture;
 
 class Direct2DRenderer : public Renderer {
  public:
-  Direct2DRenderer(ID2D1RenderTarget* pDevice,
-                   IDWriteFactory* pDWriteFactory,
-                   IWICImagingFactory* pWICFactory);
+  Direct2DRenderer(ID2D1RenderTarget* device,
+                   IDWriteFactory* dwrite_factory,
+                   IWICImagingFactory* wic_factory);
   ~Direct2DRenderer();
 
   virtual void Release();
@@ -58,48 +58,46 @@ class Direct2DRenderer : public Renderer {
 
   virtual void DrawFilledRect(Rect rect);
 
-  virtual void LoadFont(Font* pFont);
-  virtual void FreeFont(Font* pFont);
-  virtual void RenderText(Font* pFont, Point pos, const string16& text);
-  virtual Point MeasureText(Font* pFont, const string16& text);
+  virtual void LoadFont(Font* font);
+  virtual void FreeFont(Font* font);
+  virtual void RenderText(Font* font, Point pos, const string16& text);
+  virtual Point MeasureText(Font* font, const string16& text);
 
   virtual void DeviceLost();
-  virtual void DeviceAcquired(ID2D1RenderTarget* pRT);
+  virtual void DeviceAcquired(ID2D1RenderTarget* rt);
 
   void StartClip();
   void EndClip();
 
   void DrawTexturedRectAlpha(
-      Texture* pTexture,
-      Rect pTargetRect,
+      Texture* texture,
+      Rect target_rect,
       float alpha,
       float u1, float v1, float u2, float v2);
-  void LoadTexture(Texture* pTexture);
-  void FreeTexture(Texture* pTexture);
+  void LoadTexture(Texture* texture);
+  void FreeTexture(Texture* texture);
 
  private:
   bool InternalCreateDeviceResources();
   void InternalReleaseDeviceResources();
 
+ private:
+  bool InternalLoadTexture(Texture* texture);
+  bool InternalLoadFont(Font* texture);
+
+  void InternalFreeFont(Font* texture, bool bRemove = true);
+  void InternalFreeTexture(Texture* texture, bool bRemove = true);
+
+ private:
+
+  IDWriteFactory* dwrite_factory_;
+  IWICImagingFactory* wic_factory_;
+  ID2D1RenderTarget* rt_;
   ID2D1Factory* d2d_factory_;
   HWND hwnd_;
 
- private:
-  bool InternalLoadTexture(Texture* pTexture);
-  bool InternalLoadFont(Font* pFont);
-
-  void InternalFreeFont(Font* pFont, bool bRemove = true);
-  void InternalFreeTexture(Texture* pTexture, bool bRemove = true);
-
- private:
-
-  IDWriteFactory*   dwrite_factory_;
-  IWICImagingFactory* wic_factory_;
-  ID2D1RenderTarget*  rt_;
-
   ID2D1SolidColorBrush* solid_color_brush_;
-
-  D2D1::ColorF    color_;
+  D2D1::ColorF color_;
 
   std::list<Texture*> texture_list_;
   std::list<Font*> font_list_;
