@@ -40,8 +40,9 @@ ScrollHelper::~ScrollHelper() {
 
 bool ScrollHelper::Update() {
   float delta = (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.2f;
+  int before = y_pixel_scroll_;
   y_pixel_scroll_ += delta;
-  if (fabs(delta) < 1) {
+  if (before == y_pixel_scroll_) {
     y_pixel_scroll_ = y_pixel_scroll_target_;
     ticks_since_stopped_moving_++;
     return ticks_since_stopped_moving_ <
@@ -106,7 +107,11 @@ bool ScrollHelper::ClampScrollTarget() {
   int largest_possible =
       data_provider_->GetContentSize() - num_pixels_in_line_;
   y_pixel_scroll_target_ = std::min(largest_possible, y_pixel_scroll_target_);
-  return y_pixel_scroll_ != y_pixel_scroll_target_;
+  // Not this, if we want the scrollbar to re-appear if, e.g. you press up
+  // while at the top of the document.
+  // return y_pixel_scroll_ != y_pixel_scroll_target_;
+  ticks_since_stopped_moving_ = 0;
+  return true;
 }
 
 bool ScrollHelper::ScrollPixels(int delta) {
