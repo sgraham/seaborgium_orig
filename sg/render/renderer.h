@@ -43,34 +43,33 @@ class Renderer {
   Renderer();
   virtual ~Renderer();
 
-  virtual void Init() {};
+  virtual void StartClip() = 0;
+  virtual void EndClip() = 0;
 
-  virtual void SetDrawColor(Color color) {}
+  virtual void SetDrawColor(Color color) = 0;
 
-  virtual void DrawFilledRect(Rect rect) {}
-
-  virtual void StartClip() {}
-  virtual void EndClip() {}
+  virtual void DrawFilledRect(Rect rect) = 0;
 
   virtual void LoadTexture(Texture* texture) = 0;
   virtual void FreeTexture(Texture* texture) = 0;
-  virtual void DrawTexturedRect(
-      Texture* texture,
-      Rect target_rect,
-      float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f);
   virtual void DrawTexturedRectAlpha(
       Texture* texture,
       Rect target_rect,
       float alpha,
       float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f) = 0;
   virtual void DrawMissingImage(Rect target_rect);
-  virtual Color PixelColour( Texture* texture, unsigned int x, unsigned int y, const Color& col_default = Color( 255, 255, 255, 255 ) ){ return col_default; }
 
 
-  virtual void LoadFont( Font* pFont ){};
-  virtual void FreeFont( Font* pFont ){};
+  virtual void LoadFont( Font* pFont ) = 0;
+  virtual void FreeFont( Font* pFont ) = 0;
   virtual void RenderText( Font* pFont, Point pos, const string16& text ) = 0;
   virtual Point MeasureText( Font* pFont, const string16& text ) = 0;
+
+
+  virtual void DrawTexturedRect(
+      Texture* texture,
+      Rect target_rect,
+      float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f);
 
  public:
 
