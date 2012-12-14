@@ -34,78 +34,72 @@
 
 #include <math.h>
 
-Renderer::Renderer()
-{
-    m_RenderOffset = Point( 0, 0 );
+Renderer::Renderer() : render_offset_(0, 0) {
 }
 
-Renderer::~Renderer()
-{
+Renderer::~Renderer() {
 }
 
-void Renderer::Translate( int& x, int& y )
-{
-    x += m_RenderOffset.x;
-    y += m_RenderOffset.y;
+void Renderer::TranslateByRenderOffset(int* x, int* y) {
+  *x += render_offset_.x;
+  *y += render_offset_.y;
 }
 
-void Renderer::Translate( Rect& rect )
-{
-    Translate( rect.x, rect.y );
+void Renderer::TranslateByRenderOffset(Rect* rect) {
+  TranslateByRenderOffset(&rect->x, &rect->y);
 }
 
-void Renderer::SetClipRegion( Rect rect )
+void Renderer::SetClipRegion(Rect rect) { 
+  clip_region_ = rect; 
+}
+
+void Renderer::AddClipRegion(Rect rect) 
 { 
-    m_rectClipRegion = rect; 
-}
+  rect.x = render_offset_.x;
+  rect.y = render_offset_.y;
 
-void Renderer::AddClipRegion( Rect rect ) 
-{ 
-    rect.x = m_RenderOffset.x;
-    rect.y = m_RenderOffset.y;
+  Rect out = rect;
+  if (rect.x < clip_region_.x)
+  {
+    out.w -= (clip_region_.x - out.x);
+    out.x = clip_region_.x;
+  }
 
-    Rect out = rect;
-    if ( rect.x < m_rectClipRegion.x )
-    {
-        out.w -= ( m_rectClipRegion.x - out.x );
-        out.x = m_rectClipRegion.x;
-    }
+  if (rect.y < clip_region_.y)
+  {
+    out.h -= (clip_region_.y - out.y);
+    out.y = clip_region_.y;
+  }
 
-    if ( rect.y < m_rectClipRegion.y )
-    {
-        out.h -= ( m_rectClipRegion.y - out.y );
-        out.y = m_rectClipRegion.y;
-    }
+  if (rect.x + rect.w > clip_region_.x + clip_region_.w)
+  {
+    out.w = (clip_region_.x + clip_region_.w) - out.x;
+  }
 
-    if ( rect.x + rect.w > m_rectClipRegion.x + m_rectClipRegion.w )
-    {
-        out.w = (m_rectClipRegion.x + m_rectClipRegion.w) - out.x;
-    }
+  if (rect.y + rect.h > clip_region_.y + clip_region_.h)
+  {
+    out.h = (clip_region_.y + clip_region_.h) - out.y;
+  }
 
-    if ( rect.y + rect.h > m_rectClipRegion.y + m_rectClipRegion.h )
-    {
-        out.h = (m_rectClipRegion.y + m_rectClipRegion.h) - out.y;
-    }
-
-    m_rectClipRegion = out;
+  clip_region_ = out;
 }
 
 const Rect& Renderer::ClipRegion() const
 { 
-    return m_rectClipRegion; 
+  return clip_region_; 
 }
 
 bool Renderer::ClipRegionVisible()
 {
-    if ( m_rectClipRegion.w <= 0 || m_rectClipRegion.h <= 0 )
-        return false;
+  if (clip_region_.w <= 0 || clip_region_.h <= 0)
+    return false;
 
-    return true;
+  return true;
 }
 
-void Renderer::DrawMissingImage( Rect pTargetRect ) {
-  SetDrawColor( Color(255, 0, 0) );
-  DrawFilledRect( pTargetRect );
+void Renderer::DrawMissingImage(Rect pTargetRect) {
+  SetDrawColor(Color(255, 0, 0));
+  DrawFilledRect(pTargetRect);
 }
 
 void Renderer::DrawTexturedRect(

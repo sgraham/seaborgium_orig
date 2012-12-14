@@ -47,29 +47,29 @@ class Texture;
 
 class Direct2DRenderer : public Renderer {
  public:
-  Direct2DRenderer( ID2D1RenderTarget* pDevice, IDWriteFactory* pDWriteFactory, IWICImagingFactory* pWICFactory );
+  Direct2DRenderer(ID2D1RenderTarget* pDevice, IDWriteFactory* pDWriteFactory, IWICImagingFactory* pWICFactory);
   ~Direct2DRenderer();
 
   virtual void Release();
 
   virtual void SetDrawColor(Color color);
 
-  virtual void DrawFilledRect( Rect rect );
+  virtual void DrawFilledRect(Rect rect);
 
-  virtual void LoadFont( Font* pFont );
-  virtual void FreeFont( Font* pFont );
-  virtual void RenderText( Font* pFont, Point pos, const string16& text );
-  virtual Point MeasureText( Font* pFont, const string16& text );
+  virtual void LoadFont(Font* pFont);
+  virtual void FreeFont(Font* pFont);
+  virtual void RenderText(Font* pFont, Point pos, const string16& text);
+  virtual Point MeasureText(Font* pFont, const string16& text);
 
   virtual void DeviceLost();
-  virtual void DeviceAcquired( ID2D1RenderTarget* pRT );
+  virtual void DeviceAcquired(ID2D1RenderTarget* pRT);
 
   void StartClip();
   void EndClip();
 
-  void DrawTexturedRectAlpha(Texture* pTexture, Rect pTargetRect, float alpha, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f );
-  void LoadTexture( Texture* pTexture );
-  void FreeTexture( Texture* pTexture );
+  void DrawTexturedRectAlpha(Texture* pTexture, Rect pTargetRect, float alpha, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f);
+  void LoadTexture(Texture* pTexture);
+  void FreeTexture(Texture* pTexture);
 
  private:
   bool InternalCreateDeviceResources();
@@ -79,11 +79,11 @@ class Direct2DRenderer : public Renderer {
   HWND hwnd_;
 
  private:
-  bool InternalLoadTexture( Texture* pTexture );
-  bool InternalLoadFont( Font* pFont );
+  bool InternalLoadTexture(Texture* pTexture);
+  bool InternalLoadFont(Font* pFont);
 
-  void InternalFreeFont( Font* pFont, bool bRemove = true );
-  void InternalFreeTexture( Texture* pTexture, bool bRemove = true );
+  void InternalFreeFont(Font* pFont, bool bRemove = true);
+  void InternalFreeTexture(Texture* pTexture, bool bRemove = true);
 
  private:
 

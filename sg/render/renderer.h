@@ -59,49 +59,36 @@ class Renderer {
       float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f) = 0;
   virtual void DrawMissingImage(Rect target_rect);
 
+  virtual void LoadFont(Font* pFont) = 0;
+  virtual void FreeFont(Font* pFont) = 0;
+  virtual void RenderText(Font* pFont, Point pos, const string16& text) = 0;
+  virtual Point MeasureText(Font* pFont, const string16& text) = 0;
 
-  virtual void LoadFont( Font* pFont ) = 0;
-  virtual void FreeFont( Font* pFont ) = 0;
-  virtual void RenderText( Font* pFont, Point pos, const string16& text ) = 0;
-  virtual Point MeasureText( Font* pFont, const string16& text ) = 0;
-
-
+  // Can be written directly if needed, but by default calls through to
+  // DrawTexturedRectAlpha.
   virtual void DrawTexturedRect(
       Texture* texture,
       Rect target_rect,
       float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f);
 
  public:
-
-  //
-  // Translate a panel's local drawing coordinate
-  //  into view space, taking Offset's into account.
-  //
-  void Translate( int& x, int& y );
-  void Translate( Rect& rect );
-
-  //
-  // Set the rendering offset. You shouldn't have to 
-  // touch these, ever.
-  //
-  void SetRenderOffset( const Point& offset ){ m_RenderOffset = offset; }
-  void AddRenderOffset( const Rect& offset ){ m_RenderOffset.x += offset.x; m_RenderOffset.y += offset.y; }
-  const Point& GetRenderOffset() const { return m_RenderOffset; }
-
- private:
-
-  Point m_RenderOffset;
+  // Global offset applied to rendering (so that sub-controls can work only in
+  // local space.
+  void SetRenderOffset(const Point& offset) { render_offset_ = offset; }
+  const Point& GetRenderOffset() const { return render_offset_; }
+  void TranslateByRenderOffset(int* x, int* y);
+  void TranslateByRenderOffset(Rect* rect);
 
  public:
 
-  void SetClipRegion( Rect rect );
-  void AddClipRegion( Rect rect );
+  void SetClipRegion(Rect rect);
+  void AddClipRegion(Rect rect);
   bool ClipRegionVisible();
   const Rect& ClipRegion() const;
 
  private:
-
-  Rect m_rectClipRegion;
+  Point render_offset_;
+  Rect clip_region_;
 };
 
 #endif  // SG_RENDER_RENDERER_H_
