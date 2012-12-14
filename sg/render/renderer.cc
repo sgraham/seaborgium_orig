@@ -32,8 +32,6 @@
 #include "sg/render/renderer.h"
 #include "sg/render/font.h"
 
-#include <math.h>
-
 Renderer::Renderer() : render_offset_(0, 0) {
 }
 

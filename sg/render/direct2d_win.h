@@ -89,7 +89,6 @@ class Direct2DRenderer : public Renderer {
   void InternalFreeTexture(Texture* texture, bool bRemove = true);
 
  private:
-
   IDWriteFactory* dwrite_factory_;
   IWICImagingFactory* wic_factory_;
   ID2D1RenderTarget* rt_;
@@ -101,7 +100,6 @@ class Direct2DRenderer : public Renderer {
 
   std::list<Texture*> texture_list_;
   std::list<Font*> font_list_;
-
 };
 
 #endif  // SG_RENDER_DIRECT2D_WIN_H_

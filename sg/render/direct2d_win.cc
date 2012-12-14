@@ -111,7 +111,7 @@ void Direct2DRenderer::InternalFreeFont(Font* font, bool bRemove) {
   if (!font->data)
     return;
 
-  FontData* fontData = (FontData*) font->data;
+  FontData* fontData = reinterpret_cast<FontData*>(font->data);
   fontData->text_format->Release();
   delete fontData;
   font->data = NULL;
@@ -128,7 +128,7 @@ void Direct2DRenderer::RenderText(Font* font, Point pos, const string16& text) {
     InternalLoadFont(font);
   }
 
-  FontData* fontData = (FontData*) font->data;
+  FontData* fontData = reinterpret_cast<FontData*>(font->data);
 
   TranslateByRenderOffset(&pos.x, &pos.y);
 
@@ -149,20 +149,25 @@ Point Direct2DRenderer::MeasureText(Font* font, const string16& text) {
     InternalLoadFont(font);
   }
 
-  FontData* fontData = (FontData*) font->data;
+  FontData* fontData = reinterpret_cast<FontData*>(font->data);
 
   Point size;
   IDWriteTextLayout* pLayout;
   DWRITE_TEXT_METRICS metrics;
 
-  dwrite_factory_->CreateTextLayout(text.c_str(), text.length(), fontData->text_format, 50000, 50000, &pLayout);
+  dwrite_factory_->CreateTextLayout(
+      text.c_str(),
+      text.length(),
+      fontData->text_format,
+      50000,
+      50000,
+      &pLayout);
 
   pLayout->GetMetrics(&metrics);
 
   pLayout->Release();
 
   return Point(metrics.widthIncludingTrailingWhitespace, metrics.height);
-
 }
 
 void Direct2DRenderer::DeviceLost() {
@@ -207,7 +212,7 @@ void Direct2DRenderer::DrawTexturedRectAlpha(
     Rect rect,
     float alpha,
     float u1, float v1, float u2, float v2) {
-  TextureData* tex_data = (TextureData*) texture->data;
+  TextureData* tex_data = reinterpret_cast<TextureData*>(texture->data);
 
   // Missing image, not loaded properly?
   if (!texture || tex_data->bitmap == NULL)
@@ -217,60 +222,50 @@ void Direct2DRenderer::DrawTexturedRectAlpha(
 
   rt_->DrawBitmap(tex_data->bitmap,
       D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h),
-      alpha, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
-      D2D1::RectF(u1 * texture->width, v1 * texture->height, u2 * texture->width, v2 * texture->height)
-     );
+      alpha,
+      D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+      D2D1::RectF(u1 * texture->width,
+                  v1 * texture->height,
+                  u2 * texture->width,
+                  v2 * texture->height));
 }
 
 bool Direct2DRenderer::InternalLoadTexture(Texture* texture) {
-  IWICBitmapDecoder *pDecoder = NULL;
-  IWICBitmapFrameDecode *pSource = NULL;
-  IWICFormatConverter *pConverter = NULL;
-  ID2D1Bitmap     *pD2DBitmap = NULL;
+  IWICBitmapDecoder* pDecoder = NULL;
+  IWICBitmapFrameDecode* pSource = NULL;
+  IWICFormatConverter* pConverter = NULL;
+  ID2D1Bitmap* pD2DBitmap = NULL;
 
   HRESULT hr = wic_factory_->CreateDecoderFromFilename(
       texture->name.c_str(),
       NULL,
       GENERIC_READ,
       WICDecodeMetadataCacheOnLoad,
-      &pDecoder
-     );
+      &pDecoder);
 
   if (SUCCEEDED(hr))
-  {
     hr = pDecoder->GetFrame(0, &pSource);
-  }
 
-  if (SUCCEEDED(hr))
-  {
+  if (SUCCEEDED(hr)) {
     // Convert the image format to 32bppPBGRA
     // (DXGI_FORMAT_B8G8R8A8_UNORM + D2D1_ALPHA_MODE_PREMULTIPLIED).
     hr = wic_factory_->CreateFormatConverter(&pConverter);
   }
 
-  if (SUCCEEDED(hr))
-  {
+  if (SUCCEEDED(hr)) {
     hr = pConverter->Initialize(
         pSource,
         GUID_WICPixelFormat32bppPBGRA,
         WICBitmapDitherTypeNone,
         NULL,
         0.f,
-        WICBitmapPaletteTypeMedianCut
-       );
+        WICBitmapPaletteTypeMedianCut);
   }
 
   if (SUCCEEDED(hr))
-  {
-    hr = rt_->CreateBitmapFromWicBitmap(
-        pConverter,
-        NULL,
-        &pD2DBitmap
-       );
-  }
+    hr = rt_->CreateBitmapFromWicBitmap(pConverter, NULL, &pD2DBitmap);
 
-  if (SUCCEEDED(hr))
-  {
+  if (SUCCEEDED(hr)) {
     TextureData* texdata = new TextureData();
 
     texdata->wic_bitmap = pSource;
@@ -283,9 +278,7 @@ bool Direct2DRenderer::InternalLoadTexture(Texture* texture) {
     texture->width = size.width;
     texture->height = size.height;
     texture->failed = false;
-  }
-  else
-  {
+  } else {
     texture->failed = true;
   }
 
@@ -308,7 +301,7 @@ void Direct2DRenderer::InternalFreeTexture(Texture* texture, bool bRemove) {
     texture_list_.remove(texture);
 
   if (texture->data != NULL) {
-    TextureData* tex_data = (TextureData*)texture->data;
+    TextureData* tex_data = reinterpret_cast<TextureData*>(texture->data);
     if (tex_data->wic_bitmap != NULL)
       tex_data->wic_bitmap->Release();
     if (tex_data->bitmap != NULL)

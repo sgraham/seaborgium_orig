@@ -63,6 +63,8 @@ class Renderer {
   virtual void RenderText(Font* pFont, Point pos, const string16& text) = 0;
   virtual Point MeasureText(Font* pFont, const string16& text) = 0;
 
+  // Below here not implemented by derived classes.
+
   // Can be written directly if needed, but by default calls through to
   // DrawTexturedRectAlpha.
   virtual void DrawTexturedRect(
@@ -73,7 +75,7 @@ class Renderer {
   // Can be modified if necessary, or falls back to reasonable implementation.
   virtual void DrawMissingImage(Rect target_rect);
 
- public:
+
   // Global offset applied to rendering (so that sub-controls can work only in
   // local space.
   void SetRenderOffset(const Point& offset) { render_offset_ = offset; }
