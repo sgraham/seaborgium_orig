@@ -97,7 +97,6 @@ bool Direct2DRenderer::InternalLoadFont( Font* pFont ) {
     pFontData->pTextFormat = pTextFormat;
 
     pFont->data = pFontData;
-    pFont->realsize = pFont->size * Scale();
     return true;
   }
 
@@ -129,7 +128,7 @@ void Direct2DRenderer::FreeFont( Font* pFont ) {
 
 void Direct2DRenderer::RenderText( Font* pFont, Point pos, const string16& text ) {
   // If the font doesn't exist, or the font size should be changed
-  if ( !pFont->data || fabs( pFont->realsize - pFont->size * Scale() ) > 2 )
+  if ( !pFont->data )
   {
     InternalFreeFont( pFont, false );
     InternalLoadFont( pFont );
@@ -147,7 +146,7 @@ void Direct2DRenderer::RenderText( Font* pFont, Point pos, const string16& text 
 
 Point Direct2DRenderer::MeasureText( Font* pFont, const string16& text ) {
   // If the font doesn't exist, or the font size should be changed
-  if ( !pFont->data || fabs( pFont->realsize - pFont->size * Scale() ) > 2 )
+  if ( !pFont->data )
   {
     InternalFreeFont( pFont, false );
     InternalLoadFont( pFont );
@@ -197,7 +196,7 @@ void Direct2DRenderer::DeviceAcquired( ID2D1RenderTarget* pRT ) {
 void Direct2DRenderer::StartClip() {
   Rect rect = ClipRegion();
 
-  D2D1_RECT_F r = D2D1::RectF( rect.x * Scale(), rect.y * Scale(), (rect.x + rect.w) * Scale(), (rect.y + rect.h) * Scale() );
+  D2D1_RECT_F r = D2D1::RectF( rect.x, rect.y, (rect.x + rect.w), (rect.y + rect.h) );
 
   m_pRT->PushAxisAlignedClip( r, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE );
 }

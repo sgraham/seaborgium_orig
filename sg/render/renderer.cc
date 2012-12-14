@@ -37,7 +37,6 @@
 Renderer::Renderer()
 {
     m_RenderOffset = Point( 0, 0 );
-    m_fScale = 1.0f;
 }
 
 Renderer::~Renderer()
@@ -48,17 +47,11 @@ void Renderer::Translate( int& x, int& y )
 {
     x += m_RenderOffset.x;
     y += m_RenderOffset.y;
-
-    x = ceil( ((float) x ) * m_fScale );
-    y = ceil( ((float) y ) * m_fScale );
 }
 
 void Renderer::Translate( Rect& rect )
 {
     Translate( rect.x, rect.y );
-
-    rect.w = ceil(((float) rect.w ) * m_fScale);
-    rect.h = ceil(((float) rect.h ) * m_fScale);
 }
 
 void Renderer::SetClipRegion( Rect rect )

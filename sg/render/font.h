@@ -19,7 +19,6 @@ class Font {
   float size;
   void* data;
   bool bold;
-  float realsize;
 };
 
 #endif  // SG_RENDER_FONT_H_

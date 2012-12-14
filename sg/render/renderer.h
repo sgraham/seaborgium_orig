@@ -103,13 +103,6 @@ class Renderer {
  private:
 
   Rect m_rectClipRegion;
-
- public:
-
-  void SetScale( float fScale ){ m_fScale = fScale; }
-  float Scale() const { return m_fScale; }
-
-  float m_fScale;
 };
 
 #endif  // SG_RENDER_RENDERER_H_
