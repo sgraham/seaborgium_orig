@@ -4,6 +4,8 @@
 
 #include "sg/ui/scroll_helper.h"
 
+#include <algorithm>
+
 #include "base/logging.h"
 #include "sg/render/renderer.h"
 #include "sg/render/texture.h"
@@ -16,7 +18,7 @@ Texture g_vscrollbar_middle;
 const int kFadeOutAfterTicks = 90;
 const int kFadeOutOverTicks = 30;
 
-}
+}  // namespace
 
 ScrollHelper::ScrollHelper(const Skin& skin,
                            ScrollHelperDataProvider* data_provider,
