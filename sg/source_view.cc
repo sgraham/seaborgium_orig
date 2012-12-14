@@ -64,9 +64,8 @@ std::vector<Line> HighlightOnFILE(std::string utf8_text) {
 
 SourceView::SourceView(const Skin& skin)
     : Contents(skin),
+      scroll_helper_(skin, this, g_line_height),
       program_counter_line_(-1) {
-  y_pixel_scroll_ = 0.f;
-  y_pixel_scroll_target_ = 0.f;
   font_.facename = L"Consolas";
   font_.size = 13.f;
   g_pc_indicator_texture.name = "art/pc-location.png";
@@ -106,7 +105,7 @@ void SourceView::CommitAfterHighlight(std::vector<Line> lines) {
 }
 
 int SourceView::GetFirstLineInView() {
-  return std::max(0, static_cast<int>(y_pixel_scroll_ / g_line_height));
+  return scroll_helper_.GetOffset() / g_line_height;
 }
 
 bool SourceView::LineInView(int line_number) {
@@ -130,11 +129,9 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
     renderer->LoadTexture(&g_breakpoint_texture);
   }
 
-  // Ease to target.
-  y_pixel_scroll_ += (y_pixel_scroll_target_ - y_pixel_scroll_) * 0.2f;
-  if (fabsf(y_pixel_scroll_target_ - y_pixel_scroll_) < 1.f)
-    y_pixel_scroll_ = y_pixel_scroll_target_;
-  else
+  // TODO(rendering): Need to separate Update/Render.
+  bool invalidate = scroll_helper_.Update();
+  if (invalidate)
     Invalidate();
 
   renderer->SetDrawColor(skin.GetColorScheme().background());
@@ -156,6 +153,8 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
       left_margin + largest_numbers_width + right_margin + indicator_and_margin,
       Height()));
 
+  int y_pixel_scroll = scroll_helper_.GetOffset();
+
   for (size_t i = start_line; i < lines_.size(); ++i) {
     // Extra |g_line_height| added to height so that a full line is drawn at
     // the bottom when partial-line pixel scrolled.
@@ -166,7 +165,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
     renderer->SetDrawColor(skin.GetColorScheme().margin_text());
     renderer->RenderText(
         &font_,
-        Gwen::Point(left_margin, i * g_line_height - y_pixel_scroll_),
+        Gwen::Point(left_margin, i * g_line_height - y_pixel_scroll),
         base::IntToString16(i + 1).c_str());
     size_t x = left_margin + largest_numbers_width + right_margin +
                indicator_and_margin;
@@ -176,7 +175,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
       renderer->SetDrawColor(ColorForTokenType(skin, lines_[i][j].type));
       renderer->RenderText(
           &font_,
-          Gwen::Point(x, i * g_line_height - y_pixel_scroll_),
+          Gwen::Point(x, i * g_line_height - y_pixel_scroll),
           lines_[i][j].text.c_str());
       x += renderer->MeasureText(
           &font_,
@@ -186,7 +185,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
 
   if (LineInView(program_counter_line_)) {
     renderer->SetDrawColor(Gwen::Colors::Yellow);
-    int y = program_counter_line_ * g_line_height - y_pixel_scroll_;
+    int y = program_counter_line_ * g_line_height - y_pixel_scroll;
     renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
     renderer->DrawTexturedRect(
         &g_pc_indicator_texture,
@@ -194,16 +193,9 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
                    indicator_width, indicator_height),
         0, 0, 1, 1);
   }
-}
 
-float SourceView::GetLargestScrollLocation() {
-  return static_cast<float>((lines_.size() - 1) * g_line_height);
-}
-
-void SourceView::ClampScrollTarget() {
-  y_pixel_scroll_target_ = std::max(0.f, y_pixel_scroll_target_);
-  y_pixel_scroll_target_ = std::min(
-      GetLargestScrollLocation(), y_pixel_scroll_target_);
+  // Ease to target.
+  scroll_helper_.RenderScrollIndicators(renderer);
 }
 
 bool SourceView::NotifyMouseMoved(
@@ -212,9 +204,8 @@ bool SourceView::NotifyMouseMoved(
 }
 
 bool SourceView::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
-  y_pixel_scroll_target_ -= delta * .5f;  // TODO(config): Random scale.
-  ClampScrollTarget();
-  Invalidate();
+  if (scroll_helper_.ScrollPixels(-delta * .5f))  // TODO(config): Random scale.
+    Invalidate();
   return true;
 }
 
@@ -223,35 +214,37 @@ bool SourceView::NotifyKey(
   if (!down)
     return false;
   bool handled = false;
+  bool invalidate = false;
   if (key == kDown) {
-    ScrollView(-1);
+    invalidate = scroll_helper_.ScrollLines(1);
     handled = true;
   } else if (key == kUp) {
-    ScrollView(1);
+    invalidate = scroll_helper_.ScrollLines(-1);
     handled = true;
   } else if (key == kPageUp || (key == kSpace && modifiers.ShiftPressed())) {
-    ScrollView(-(Height() / g_line_height - 1));
+    invalidate = scroll_helper_.ScrollPages(-1);
     handled = true;
   } else if (key == kPageDown || (key == kSpace && !modifiers.ShiftPressed())) {
-    ScrollView(Height() / g_line_height - 1);
+    invalidate = scroll_helper_.ScrollPages(1);
     handled = true;
   } else if (key == kHome) {
-    y_pixel_scroll_target_ = 0.f;
+    invalidate = scroll_helper_.ScrollToBeginning();
     handled = true;
   } else if (key == kEnd) {
-    y_pixel_scroll_target_ = GetLargestScrollLocation();
+    invalidate = scroll_helper_.ScrollToEnd();
     handled = true;
   }
-  if (handled)
+  if (invalidate)
     Invalidate();
   return handled;
 }
 
-void SourceView::ScrollView(int number_of_lines) {
-  y_pixel_scroll_target_ =
-    static_cast<int>(y_pixel_scroll_target_ / g_line_height) * g_line_height;
-  y_pixel_scroll_target_ += g_line_height * number_of_lines;
-  ClampScrollTarget();
+int SourceView::GetContentSize() {
+  return g_line_height * lines_.size();
+}
+
+const Rect& SourceView::GetScreenRect() {
+  return Contents::GetScreenRect();
 }
 
 const Gwen::Color& SourceView::ColorForTokenType(

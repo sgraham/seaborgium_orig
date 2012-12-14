@@ -14,8 +14,8 @@
 #include "Gwen/Structures.h"
 #include "sg/lexer.h"
 #include "sg/ui/contents.h"
+#include "sg/ui/scroll_helper.h"
 
-namespace Gwen { namespace Skin { class Base; }}
 class Skin;
 
 struct ColoredText {
@@ -24,7 +24,7 @@ struct ColoredText {
 };
 typedef std::vector<ColoredText> Line;
 
-class SourceView : public Contents {
+class SourceView : public Contents, public ScrollHelperDataProvider {
  public:
   explicit SourceView(const Skin& skin);
 
@@ -34,7 +34,7 @@ class SourceView : public Contents {
   // TODO(scottmg): Probably some sort of "margin indicator" abstraction.
   virtual void SetProgramCounterLine(int line_number);
 
-  // Implementation of InputHandler.
+  // Implementation of InputHandler:
   virtual bool NotifyMouseMoved(
       int x, int y, int dx, int dy, const InputModifiers& modifiers) OVERRIDE;
   virtual bool NotifyMouseWheel(
@@ -44,11 +44,13 @@ class SourceView : public Contents {
   virtual bool WantMouseEvents() { return true; }
   virtual bool WantKeyEvents() { return true; }
 
+  // Implementation of ScrollHelperDataProvider:
+  virtual int GetContentSize() OVERRIDE;
+  virtual const Rect& GetScreenRect() OVERRIDE;
+
+
  private:
   const Gwen::Color& ColorForTokenType(const Skin& skin, Lexer::TokenType type);
-  float GetLargestScrollLocation();
-  void ClampScrollTarget();
-  void ScrollView(int number_of_lines);
   void CommitAfterHighlight(std::vector<Line> lines);
   bool LineInView(int line_number);
   int GetFirstLineInView();
@@ -58,6 +60,8 @@ class SourceView : public Contents {
 
   std::vector<Line> lines_;
   Gwen::Font font_;
+
+  ScrollHelper scroll_helper_;
 
   int program_counter_line_;
 };

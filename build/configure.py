@@ -399,6 +399,7 @@ def main():
                'ui\\container',
                'ui\\contents',
                'ui\\focus',
+               'ui\\scroll_helper',
                'ui\\skin',
                'workspace',
               ]:
