@@ -13,6 +13,3 @@
 [submodule "third_party/freetype"]
 	path = third_party/freetype
 	url = git://git.sv.nongnu.org/freetype/freetype2.git
-[submodule "third_party/glfw"]
-	path = third_party/glfw
-	url = git://github.com/elmindreda/glfw.git
