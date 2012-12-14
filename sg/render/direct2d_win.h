@@ -93,16 +93,16 @@ class Direct2DRenderer : public Renderer {
 
  private:
 
-  IDWriteFactory*   m_pDWriteFactory;
-  IWICImagingFactory* m_pWICFactory;
-  ID2D1RenderTarget*  m_pRT;
+  IDWriteFactory*   dwrite_factory_;
+  IWICImagingFactory* wic_factory_;
+  ID2D1RenderTarget*  rt_;
 
   ID2D1SolidColorBrush* solid_color_brush_;
 
-  D2D1::ColorF    m_Color;
+  D2D1::ColorF    color_;
 
-  std::list<Texture*> m_TextureList;
-  std::list<Font*> m_FontList;
+  std::list<Texture*> texture_list_;
+  std::list<Font*> font_list_;
 
 };
 
