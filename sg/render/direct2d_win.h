@@ -97,7 +97,7 @@ class Direct2DRenderer : public Renderer {
   IWICImagingFactory* m_pWICFactory;
   ID2D1RenderTarget*  m_pRT;
 
-  ID2D1SolidColorBrush* m_pSolidColorBrush;
+  ID2D1SolidColorBrush* solid_color_brush_;
 
   D2D1::ColorF    m_Color;
 

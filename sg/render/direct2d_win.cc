@@ -39,14 +39,12 @@
 #include "sg/render/font.h"
 #include "sg/render/texture.h"
 
-struct FontData
-{
+struct FontData {
   IDWriteTextFormat*pTextFormat;
 };
 
-struct TextureData
-{
-  ID2D1Bitmap* pBitmap; // device-specific
+struct TextureData {
+  ID2D1Bitmap* pBitmap;  // device-specific
   IWICBitmapSource* pWICBitmap;
 };
 
@@ -67,13 +65,13 @@ Direct2DRenderer::~Direct2DRenderer() {
 
 void Direct2DRenderer::DrawFilledRect(Rect rect) {
   TranslateByRenderOffset(&rect);
-  if (m_pSolidColorBrush)
-    m_pRT->FillRectangle(D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h), m_pSolidColorBrush);
+  if (solid_color_brush_)
+    m_pRT->FillRectangle(D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h), solid_color_brush_);
 }
 
 void Direct2DRenderer::SetDrawColor(Color color) {
   m_Color = D2D1::ColorF(color.r / 255.0f , color.g / 255.0f , color.b / 255.0f , color.a / 255.0f);
-  m_pSolidColorBrush->SetColor(m_Color);
+  solid_color_brush_->SetColor(m_Color);
 }
 
 bool Direct2DRenderer::InternalLoadFont(Font* pFont) {
@@ -138,9 +136,9 @@ void Direct2DRenderer::RenderText(Font* pFont, Point pos, const string16& text) 
 
   TranslateByRenderOffset(&pos.x, &pos.y);
 
-  if (m_pSolidColorBrush)
+  if (solid_color_brush_)
   {
-    m_pRT->DrawTextW(text.c_str(), text.length(), pFontData->pTextFormat, D2D1::RectF(pos.x, pos.y, pos.x + 50000, pos.y + 50000), m_pSolidColorBrush);
+    m_pRT->DrawTextW(text.c_str(), text.length(), pFontData->pTextFormat, D2D1::RectF(pos.x, pos.y, pos.x + 50000, pos.y + 50000), solid_color_brush_);
   }
 }
 
@@ -169,10 +167,10 @@ Point Direct2DRenderer::MeasureText(Font* pFont, const string16& text) {
 }
 
 void Direct2DRenderer::DeviceLost() {
-  if (m_pSolidColorBrush != NULL)
+  if (solid_color_brush_ != NULL)
   {
-    m_pSolidColorBrush->Release();
-    m_pSolidColorBrush = NULL;
+    solid_color_brush_->Release();
+    solid_color_brush_ = NULL;
   }
 
   for (std::list<Texture*>::const_iterator tex_it = m_TextureList.begin(); tex_it != m_TextureList.end(); ++tex_it)
@@ -184,7 +182,7 @@ void Direct2DRenderer::DeviceLost() {
 void Direct2DRenderer::DeviceAcquired(ID2D1RenderTarget* pRT) {
   m_pRT = pRT;
 
-  HRESULT hr = m_pRT->CreateSolidColorBrush(m_Color, &m_pSolidColorBrush);
+  HRESULT hr = m_pRT->CreateSolidColorBrush(m_Color, &solid_color_brush_);
   (void)hr;
 
   for (std::list<Texture*>::const_iterator tex_it = m_TextureList.begin(); tex_it != m_TextureList.end(); ++tex_it)
