@@ -114,3 +114,10 @@ void Renderer::DrawMissingImage( Rect pTargetRect ) {
   SetDrawColor( Color(255, 0, 0) );
   DrawFilledRect( pTargetRect );
 }
+
+void Renderer::DrawTexturedRect(
+    Texture* texture,
+    Rect target_rect,
+    float u1, float v1, float u2, float v2) {
+  DrawTexturedRectAlpha(texture, target_rect, 1.0, u1, v1, u2, v2);
+}

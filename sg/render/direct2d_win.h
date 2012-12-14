@@ -67,14 +67,9 @@ class Direct2DRenderer : public Renderer {
   void StartClip();
   void EndClip();
 
-  void DrawTexturedRect( Texture* pTexture, Rect pTargetRect, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f );
-  void DrawTexturedRectAlpha( Texture* pTexture, Rect pTargetRect, float alpha, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f );
+  void DrawTexturedRectAlpha(Texture* pTexture, Rect pTargetRect, float alpha, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f );
   void LoadTexture( Texture* pTexture );
   void FreeTexture( Texture* pTexture );
-  Color PixelColour( Texture* pTexture, unsigned int x, unsigned int y, const Color& col_default );
-
-  void DrawLinedRect( Rect rect );
-  void DrawShavedCornerRect( Rect rect, bool bSlight = false );
 
  private:
   bool InternalCreateDeviceResources();

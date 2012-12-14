@@ -206,8 +206,8 @@ void Direct2DRenderer::EndClip() {
   m_pRT->PopAxisAlignedClip();
 }
 
-void Direct2DRenderer::DrawTexturedRect( Texture* pTexture, Rect rect, float u1, float v1, float u2, float v2 ) {
-  TextureData* pTexData = (TextureData*) pTexture->data;
+void Direct2DRenderer::DrawTexturedRectAlpha(Texture* texture, Rect rect, float alpha, float u1, float v1, float u2, float v2 ) {
+  TextureData* pTexData = (TextureData*) texture->data;
 
   // Missing image, not loaded properly?
   if ( !pTexData || pTexData->pBitmap == NULL ) 
@@ -215,26 +215,10 @@ void Direct2DRenderer::DrawTexturedRect( Texture* pTexture, Rect rect, float u1,
 
   Translate( rect );
 
-  m_pRT->DrawBitmap( pTexData->pBitmap, 
-      D2D1::RectF( rect.x, rect.y, rect.x + rect.w, rect.y + rect.h ), 
-      1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
-      D2D1::RectF( u1 * pTexture->width, v1 * pTexture->height, u2 * pTexture->width, v2 * pTexture->height )
-      );
-}
-
-void Direct2DRenderer::DrawTexturedRectAlpha( Texture* pTexture, Rect rect, float alpha, float u1, float v1, float u2, float v2 ) {
-  TextureData* pTexData = (TextureData*) pTexture->data;
-
-  // Missing image, not loaded properly?
-  if ( !pTexData || pTexData->pBitmap == NULL ) 
-    return DrawMissingImage( rect );
-
-  Translate( rect );
-
-  m_pRT->DrawBitmap( pTexData->pBitmap, 
+  m_pRT->DrawBitmap( pTexData->pBitmap,
       D2D1::RectF( rect.x, rect.y, rect.x + rect.w, rect.y + rect.h ), 
       alpha, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
-      D2D1::RectF( u1 * pTexture->width, v1 * pTexture->height, u2 * pTexture->width, v2 * pTexture->height )
+      D2D1::RectF( u1 * texture->width, v1 * texture->height, u2 * texture->width, v2 * texture->height )
       );
 }
 
@@ -342,45 +326,6 @@ void Direct2DRenderer::InternalFreeTexture( Texture* pTexture, bool bRemove ) {
 void Direct2DRenderer::FreeTexture( Texture* pTexture )
 {
   InternalFreeTexture( pTexture );
-}
-
-Color Direct2DRenderer::PixelColour( Texture* pTexture, unsigned int x, unsigned int y, const Color& col_default ) {
-  TextureData* pTexData = (TextureData*) pTexture->data;
-
-  if ( !pTexData || pTexData->pBitmap == NULL ) 
-    return col_default;
-
-  WICRect sourceRect;
-
-  sourceRect.X = x;
-  sourceRect.Y = y;
-  sourceRect.Width = sourceRect.Height = 1;
-
-  // these bitmaps are always in GUID_WICPixelFormat32bppPBGRA
-  byte pixelBuffer[4 * 1 * 1];
-
-  pTexData->pWICBitmap->CopyPixels( &sourceRect, 4, 4 * pTexture->width * pTexture->height, pixelBuffer );
-
-  return Color( pixelBuffer[2], pixelBuffer[1], pixelBuffer[0], pixelBuffer[3] );
-}
-
-
-void Direct2DRenderer::DrawLinedRect( Rect rect ) {
-  Translate( rect );
-
-  if ( m_pSolidColorBrush )
-  {
-    m_pRT->DrawRectangle( D2D1::RectF( rect.x, rect.y, rect.x + rect.w, rect.y + rect.h ), m_pSolidColorBrush );
-  }
-}
-
-void Direct2DRenderer::DrawShavedCornerRect( Rect rect, bool bSlight ) {
-  Translate( rect );
-
-  if ( m_pSolidColorBrush )
-  {
-    m_pRT->DrawRoundedRectangle( D2D1::RoundedRect( D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h ), 10.f, 10.f ), m_pSolidColorBrush );
-  }
 }
 
 void Direct2DRenderer::Release() {

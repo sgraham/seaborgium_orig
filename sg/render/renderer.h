@@ -43,21 +43,28 @@ class Renderer {
   Renderer();
   virtual ~Renderer();
 
-  virtual void Init(){};
+  virtual void Init() {};
 
-  virtual void SetDrawColor( Color color ){};
+  virtual void SetDrawColor(Color color) {}
 
-  virtual void DrawFilledRect( Rect rect ){};;
+  virtual void DrawFilledRect(Rect rect) {}
 
-  virtual void StartClip(){};
-  virtual void EndClip(){};
+  virtual void StartClip() {}
+  virtual void EndClip() {}
 
-  virtual void LoadTexture( Texture* pTexture ){};
-  virtual void FreeTexture( Texture* pTexture ){};
-  virtual void DrawTexturedRect( Texture* pTexture, Rect pTargetRect, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f ){};
-  virtual void DrawTexturedRectAlpha( Texture* pTexture, Rect pTargetRect, float alpha, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f ){};
-  virtual void DrawMissingImage(Rect pTargetRect);
-  virtual Color PixelColour( Texture* pTexture, unsigned int x, unsigned int y, const Color& col_default = Color( 255, 255, 255, 255 ) ){ return col_default; }
+  virtual void LoadTexture(Texture* texture) = 0;
+  virtual void FreeTexture(Texture* texture) = 0;
+  virtual void DrawTexturedRect(
+      Texture* texture,
+      Rect target_rect,
+      float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f);
+  virtual void DrawTexturedRectAlpha(
+      Texture* texture,
+      Rect target_rect,
+      float alpha,
+      float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f) = 0;
+  virtual void DrawMissingImage(Rect target_rect);
+  virtual Color PixelColour( Texture* texture, unsigned int x, unsigned int y, const Color& col_default = Color( 255, 255, 255, 255 ) ){ return col_default; }
 
 
   virtual void LoadFont( Font* pFont ){};
