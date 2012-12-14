@@ -44,49 +44,6 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::DrawLinedRect( Rect rect )
-{
-    DrawFilledRect( Rect( rect.x, rect.y, rect.w, 1 ) );
-    DrawFilledRect( Rect( rect.x, rect.y + rect.h-1, rect.w, 1 ) );
-
-    DrawFilledRect( Rect( rect.x, rect.y, 1, rect.h ) );
-    DrawFilledRect( Rect( rect.x + rect.w-1, rect.y, 1, rect.h ) );
-};
-
-void Renderer::DrawPixel( int x, int y )
-{
-    DrawFilledRect( Rect( x, y, 1, 1 ) );
-}
-
-void Renderer::DrawShavedCornerRect( Rect rect, bool bSlight )
-{
-    // Draw INSIDE the w/h.
-    rect.w -= 1;
-    rect.h -= 1;
-
-    if ( bSlight )
-    {
-        DrawFilledRect( Rect( rect.x+1, rect.y, rect.w-1, 1 ) );
-        DrawFilledRect( Rect( rect.x+1, rect.y + rect.h, rect.w-1, 1 ) );
-
-        DrawFilledRect( Rect( rect.x, rect.y+1, 1, rect.h-1 ) );
-        DrawFilledRect( Rect( rect.x + rect.w, rect.y+1, 1, rect.h-1 ) );
-        return;
-    }
-
-    DrawPixel( rect.x+1, rect.y+1 );
-    DrawPixel( rect.x+rect.w-1, rect.y+1 );
-
-    DrawPixel( rect.x+1, rect.y+rect.h-1 );
-    DrawPixel( rect.x+rect.w-1, rect.y+rect.h-1 );
-
-    DrawFilledRect( Rect( rect.x+2, rect.y, rect.w-3, 1 ) );
-    DrawFilledRect( Rect( rect.x+2, rect.y + rect.h, rect.w-3, 1 ) );
-
-    DrawFilledRect( Rect( rect.x, rect.y+2, 1, rect.h-3 ) );
-    DrawFilledRect( Rect( rect.x + rect.w, rect.y+2, 1, rect.h-3 ) );
-}
-
 void Renderer::Translate( int& x, int& y )
 {
     x += m_RenderOffset.x;
@@ -153,70 +110,7 @@ bool Renderer::ClipRegionVisible()
     return true;
 }
 
-void Renderer::DrawMissingImage( Rect pTargetRect )
-{
-    SetDrawColor( Color(255, 0, 0) );
-    DrawFilledRect( pTargetRect );
-}
-
-
-/*
-   If they haven't defined these font functions in their renderer code
-   we just draw some rects where the letters would be to give them an idea.
-   */
-
-void Renderer::RenderText( Font* pFont, Point pos, const string16& text )
-{
-    float fSize = pFont->size * Scale();
-
-    for ( float i=0; i<text.length(); i++ )
-    {
-        wchar_t chr = text[i];
-
-        if ( chr == ' ' ) continue;
-
-        Rect r( pos.x + i * fSize * 0.4, pos.y, fSize * 0.4 -1, fSize );
-
-        /*
-           This isn't important, it's just me messing around changing the
-           shape of the rect based on the letter.. just for fun.
-           */
-        if ( chr == 'l' || chr == 'i' || chr == '!' || chr == 't' )
-        {
-            r.w = 1;
-        }
-        else if ( chr >= 'a' && chr <= 'z' )
-        {
-            r.y += fSize * 0.5f;
-            r.h -= fSize * 0.4f;
-        }
-        else if ( chr == '.' || chr == ',' )
-        {
-            r.x += 2;
-            r.y += r.h - 2;
-            r.w = 2;
-            r.h = 2;
-        }
-        else if ( chr == '\'' || chr == '`'  || chr == '"' )
-        {
-            r.x += 3;
-            r.w = 2;
-            r.h = 2;
-        }
-
-
-        if ( chr == 'o' || chr == 'O' || chr == '0' )
-            DrawLinedRect( r ); 
-        else
-            DrawFilledRect( r );
-    }
-}
-
-Point Renderer::MeasureText( Font* pFont, const string16& text )
-{
-    Point p;
-    p.x = pFont->size * Scale() * (float)text.length() * 0.4;
-    p.y = pFont->size * Scale();
-
-    return p;
+void Renderer::DrawMissingImage( Rect pTargetRect ) {
+  SetDrawColor( Color(255, 0, 0) );
+  DrawFilledRect( pTargetRect );
 }

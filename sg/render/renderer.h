@@ -56,22 +56,14 @@ class Renderer {
   virtual void FreeTexture( Texture* pTexture ){};
   virtual void DrawTexturedRect( Texture* pTexture, Rect pTargetRect, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f ){};
   virtual void DrawTexturedRectAlpha( Texture* pTexture, Rect pTargetRect, float alpha, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f ){};
-  virtual void DrawMissingImage( Rect pTargetRect );
+  virtual void DrawMissingImage(Rect pTargetRect);
   virtual Color PixelColour( Texture* pTexture, unsigned int x, unsigned int y, const Color& col_default = Color( 255, 255, 255, 255 ) ){ return col_default; }
 
 
   virtual void LoadFont( Font* pFont ){};
   virtual void FreeFont( Font* pFont ){};
-  virtual void RenderText( Font* pFont, Point pos, const string16& text );
-  virtual Point MeasureText( Font* pFont, const string16& text );
-
-  //
-  // No need to implement these functions in your derived class, but if 
-  // you can do them faster than the default implementation it's a good idea to.
-  //
-  virtual void DrawLinedRect( Rect rect );
-  virtual void DrawPixel( int x, int y );
-  virtual void DrawShavedCornerRect( Rect rect, bool bSlight = false );
+  virtual void RenderText( Font* pFont, Point pos, const string16& text ) = 0;
+  virtual Point MeasureText( Font* pFont, const string16& text ) = 0;
 
  public:
 
