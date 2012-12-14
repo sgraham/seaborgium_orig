@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sg/gpu.h"
+#include "sg/render/gpu.h"
 
 #include <windows.h>
 #include <d2d1.h>
@@ -10,11 +10,12 @@
 #include <dwrite.h>
 #include <wincodec.h>
 #include <map>
+
 #include "base/bind.h"
 #include "base/lazy_instance.h"
 #include "sg/app_thread.h"
-#include "sg/application_window.h"
 #include "sg/debug_presenter_notify.h"
+#include "sg/render/application_window.h"
 #include "sg/ui/contents.h"
 #include "sg/workspace.h"
 

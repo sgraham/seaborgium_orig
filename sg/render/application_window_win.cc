@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sg/application_window.h"
+#include "sg/render/application_window.h"
 
 #include "base/basictypes.h"
 #include "base/bind.h"
 #include "sg/app_thread.h"
-#include "sg/gpu.h"
+#include "sg/render/gpu.h"
 #include "sg/ui/base_types.h"
 #include "sg/ui/input.h"
 #include "sg/workspace.h"
@@ -78,10 +78,6 @@ class ApplicationWindowWin : public ApplicationWindow {
       case WM_ERASEBKGND:
         return 1;
       case WM_PAINT:
-        /* TODO(gputhread)
-        AppThread::PostTask(
-            AppThread::GPU, FROM_HERE, base::Bind(&Gpu::Paint, this));
-            */
         Paint();
         return 0;
       case WM_SIZE:
@@ -89,23 +85,9 @@ class ApplicationWindowWin : public ApplicationWindow {
         GetClientRect(hwnd_, &rc);
         Gpu::Resize(this, Rect(rc.left, rc.top,
                             rc.right - rc.left, rc.bottom - rc.top));
-        /* TODO(gputhread)
-        AppThread::PostTask(
-            AppThread::GPU, FROM_HERE,
-            base::Bind(&Gpu::Resize,
-                       this,
-                       Rect(rc.left, rc.top,
-                            rc.right - rc.left, rc.bottom - rc.top)));
-                            */
         return 0;
       case WM_CREATE:
         DCHECK(got_valid_hwnd_);
-        /* TODO(gputhread)
-        AppThread::PostTask(
-            AppThread::GPU,
-            FROM_HERE,
-            base::Bind(&Gpu::InitializeForRenderingSurface, this, hwnd_));
-            */
         Gpu::InitializeForRenderingSurface(this, hwnd_);
         return 0;
       case WM_CLOSE:

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SG_APPLICATION_WINDOW_H_
-#define SG_APPLICATION_WINDOW_H_
+#ifndef SG_RENDER_APPLICATION_WINDOW_H_
+#define SG_RENDER_APPLICATION_WINDOW_H_
 
-#include "sg/gpu.h"
+#include "sg/render/gpu.h"
 class Workspace;
 class DebugPresenterNotify;
 
@@ -29,4 +29,4 @@ class ApplicationWindow {
   static ApplicationWindow* Create();
 };
 
-#endif  // SG_APPLICATION_WINDOW_H_
+#endif  // SG_RENDER_APPLICATION_WINDOW_H_

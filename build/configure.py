@@ -454,8 +454,8 @@ def main():
   n.comment('Main executable is library plus main() and some startup goop.')
   main_objs = []
   main_objs += cxx('application')
-  main_objs += cxx('application_window_win')
-  main_objs += cxx('gpu_win')
+  main_objs += cxx('render\\application_window_win')
+  main_objs += cxx('render\\gpu_win')
   main_objs += cxx('main_win')
   main_objs += rc('sg', implicit=['art\\sg.ico'])
   # No .libs for /incremental to work.

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SG_GPU_H_
-#define SG_GPU_H_
+#ifndef SG_RENDER_GPU_H_
+#define SG_RENDER_GPU_H_
 
 #include "base/basictypes.h"
 #include "sg/ui/base_types.h"
@@ -30,4 +30,4 @@ class Gpu {
   static void OneTimeInitialization();
 };
 
-#endif  // SG_GPU_H_
+#endif  // SG_RENDER_GPU_H_
