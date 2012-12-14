@@ -8,9 +8,9 @@
 
 #include "base/logging.h"
 #include "sg/app_thread.h"
-#include "sg/application_window.h"
 #include "sg/backend/debug_core_gdb.h"
 #include "sg/debug_presenter.h"
+#include "sg/render/application_window.h"
 #include "sg/source_files.h"
 #include "sg/workspace.h"
 
