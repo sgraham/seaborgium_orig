@@ -6,11 +6,11 @@
 
 #include "base/bind.h"
 #include "sg/app_thread.h"
-#include "sg/application_window.h"
 #include "sg/debug_presenter_notify.h"
+#include "sg/render/application_window.h"
 #include "sg/source_view.h"
-#include "sg/status_bar.h"
 #include "sg/stack_view.h"
+#include "sg/status_bar.h"
 #include "sg/ui/container.h"
 #include "sg/ui/focus.h"
 #include "sg/ui/solid_color.h"

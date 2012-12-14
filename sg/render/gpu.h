@@ -6,7 +6,7 @@
 #define SG_RENDER_GPU_H_
 
 #include "base/basictypes.h"
-#include "sg/ui/base_types.h"
+#include "sg/basic_geometric_types.h"
 
 // TODO(rendering): Maybe move this to a gpu_win.h.
 #if defined(OS_WIN)

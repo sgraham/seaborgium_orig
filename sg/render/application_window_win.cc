@@ -7,8 +7,8 @@
 #include "base/basictypes.h"
 #include "base/bind.h"
 #include "sg/app_thread.h"
+#include "sg/basic_geometric_types.h"
 #include "sg/render/gpu.h"
-#include "sg/ui/base_types.h"
 #include "sg/ui/input.h"
 #include "sg/workspace.h"
 

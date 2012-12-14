@@ -8,7 +8,7 @@
 #include "base/basictypes.h"
 #include "base/compiler_specific.h"
 #include "Gwen/BaseRender.h"
-#include "sg/ui/base_types.h"
+#include "sg/basic_geometric_types.h"
 #include "sg/ui/input.h"
 class Skin;
 

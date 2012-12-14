@@ -7,7 +7,7 @@
 
 #include "base/bind.h"
 #include "base/string16.h"
-#include "sg/ui/base_types.h"
+#include "sg/basic_geometric_types.h"
 
 class Skin;
 namespace Gwen { namespace Renderer { class Base; }}
