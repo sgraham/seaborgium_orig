@@ -5,64 +5,60 @@
 #ifndef SG_UI_SKIN_H_
 #define SG_UI_SKIN_H_
 
-#include "Gwen/Structures.h"
+#include "sg/basic_geometric_types.h"
 
 class ColorScheme {
  public:
   // TODO(config): Configuration from .json or something.
   ColorScheme();
-  const Gwen::Color& border() const { return border_; }
-  const Gwen::Color& background() const { return background_; }
-  const Gwen::Color& text() const { return text_; }
-  const Gwen::Color& title_bar_active() const { return title_bar_active_; }
-  const Gwen::Color& title_bar_text_active() const {
-    return title_bar_text_active_;
-  }
-  const Gwen::Color& title_bar_inactive() const { return title_bar_inactive_; }
-  const Gwen::Color& title_bar_text_inactive() const {
+  const Color& border() const { return border_; }
+  const Color& background() const { return background_; }
+  const Color& text() const { return text_; }
+  const Color& title_bar_active() const { return title_bar_active_; }
+  const Color& title_bar_text_active() const { return title_bar_text_active_; }
+  const Color& title_bar_inactive() const { return title_bar_inactive_; }
+  const Color& title_bar_text_inactive() const {
     return title_bar_text_inactive_;
   }
 
-  const Gwen::Color& comment() const { return comment_; }
-  const Gwen::Color& comment_preprocessor() const {
-    return comment_preprocessor_;
-  }
-  const Gwen::Color& error() const { return error_; }
-  const Gwen::Color& keyword() const { return keyword_; }
-  const Gwen::Color& keyword_type() const { return keyword_type_; }
-  const Gwen::Color& literal_number() const { return literal_number_; }
-  const Gwen::Color& literal_string() const { return literal_string_; }
-  const Gwen::Color& klass() const { return klass_; }
-  const Gwen::Color& op() const { return op_; }
+  const Color& comment() const { return comment_; }
+  const Color& comment_preprocessor() const { return comment_preprocessor_; }
+  const Color& error() const { return error_; }
+  const Color& keyword() const { return keyword_; }
+  const Color& keyword_type() const { return keyword_type_; }
+  const Color& literal_number() const { return literal_number_; }
+  const Color& literal_string() const { return literal_string_; }
+  const Color& klass() const { return klass_; }
+  const Color& op() const { return op_; }
 
-  const Gwen::Color& margin() const { return margin_; }
-  const Gwen::Color& margin_text() const { return margin_text_; }
+  const Color& margin() const { return margin_; }
+  const Color& margin_text() const { return margin_text_; }
 
-  const Gwen::Color& pc_indicator() const { return pc_indicator_; }
+  const Color& pc_indicator() const { return pc_indicator_; }
 
  private:
-  Gwen::Color border_;
-  Gwen::Color background_;
-  Gwen::Color text_;
-  Gwen::Color title_bar_active_;
-  Gwen::Color title_bar_text_active_;
-  Gwen::Color title_bar_inactive_;
-  Gwen::Color title_bar_text_inactive_;
+  Color border_;
+  Color background_;
+  Color text_;
+  Color title_bar_active_;
+  Color title_bar_text_active_;
+  Color title_bar_inactive_;
+  Color title_bar_text_inactive_;
 
-  Gwen::Color comment_;
-  Gwen::Color comment_preprocessor_;
-  Gwen::Color error_;
-  Gwen::Color keyword_;
-  Gwen::Color keyword_type_;
-  Gwen::Color literal_number_;
-  Gwen::Color literal_string_;
-  Gwen::Color klass_;
-  Gwen::Color op_;
+  Color comment_;
+  Color comment_preprocessor_;
+  Color error_;
+  Color keyword_;
+  Color keyword_type_;
+  Color literal_number_;
+  Color literal_string_;
+  Color klass_;
+  Color op_;
 
-  Gwen::Color margin_;
-  Gwen::Color margin_text_;
+  Color margin_;
+  Color margin_text_;
 
-  Gwen::Color pc_indicator_;
+  Color pc_indicator_;
 };
 
 class Skin {

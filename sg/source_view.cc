@@ -247,7 +247,7 @@ const Rect& SourceView::GetScreenRect() {
   return Contents::GetScreenRect();
 }
 
-const Gwen::Color& SourceView::ColorForTokenType(
+const Color& SourceView::ColorForTokenType(
     const ::Skin& skin, Lexer::TokenType type) {
   // TODO(config): More customizability with fallbacks.
   const ColorScheme& cs = skin.GetColorScheme();

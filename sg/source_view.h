@@ -50,7 +50,7 @@ class SourceView : public Contents, public ScrollHelperDataProvider {
 
 
  private:
-  const Gwen::Color& ColorForTokenType(const Skin& skin, Lexer::TokenType type);
+  const Color& ColorForTokenType(const Skin& skin, Lexer::TokenType type);
   void CommitAfterHighlight(std::vector<Line> lines);
   bool LineInView(int line_number);
   int GetFirstLineInView();
