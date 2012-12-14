@@ -104,7 +104,7 @@ void Workspace::Init() {
     top_right->AddChild(breakpoints);
     first_row->AddChild(source_view_container_);
     first_row->AddChild(top_right);
-    first_row->SetFraction(source_view_container_, .6);
+    first_row->SetFraction(source_view_container_, .55);
 
     Container* views = new Container(skin_);
     views->SetMode(Container::SplitHorizontal);

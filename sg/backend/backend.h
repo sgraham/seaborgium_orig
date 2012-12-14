@@ -9,12 +9,20 @@
 
 #include "base/string16.h"
 
+class FrameArgumentData {
+ public:
+  string16 name;
+  string16 type;
+  string16 value;
+};
+
 class FrameData {
  public:
   uintptr_t address;
   string16 function;
   string16 filename;
   int line_number;
+  std::vector<FrameArgumentData> arguments;
 };
 
 class StoppedAtBreakpointData {

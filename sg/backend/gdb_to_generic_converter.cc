@@ -82,3 +82,37 @@ RetrievedStackData RetrievedStackDataFromList(base::Value* value) {
   }
   return data;
 }
+
+RetrievedStackData MergeArgumentsIntoStackFrameData(
+    const RetrievedStackData& just_stack,
+    base::Value* value) {
+  base::ListValue* list_value;
+  CHECK(value->GetAsList(&list_value));
+  if (list_value->GetSize() != just_stack.frames.size()) {
+    // Don't match, bail.
+    return just_stack;
+  }
+  RetrievedStackData data = just_stack;
+  for (size_t i = 0; i < list_value->GetSize(); ++i) {
+    base::DictionaryValue* dict_value;
+    CHECK(list_value->GetDictionary(i, &dict_value));
+    base::DictionaryValue* frame_dict_value;
+    CHECK(dict_value->GetDictionary("frame", &frame_dict_value));
+    base::ListValue* args_list_value;
+    CHECK(frame_dict_value->GetList("args", &args_list_value));
+    std::vector<FrameArgumentData>* arguments = &data.frames[i].arguments;
+    for (size_t j = 0; j < args_list_value->GetSize(); ++j) {
+      base::DictionaryValue* argument_dictionary;
+      CHECK(args_list_value->GetDictionary(j, &argument_dictionary));
+      FrameArgumentData argument_data;
+      CHECK(argument_dictionary->GetStringWithoutPathExpansion(
+            "name", &argument_data.name));
+      CHECK(argument_dictionary->GetStringWithoutPathExpansion(
+            "type", &argument_data.type));
+      CHECK(argument_dictionary->GetStringWithoutPathExpansion(
+            "value", &argument_data.value));
+      arguments->push_back(argument_data);
+    }
+  }
+  return data;
+}

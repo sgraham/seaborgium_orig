@@ -26,7 +26,8 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
       : read_state_(input),
         write_state_(output),
         terminating_(false),
-        debug_notification_(NULL) {
+        debug_notification_(NULL),
+        got_stack_frames_waiting_for_arguments_(false) {
     MessageLoopForIO::current()->RegisterIOHandler(input, this);
     MessageLoopForIO::current()->RegisterIOHandler(output, this);
     read_state_.context.handler = this;
@@ -100,11 +101,29 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
                 record->results()[0]->variable() == "stack") {
               RetrievedStackData data =
                   RetrievedStackDataFromList(record->results()[0]->value());
+              stack_without_arguments_ = data;
+              got_stack_frames_waiting_for_arguments_ = true;
+              // Possibly want to post here if the stack-args is too slow.
+              // On small stacks though, it just causes one frame of flicker,
+              // so just defer until we get the argument data.
+              continue;
+            } else if (record->results().size() == 1 &&
+                       record->results()[0]->variable() == "stack-args") {
+              // The -stack-list-frames (above, "stack"), doesn't include any
+              // information about the function other than the name, so we
+              // also request the argument information, merge it in, and send
+              // stack results again.
+              RetrievedStackData data =
+                  MergeArgumentsIntoStackFrameData(
+                      stack_without_arguments_,
+                      record->results()[0]->value());
               AppThread::PostTask(AppThread::UI, FROM_HERE,
                   base::Bind(&DebugNotification::OnRetrievedStack,
                              base::Unretained(debug_notification_), data));
+              got_stack_frames_waiting_for_arguments_ = false;
               continue;
             }
+            got_stack_frames_waiting_for_arguments_ = false;
           }
           goto notimplemented;
         case GdbRecord::RT_EXEC_ASYNC_OUTPUT:
@@ -185,6 +204,9 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
   std::list<string16> pending_writes_;
 
   bool terminating_;
+
+  RetrievedStackData stack_without_arguments_;
+  bool got_stack_frames_waiting_for_arguments_;
 
   DebugNotification* debug_notification_;
 };
@@ -269,8 +291,7 @@ void DebugCoreGdb::StepIn() {
 
 void DebugCoreGdb::GetStack() {
   SendCommand(token_, L"-stack-list-frames");
-  // TODO(scottmg): Need to merge the results of these two commands:
-  // SendCommand(token_, L"-stack-list-arguments", L"--simple-values");
+  SendCommand(token_, L"-stack-list-arguments", L"--simple-values");
   // return token_++;
 }
 
