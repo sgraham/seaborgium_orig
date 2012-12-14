@@ -448,7 +448,7 @@ bool Direct2DRenderer::InternalCreateDeviceResources()
   if ( !m_pRT )
   {
     RECT rc;
-    GetClientRect(m_pHWND, &rc);
+    GetClientRect(hwnd_, &rc);
 
     D2D1_SIZE_U size = D2D1::SizeU(
         rc.right - rc.left,
@@ -457,9 +457,9 @@ bool Direct2DRenderer::InternalCreateDeviceResources()
 
     ID2D1HwndRenderTarget* pRT;
     // Create a Direct2DRenderer render target.
-    hr = m_pD2DFactory->CreateHwndRenderTarget(
+    hr = d2d_factory_->CreateHwndRenderTarget(
         D2D1::RenderTargetProperties(),
-        D2D1::HwndRenderTargetProperties(m_pHWND, size),
+        D2D1::HwndRenderTargetProperties(hwnd_, size),
         &pRT
         );
 

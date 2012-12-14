@@ -85,8 +85,8 @@ class Direct2DRenderer : public Renderer
   bool InternalCreateDeviceResources();
   void InternalReleaseDeviceResources();
 
-  ID2D1Factory* m_pD2DFactory;
-  HWND      m_pHWND;
+  ID2D1Factory* d2d_factory_;
+  HWND hwnd_;
 
  private:
   bool InternalLoadTexture( Texture* pTexture );
