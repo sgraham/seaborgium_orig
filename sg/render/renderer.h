@@ -56,7 +56,7 @@ class Renderer {
       Texture* texture,
       Rect target_rect,
       float alpha,
-      float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f) = 0;
+      float u1, float v1, float u2, float v2) = 0;
   virtual void DrawMissingImage(Rect target_rect);
 
   virtual void LoadFont(Font* pFont) = 0;
@@ -69,7 +69,7 @@ class Renderer {
   virtual void DrawTexturedRect(
       Texture* texture,
       Rect target_rect,
-      float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f);
+      float u1, float v1, float u2, float v2);
 
  public:
   // Global offset applied to rendering (so that sub-controls can work only in

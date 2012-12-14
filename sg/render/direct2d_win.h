@@ -47,7 +47,9 @@ class Texture;
 
 class Direct2DRenderer : public Renderer {
  public:
-  Direct2DRenderer(ID2D1RenderTarget* pDevice, IDWriteFactory* pDWriteFactory, IWICImagingFactory* pWICFactory);
+  Direct2DRenderer(ID2D1RenderTarget* pDevice,
+                   IDWriteFactory* pDWriteFactory,
+                   IWICImagingFactory* pWICFactory);
   ~Direct2DRenderer();
 
   virtual void Release();
@@ -67,7 +69,11 @@ class Direct2DRenderer : public Renderer {
   void StartClip();
   void EndClip();
 
-  void DrawTexturedRectAlpha(Texture* pTexture, Rect pTargetRect, float alpha, float u1=0.0f, float v1=0.0f, float u2=1.0f, float v2=1.0f);
+  void DrawTexturedRectAlpha(
+      Texture* pTexture,
+      Rect pTargetRect,
+      float alpha,
+      float u1, float v1, float u2, float v2);
   void LoadTexture(Texture* pTexture);
   void FreeTexture(Texture* pTexture);
 
