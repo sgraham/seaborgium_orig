@@ -269,6 +269,8 @@ void DebugCoreGdb::StepIn() {
 
 void DebugCoreGdb::GetStack() {
   SendCommand(token_, L"-stack-list-frames");
+  // TODO(scottmg): Need to merge the results of these two commands:
+  // SendCommand(token_, L"-stack-list-arguments", L"--simple-values");
   // return token_++;
 }
 

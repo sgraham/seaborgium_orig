@@ -95,3 +95,14 @@ n
 ^done,locals=[]
 (gdb)
 
+
+STACK ARGS AND VALUES
+
+(gdb)
+-stack-list-frames
+^done,stack=[frame={level="0",addr="0x004013a3",func="Function",file="test_binary.cc",line="15"},frame={level="1",addr="0x00401457",func="main",file="test_binary.cc",line="27"}]
+(gdb)
+-stack-list-arguments --simple-values
+^done,stack-args=[frame={level="0",args=[]},frame={level="1",args=[{name="argc",type="int",value="1"},{name="argv",type="char **",value="0x3b2c80"}]}]
+(gdb)
+q
