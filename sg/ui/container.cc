@@ -147,10 +147,10 @@ void Container::RenderBorders(Gwen::Renderer::Base* renderer) {
 
       // And title bar.
       bool is_focused = GetFocusedContents() == child->contents;
-      Gwen::Color title_bar_background = is_focused ?
+      const Color& title_bar_background = is_focused ?
           skin.GetColorScheme().title_bar_active() :
           skin.GetColorScheme().title_bar_inactive();
-      Gwen::Color title_bar_text = is_focused ?
+      const Color& title_bar_text = is_focused ?
           skin.GetColorScheme().title_bar_text_active() :
           skin.GetColorScheme().title_bar_text_inactive();
       renderer->SetDrawColor(title_bar_background);

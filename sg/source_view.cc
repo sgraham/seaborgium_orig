@@ -184,7 +184,6 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   }
 
   if (LineInView(program_counter_line_)) {
-    renderer->SetDrawColor(Gwen::Colors::Yellow);
     int y = program_counter_line_ * g_line_height - y_pixel_scroll;
     renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
     renderer->DrawTexturedRect(

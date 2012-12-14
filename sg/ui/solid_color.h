@@ -7,7 +7,7 @@
 
 class SolidColor : public Contents {
  public:
-  SolidColor(const Skin& skin, Gwen::Color color)
+  SolidColor(const Skin& skin, const Color& color)
       : Contents(skin),
         color_(color) {
   }
@@ -22,7 +22,7 @@ class SolidColor : public Contents {
   }
 
  private:
-  Gwen::Color color_;
+  Color color_;
 
   DISALLOW_COPY_AND_ASSIGN(SolidColor);
 };

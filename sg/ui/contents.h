@@ -10,6 +10,7 @@
 #include "Gwen/BaseRender.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/input.h"
+
 class Skin;
 
 class Contents : public InputHandler {
