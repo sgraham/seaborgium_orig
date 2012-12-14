@@ -35,15 +35,11 @@
 #include "base/string16.h"
 #include "sg/basic_geometric_types.h"
 
+class Font;
 class Texture;
 
-class Font;
-class WindowProvider;
-
-class Renderer
-{
+class Renderer {
  public:
-
   Renderer();
   virtual ~Renderer();
 
