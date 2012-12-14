@@ -149,7 +149,7 @@ class GpuSystem {
   }
 
   void CreateRenderer() {
-    renderer_ = new Renderer::Direct2D(
+    renderer_ = new Direct2DRenderer(
         render_target_, dwrite_factory_, wic_factory_);
   }
 
@@ -158,7 +158,7 @@ class GpuSystem {
   IDWriteFactory* dwrite_factory_;
   IWICImagingFactory* wic_factory_;
   ID2D1HwndRenderTarget* render_target_;
-  Renderer::Direct2D* renderer_;
+  Direct2DRenderer* renderer_;
   ApplicationWindow* application_window_;
   DebugPresenterNotify* debug_presenter_notify_;
 

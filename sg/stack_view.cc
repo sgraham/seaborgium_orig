@@ -43,7 +43,7 @@ void StackView::SetData(const std::vector<FrameData>& frames, int active) {
   Invalidate();
 }
 
-void StackView::Render(Renderer::Base* renderer) {
+void StackView::Render(Renderer* renderer) {
   const Skin& skin = Contents::GetSkin();
 
   // TODO(rendering): Hacky.

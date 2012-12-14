@@ -374,7 +374,7 @@ def main():
   main_objs += cxx('render\\application_window_win')
   main_objs += cxx('render\\gpu_win')
   main_objs += cxx('render\\texture')
-  main_objs += cxx('render\\BaseRender')
+  main_objs += cxx('render\\renderer')
   main_objs += cxx('render\\direct2d_win')
   main_objs += cxx('main_win')
   main_objs += rc('sg', implicit=['art\\sg.ico'])

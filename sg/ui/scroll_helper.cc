@@ -5,6 +5,7 @@
 #include "sg/ui/scroll_helper.h"
 
 #include "base/logging.h"
+#include "sg/render/renderer.h"
 #include "sg/render/texture.h"
 
 namespace {
@@ -48,7 +49,7 @@ bool ScrollHelper::Update() {
   return true;
 }
 
-void ScrollHelper::RenderScrollIndicators(Renderer::Base* renderer) {
+void ScrollHelper::RenderScrollIndicators(Renderer* renderer) {
   // TODO(rendering)
   if (!g_vscrollbar_top.data) {
     renderer->LoadTexture(&g_vscrollbar_top);

@@ -7,15 +7,15 @@
 
 #include "base/string16.h"
 
-namespace Renderer { class Base; }
+class Renderer;
 
 class Texture {
  public:
   Texture() : data(NULL), width(-1), height(-1), failed(false) {
   }
 
-  void Load(const string16& name, Renderer::Base* renderer);
-  void Free(Renderer::Base* renderer);
+  void Load(const string16& name, Renderer* renderer);
+  void Free(Renderer* renderer);
 
   string16 name;
   void* data;

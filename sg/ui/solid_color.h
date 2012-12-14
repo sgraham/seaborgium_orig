@@ -13,7 +13,7 @@ class SolidColor : public Contents {
   }
   virtual ~SolidColor() {}
 
-  virtual void Render(Renderer::Base* renderer) OVERRIDE {
+  virtual void Render(Renderer* renderer) OVERRIDE {
     renderer->SetDrawColor(color_);
     // TODO(rendering): Conversion.
     Rect client_rect = GetClientRect();

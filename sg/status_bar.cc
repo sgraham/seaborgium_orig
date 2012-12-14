@@ -29,7 +29,7 @@ void StatusBar::SetDebugState(const string16& status) {
   debug_state_ = status;
 }
 
-void StatusBar::Render(Renderer::Base* renderer) {
+void StatusBar::Render(Renderer* renderer) {
   const Skin& skin = GetSkin();
   const ColorScheme& color = skin.GetColorScheme();
 

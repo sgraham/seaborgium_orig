@@ -26,7 +26,7 @@ class SourceView : public Contents, public ScrollHelperDataProvider {
  public:
   explicit SourceView(const Skin& skin);
 
-  virtual void Render(Renderer::Base* renderer);
+  virtual void Render(Renderer* renderer);
 
   virtual void SetData(const std::string& utf8_text);
   // TODO(scottmg): Probably some sort of "margin indicator" abstraction.

@@ -4,13 +4,13 @@
 
 #include "sg/render/texture.h"
 
-#include "sg/render/BaseRender.h"
+#include "sg/render/renderer.h"
 
-void Texture::Load(const string16& name, Renderer::Base* renderer) {
+void Texture::Load(const string16& name, Renderer* renderer) {
   this->name = name;
   renderer->LoadTexture(this);
 }
 
-void Texture::Free(Renderer::Base* renderer) {
+void Texture::Free(Renderer* renderer) {
   renderer->FreeTexture(this);
 }

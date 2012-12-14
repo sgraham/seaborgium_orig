@@ -19,7 +19,7 @@ class StackView : public Contents {
  public:
   explicit StackView(const Skin& skin);
 
-  virtual void Render(Renderer::Base* renderer);
+  virtual void Render(Renderer* renderer);
 
   virtual void SetData(const std::vector<FrameData>& frames, int active);
 

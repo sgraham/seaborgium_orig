@@ -24,7 +24,7 @@ Container::~Container() {
   }
 }
 
-void Container::Render(Renderer::Base* renderer) {
+void Container::Render(Renderer* renderer) {
   RenderChildren(renderer);
   RenderBorders(renderer);
 }
@@ -117,7 +117,7 @@ void Container::DoStandardLayout() {
   DCHECK(last_fraction == 1.0);
 }
 
-void Container::RenderChildren(Renderer::Base* renderer) {
+void Container::RenderChildren(Renderer* renderer) {
   Point old_render_offset = renderer->GetRenderOffset();
   for (size_t i = 0; i < children_.size(); ++i) {
     const Rect& screen_rect = children_[i].contents->GetScreenRect();
@@ -128,7 +128,7 @@ void Container::RenderChildren(Renderer::Base* renderer) {
   renderer->SetRenderOffset(old_render_offset);
 }
 
-void Container::RenderBorders(Renderer::Base* renderer) {
+void Container::RenderBorders(Renderer* renderer) {
   const Skin& skin = GetSkin();
   Rect title_border_size(
       skin.border_size(), skin.border_size() + skin.title_bar_size(),
@@ -169,7 +169,7 @@ void Container::RenderBorders(Renderer::Base* renderer) {
   }
 }
 
-void Container::RenderFrame(Renderer::Base* renderer, const Rect& rect) {
+void Container::RenderFrame(Renderer* renderer, const Rect& rect) {
   const Skin& skin = GetSkin();
   renderer->SetDrawColor(skin.GetColorScheme().border());
   renderer->DrawFilledRect(

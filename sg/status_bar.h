@@ -16,7 +16,7 @@ class StatusBar : public Contents {
   void SetRenderTime(double ms_per_frame);
   void SetDebugState(const string16& status);
 
-  virtual void Render(Renderer::Base* renderer);
+  virtual void Render(Renderer* renderer);
 
  private:
   string16 ms_per_frame_;

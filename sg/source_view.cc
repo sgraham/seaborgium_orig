@@ -16,7 +16,7 @@
 #include "sg/cpp_lexer.h"
 #include "sg/lexer.h"
 #include "sg/render/texture.h"
-#include "sg/render/BaseRender.h"
+#include "sg/render/renderer.h"
 #include "sg/ui/skin.h"
 
 namespace {
@@ -118,7 +118,7 @@ bool SourceView::LineInView(int line_number) {
 }
 
 // TODO(rendering): Brutal efficiency.
-void SourceView::Render(Renderer::Base* renderer) {
+void SourceView::Render(Renderer* renderer) {
   const Skin& skin = Contents::GetSkin();
 
   // TODO(rendering): Hacky.
