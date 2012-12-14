@@ -45,9 +45,6 @@ class Renderer {
 
   virtual void Init(){};
 
-  virtual void Begin(){};
-  virtual void End(){};
-
   virtual void SetDrawColor( Color color ){};
 
   virtual void DrawFilledRect( Rect rect ){};;

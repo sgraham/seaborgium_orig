@@ -50,8 +50,6 @@ class Direct2DRenderer : public Renderer {
   Direct2DRenderer( ID2D1RenderTarget* pDevice, IDWriteFactory* pDWriteFactory, IWICImagingFactory* pWICFactory );
   ~Direct2DRenderer();
 
-  virtual void Begin();
-  virtual void End();
   virtual void Release();
 
   virtual void SetDrawColor(Color color);
