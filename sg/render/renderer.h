@@ -57,7 +57,6 @@ class Renderer {
       Rect target_rect,
       float alpha,
       float u1, float v1, float u2, float v2) = 0;
-  virtual void DrawMissingImage(Rect target_rect);
 
   virtual void LoadFont(Font* pFont) = 0;
   virtual void FreeFont(Font* pFont) = 0;
@@ -71,6 +70,9 @@ class Renderer {
       Rect target_rect,
       float u1, float v1, float u2, float v2);
 
+  // Can be modified if necessary, or falls back to reasonable implementation.
+  virtual void DrawMissingImage(Rect target_rect);
+
  public:
   // Global offset applied to rendering (so that sub-controls can work only in
   // local space.
@@ -79,8 +81,7 @@ class Renderer {
   void TranslateByRenderOffset(int* x, int* y);
   void TranslateByRenderOffset(Rect* rect);
 
- public:
-
+  // Clip region. UNTESTED.
   void SetClipRegion(Rect rect);
   void AddClipRegion(Rect rect);
   bool ClipRegionVisible();

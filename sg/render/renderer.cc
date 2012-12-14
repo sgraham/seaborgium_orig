@@ -49,51 +49,41 @@ void Renderer::TranslateByRenderOffset(Rect* rect) {
   TranslateByRenderOffset(&rect->x, &rect->y);
 }
 
-void Renderer::SetClipRegion(Rect rect) { 
-  clip_region_ = rect; 
+void Renderer::SetClipRegion(Rect rect) {
+  clip_region_ = rect;
 }
 
-void Renderer::AddClipRegion(Rect rect) 
-{ 
+void Renderer::AddClipRegion(Rect rect) {
   rect.x = render_offset_.x;
   rect.y = render_offset_.y;
 
   Rect out = rect;
-  if (rect.x < clip_region_.x)
-  {
+  if (rect.x < clip_region_.x) {
     out.w -= (clip_region_.x - out.x);
     out.x = clip_region_.x;
   }
 
-  if (rect.y < clip_region_.y)
-  {
+  if (rect.y < clip_region_.y) {
     out.h -= (clip_region_.y - out.y);
     out.y = clip_region_.y;
   }
 
   if (rect.x + rect.w > clip_region_.x + clip_region_.w)
-  {
     out.w = (clip_region_.x + clip_region_.w) - out.x;
-  }
 
   if (rect.y + rect.h > clip_region_.y + clip_region_.h)
-  {
     out.h = (clip_region_.y + clip_region_.h) - out.y;
-  }
 
   clip_region_ = out;
 }
 
-const Rect& Renderer::ClipRegion() const
-{ 
-  return clip_region_; 
+const Rect& Renderer::ClipRegion() const {
+  return clip_region_;
 }
 
-bool Renderer::ClipRegionVisible()
-{
+bool Renderer::ClipRegionVisible() {
   if (clip_region_.w <= 0 || clip_region_.h <= 0)
     return false;
-
   return true;
 }
 
