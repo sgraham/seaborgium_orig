@@ -51,14 +51,6 @@ struct TextureData
 };
 
 
-// self-hosting constructor
-Direct2DRenderer::Direct2DRenderer() : m_Color( D2D1::ColorF::White )
-{
-  m_pRT       = NULL;
-  m_pDWriteFactory  = NULL;
-  m_pWICFactory   = NULL;
-}
-
 Direct2DRenderer::Direct2DRenderer( ID2D1RenderTarget* pRT, IDWriteFactory* pDWriteFactory, IWICImagingFactory* pWICFactory ) : m_Color( D2D1::ColorF::White )
 {
   DeviceAcquired( pRT );

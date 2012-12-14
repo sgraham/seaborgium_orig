@@ -45,11 +45,8 @@
 class Font;
 class Texture;
 
-class Direct2DRenderer : public Renderer
-{
+class Direct2DRenderer : public Renderer {
  public:
-
-  Direct2DRenderer();
   Direct2DRenderer( ID2D1RenderTarget* pDevice, IDWriteFactory* pDWriteFactory, IWICImagingFactory* pWICFactory );
   ~Direct2DRenderer();
 
