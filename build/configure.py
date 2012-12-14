@@ -142,7 +142,22 @@ def GetFreetypeFileList():
 
 
 def main():
-  if not os.path.exists(os.path.join(ninja_dir, 'ninja.exe')):
+  platform = 'windows'
+  if sys.platform.startswith('linux'):
+    platform = 'linux'
+
+  if platform == 'windows':
+    CXX = 'cl'
+    CC = 'cl'
+    objext = '.obj'
+    exeext = '.exe'
+  elif platform == 'linux':
+    CXX = os.environ.get('CXX', 'g++')
+    CC = os.environ.get('CC', 'gcc')
+    objext = '.o'
+    exeext = ''
+
+  if not os.path.exists(os.path.join(ninja_dir, 'ninja' + exeext)):
     print "ninja binary doesn't exist, trying to build it..."
     old_dir = os.getcwd()
     os.chdir(ninja_dir)
@@ -166,19 +181,16 @@ def main():
   n.variable('configure_args', ' '.join(sys.argv[1:]))
   n.newline()
 
-  CXX = 'cl'
-  objext = '.obj'
-
   def src(filename):
-    return os.path.join('sg', filename)
+    return os.path.normpath(os.path.join('sg', filename))
   def base_src(filename):
-    return os.path.join('third_party', 'base', filename)
+    return os.path.normpath(os.path.join('third_party', 'base', filename))
   def gwen_src(filename):
-    return os.path.join('third_party', 'gwen', filename)
+    return os.path.normpath(os.path.join('third_party', 'gwen', filename))
   def ft2_src(filename):
-    return os.path.join('third_party', 'freetype', filename)
+    return os.path.normpath(os.path.join('third_party', 'freetype', filename))
   def re2_src(filename):
-    return os.path.join('third_party', 're2', filename)
+    return os.path.normpath(os.path.join('third_party', 're2', filename))
   def built(filename):
     return os.path.join('$builddir', 'obj', filename)
   pch_name = built('sg.pch')
@@ -208,7 +220,7 @@ def main():
     os.makedirs('out')
   n.variable('builddir', 'out')
   n.variable('cxx', CXX)
-  n.variable('cc', CXX)
+  n.variable('cc', CC)
 
   cflags = ['/nologo',  # Don't print startup banner.
             '/Zi',  # Create pdb with debug info.
@@ -302,13 +314,13 @@ def main():
   n.comment('Core source files.')
   for name in [
                'app_thread',
-               'backend\\backend_native_win',
-               'backend\\debug_core_gdb',
-               'backend\\debug_core_native_win',
-               'backend\\gdb_mi_parse',
-               'backend\\gdb_to_generic_converter',
-               'backend\\process_native_win',
-               'backend\\subprocess_win',
+               'backend/backend_native_win',
+               'backend/debug_core_gdb',
+               'backend/debug_core_native_win',
+               'backend/gdb_mi_parse',
+               'backend/gdb_to_generic_converter',
+               'backend/process_native_win',
+               'backend/subprocess_win',
                'cpp_lexer',
                'debug_presenter',
                'debug_presenter_display',
@@ -319,11 +331,11 @@ def main():
                'source_view',
                'status_bar',
                'stack_view',
-               'ui\\container',
-               'ui\\contents',
-               'ui\\focus',
-               'ui\\scroll_helper',
-               'ui\\skin',
+               'ui/container',
+               'ui/contents',
+               'ui/focus',
+               'ui/scroll_helper',
+               'ui/skin',
                'workspace',
               ]:
     sg_objs += cxx(name)
@@ -370,14 +382,17 @@ def main():
 
   n.comment('Main executable is library plus main() and some startup goop.')
   main_objs = []
-  main_objs += cxx('application')
-  main_objs += cxx('render\\application_window_win')
-  main_objs += cxx('render\\gpu_win')
-  main_objs += cxx('render\\texture')
-  main_objs += cxx('render\\renderer')
-  main_objs += cxx('render\\direct2d_win')
-  main_objs += cxx('main_win')
-  main_objs += rc('sg', implicit=['art\\sg.ico'])
+  for base in ['application',
+               'render/application_window_win',
+               'render/gpu_win',
+               'render/texture',
+               'render/renderer',
+               'render/direct2d_win',
+               'main_win'
+               ]:
+    main_objs += cxx(base)
+  if platform == 'windows':
+    main_objs += rc('sg', implicit=['art\\sg.ico'])
   # No .libs for /incremental to work.
   sg_binary = binary('sg')
   sg = n.build(sg_binary, 'link', inputs=main_objs + app_objs,
@@ -410,10 +425,10 @@ def main():
 
   for name in [
                'lexer_test',
-               'backend\\debug_core_native_win_test',
-               'backend\\debug_core_gdb_test',
-               'backend\\gdb_mi_parse_test',
-               'backend\\subprocess_test',
+               'backend/debug_core_native_win_test',
+               'backend/debug_core_gdb_test',
+               'backend/gdb_mi_parse_test',
+               'backend/subprocess_test',
               ]:
     test_objs += cxx(name, variables=[('cflags', test_cflags)])
 
@@ -428,7 +443,7 @@ def main():
   n.newline()
 
   reader_writer_objs = []
-  reader_writer_objs += cxx('backend\\reader_writer_test')
+  reader_writer_objs += cxx('backend/reader_writer_test')
   reader_writer_test = n.build(binary('reader_writer_test'), 'link',
                                inputs=reader_writer_objs,
                                implicit=pch_implicit,
@@ -438,8 +453,11 @@ def main():
   n.newline()
 
   n.comment('Regenerate build files if build script changes.')
+  prefix = ''
+  if platform == 'windows':
+    prefix = 'cmd /c '
   n.rule('configure',
-          command='cmd /c python build/configure.py $configure_args',
+          command=prefix + 'python build/configure.py $configure_args',
           generator=True)
   n.build('build.ninja', 'configure',
           implicit=[os.path.normpath('build/configure.py'),
