@@ -19,7 +19,7 @@
 #include "sg/ui/contents.h"
 #include "sg/workspace.h"
 
-#include "sg/render/Direct2D.h"
+#include "sg/render/direct2d_win.h"
 
 // Implementation of Gpu for Windows using Direct2D and DirectWrite.
 

@@ -1,11 +1,36 @@
+// Copyright 2012 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+//
+// Originally derived from some rendering code in "GWEN", copyright below:
 /*
 	GWEN
+
 	Copyright (c) 2010 Facepunch Studios
-	See license in Gwen.h
+
+	MIT License
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
 */
 
-#ifndef GWEN_RENDERERS_DIRECT2D_H
-#define GWEN_RENDERERS_DIRECT2D_H
+#ifndef SG_RENDER_DIRECT2D_WIN_H_
+#define SG_RENDER_DIRECT2D_WIN_H_
 
 #include <d2d1.h>
 #include <d2d1helper.h>
@@ -20,8 +45,6 @@
 class Font;
 class Texture;
 
-//namespace Gwen 
-//{
 	namespace Renderer 
 	{
 
@@ -91,5 +114,5 @@ class Texture;
 		};
 
 	}
-//}
-#endif
+
+#endif  // SG_RENDER_DIRECT2D_WIN_H_
