@@ -9,10 +9,8 @@
 #include <vector>
 
 #include "base/string16.h"
-#include "Gwen/Controls/Base.h"
-#include "Gwen/Font.h"
-#include "Gwen/Structures.h"
 #include "sg/lexer.h"
+#include "sg/render/font.h"
 #include "sg/ui/contents.h"
 #include "sg/ui/scroll_helper.h"
 
@@ -28,7 +26,7 @@ class SourceView : public Contents, public ScrollHelperDataProvider {
  public:
   explicit SourceView(const Skin& skin);
 
-  virtual void Render(Gwen::Renderer::Base* renderer);
+  virtual void Render(Renderer::Base* renderer);
 
   virtual void SetData(const std::string& utf8_text);
   // TODO(scottmg): Probably some sort of "margin indicator" abstraction.
@@ -59,7 +57,7 @@ class SourceView : public Contents, public ScrollHelperDataProvider {
   float y_pixel_scroll_target_;
 
   std::vector<Line> lines_;
-  Gwen::Font font_;
+  Font font_;
 
   ScrollHelper scroll_helper_;
 

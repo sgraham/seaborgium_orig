@@ -5,14 +5,13 @@
 #include "sg/ui/scroll_helper.h"
 
 #include "base/logging.h"
-#include "Gwen/Gwen.h"
-#include "Gwen/Texture.h"
+#include "sg/render/texture.h"
 
 namespace {
 
-Gwen::Texture g_vscrollbar_top;
-Gwen::Texture g_vscrollbar_bottom;
-Gwen::Texture g_vscrollbar_middle;
+Texture g_vscrollbar_top;
+Texture g_vscrollbar_bottom;
+Texture g_vscrollbar_middle;
 const int kFadeOutAfterTicks = 90;
 const int kFadeOutOverTicks = 30;
 
@@ -28,9 +27,9 @@ ScrollHelper::ScrollHelper(const Skin& skin,
       num_pixels_in_line_(num_pixels_in_line),
       data_provider_(data_provider) {
   // TODO(rendering): skin for these.
-  g_vscrollbar_top.name = "art/scrollbar-top.png";
-  g_vscrollbar_bottom.name = "art/scrollbar-bottom.png";
-  g_vscrollbar_middle.name = "art/scrollbar-middle.png";
+  g_vscrollbar_top.name = L"art/scrollbar-top.png";
+  g_vscrollbar_bottom.name = L"art/scrollbar-bottom.png";
+  g_vscrollbar_middle.name = L"art/scrollbar-middle.png";
 }
 
 ScrollHelper::~ScrollHelper() {
@@ -49,7 +48,7 @@ bool ScrollHelper::Update() {
   return true;
 }
 
-void ScrollHelper::RenderScrollIndicators(Gwen::Renderer::Base* renderer) {
+void ScrollHelper::RenderScrollIndicators(Renderer::Base* renderer) {
   // TODO(rendering)
   if (!g_vscrollbar_top.data) {
     renderer->LoadTexture(&g_vscrollbar_top);
@@ -82,19 +81,19 @@ void ScrollHelper::RenderScrollIndicators(Gwen::Renderer::Base* renderer) {
   int y = scrollbar_offset;
   renderer->DrawTexturedRectAlpha(
       &g_vscrollbar_top,
-      Gwen::Rect(x, y, g_vscrollbar_top.width, g_vscrollbar_top.height),
+      Rect(x, y, g_vscrollbar_top.width, g_vscrollbar_top.height),
       alpha,
       0, 0, 1, 1);
   y += g_vscrollbar_top.height;
   renderer->DrawTexturedRectAlpha(
       &g_vscrollbar_middle,
-      Gwen::Rect(x, y, g_vscrollbar_middle.width, scrollbar_middle_height),
+      Rect(x, y, g_vscrollbar_middle.width, scrollbar_middle_height),
       alpha,
       0, 0, 1, 1);
   y += scrollbar_middle_height;
   renderer->DrawTexturedRectAlpha(
       &g_vscrollbar_bottom,
-      Gwen::Rect(x, y, g_vscrollbar_bottom.width, g_vscrollbar_bottom.height),
+      Rect(x, y, g_vscrollbar_bottom.width, g_vscrollbar_bottom.height),
       alpha,
       0, 0, 1, 1);
 }

@@ -6,12 +6,12 @@
 
 #include "base/string_number_conversions.h"
 #include "base/utf_string_conversions.h"
-#include "Gwen/Font.h"
+#include "sg/render/font.h"
 #include "sg/ui/skin.h"
 
 // TODO(rendering)
 // TODO(config)
-Gwen::Font kStatusBarFont(L"Segoe UI", 12.f);
+Font kStatusBarFont(L"Segoe UI", 12.f);
 
 StatusBar::StatusBar(const Skin& skin) : Contents(skin) {
   debug_state_ = L"";
@@ -29,7 +29,7 @@ void StatusBar::SetDebugState(const string16& status) {
   debug_state_ = status;
 }
 
-void StatusBar::Render(Gwen::Renderer::Base* renderer) {
+void StatusBar::Render(Renderer::Base* renderer) {
   const Skin& skin = GetSkin();
   const ColorScheme& color = skin.GetColorScheme();
 
@@ -37,11 +37,11 @@ void StatusBar::Render(Gwen::Renderer::Base* renderer) {
   // TODO(rendering): Conversion.
   Rect client_rect = GetClientRect();
   renderer->DrawFilledRect(
-      Gwen::Rect(client_rect.x, client_rect.y, client_rect.w, client_rect.h));
+      Rect(client_rect.x, client_rect.y, client_rect.w, client_rect.h));
 
   const int kEdgeOffset = 3;
   renderer->SetDrawColor(color.text());
-  renderer->RenderText(&kStatusBarFont, Gwen::Point(kEdgeOffset, kEdgeOffset),
+  renderer->RenderText(&kStatusBarFont, Point(kEdgeOffset, kEdgeOffset),
                        L"Ready.");
 
   int debug_state_width =
@@ -51,15 +51,15 @@ void StatusBar::Render(Gwen::Renderer::Base* renderer) {
 
   const int kItemPadding = 10;
   int x = GetClientRect().w - kItemPadding - ms_per_frame_width;
-  renderer->RenderText(&kStatusBarFont, Gwen::Point(x, kEdgeOffset),
+  renderer->RenderText(&kStatusBarFont, Point(x, kEdgeOffset),
                        ms_per_frame_);
   int separator_x = x - kItemPadding;
   x -= kItemPadding + 1 + kItemPadding + debug_state_width;
-  renderer->RenderText(&kStatusBarFont, Gwen::Point(x , kEdgeOffset),
+  renderer->RenderText(&kStatusBarFont, Point(x , kEdgeOffset),
                        debug_state_);
 
   renderer->SetDrawColor(color.border());
-  renderer->DrawFilledRect(Gwen::Rect(separator_x, 0, 1, client_rect.h));
+  renderer->DrawFilledRect(Rect(separator_x, 0, 1, client_rect.h));
   x -= kItemPadding + 1;
-  renderer->DrawFilledRect(Gwen::Rect(x, 0, 1, client_rect.h));
+  renderer->DrawFilledRect(Rect(x, 0, 1, client_rect.h));
 }

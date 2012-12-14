@@ -63,83 +63,6 @@ def GetChromiumBaseFileList(base_dir):
   files = get_file_list()
   return filter_file_list(files, ('win', 'lib'))
 
-def GetGwenFileList():
-  files = [
-    'gwen/src/Anim',
-    'gwen/src/BaseRender',
-    'gwen/src/ControlList',
-    'gwen/src/DragAndDrop',
-    'gwen/src/events',
-    'gwen/src/Gwen',
-    'gwen/src/Hook',
-    'gwen/src/inputhandler',
-    'gwen/src/Skin',
-    'gwen/src/ToolTip',
-    'gwen/src/Utility',
-    'gwen/src/Controls/Base',
-    'gwen/src/Controls/Button',
-    'gwen/src/Controls/Canvas',
-    'gwen/src/Controls/CheckBox',
-    'gwen/src/Controls/CollapsibleCategory',
-    'gwen/src/Controls/ColorControls',
-    'gwen/src/Controls/ColorPicker',
-    'gwen/src/Controls/ComboBox',
-    'gwen/src/Controls/CrossSplitter',
-    'gwen/src/Controls/DockBase',
-    'gwen/src/Controls/DockedTabControl',
-    'gwen/src/Controls/Dragger',
-    'gwen/src/Controls/GroupBox',
-    'gwen/src/Controls/HorizontalScrollBar',
-    'gwen/src/Controls/HorizontalSlider',
-    'gwen/src/Controls/HSVColorPicker',
-    'gwen/src/Controls/ImagePanel',
-    'gwen/src/Controls/Label',
-    'gwen/src/Controls/LabelClickable',
-    'gwen/src/Controls/ListBox',
-    'gwen/src/Controls/Menu',
-    'gwen/src/Controls/MenuItem',
-    'gwen/src/Controls/MenuStrip',
-    'gwen/src/Controls/NumericUpDown',
-    'gwen/src/Controls/PageControl',
-    'gwen/src/Controls/ProgressBar',
-    'gwen/src/Controls/Properties',
-    'gwen/src/Controls/PropertyTree',
-    'gwen/src/Controls/RadioButton',
-    'gwen/src/Controls/RadioButtonController',
-    'gwen/src/Controls/Rectangle',
-    'gwen/src/Controls/ResizableControl',
-    'gwen/src/Controls/Resizer',
-    'gwen/src/Controls/RichLabel',
-    'gwen/src/Controls/ScrollBar',
-    'gwen/src/Controls/ScrollBarBar',
-    'gwen/src/Controls/ScrollBarButton',
-    'gwen/src/Controls/ScrollControl',
-    'gwen/src/Controls/Slider',
-    'gwen/src/Controls/SplitterBar',
-    'gwen/src/Controls/TabButton',
-    'gwen/src/Controls/TabControl',
-    'gwen/src/Controls/TabStrip',
-    'gwen/src/Controls/Text',
-    'gwen/src/Controls/TextBox',
-    'gwen/src/Controls/TextBoxNumeric',
-    'gwen/src/Controls/TreeControl',
-    'gwen/src/Controls/TreeNode',
-    'gwen/src/Controls/VerticalScrollBar',
-    'gwen/src/Controls/VerticalSlider',
-    'gwen/src/Controls/WindowCanvas',
-    'gwen/src/Controls/WindowControl',
-    'gwen/src/Controls/Dialog/FileOpen',
-    'gwen/src/Controls/Dialog/FileSave',
-    'gwen/src/Controls/Dialog/FolderOpen',
-    'gwen/src/Controls/Dialog/Query',
-    'gwen/src/Platforms/Null',
-    'gwen/src/Platforms/Windows',
-
-    # These are fairly temporary; using Gwen sample renderer.
-    'gwen/Renderers/Direct2D/Direct2D',
-    ]
-  return [os.path.normpath(p) for p in files]
-
 
 def GetRe2FileList():
   files = [
@@ -406,12 +329,6 @@ def main():
     sg_objs += cxx(name)
   n.newline() 
 
-  gwen_objs = []
-  n.comment('Gwen.')
-  for base in GetGwenFileList():
-    gwen_objs += cpp(base, src=gwen_src)
-  n.newline()
-
   re2_objs = []
   n.comment('RE2.')
   for base in GetRe2FileList():
@@ -449,13 +366,16 @@ def main():
 
   all_targets = []
 
-  app_objs = sg_objs + base_objs + gwen_objs + re2_objs + ft2_objs + pch_objs
+  app_objs = sg_objs + base_objs + re2_objs + ft2_objs + pch_objs
 
   n.comment('Main executable is library plus main() and some startup goop.')
   main_objs = []
   main_objs += cxx('application')
   main_objs += cxx('render\\application_window_win')
   main_objs += cxx('render\\gpu_win')
+  main_objs += cxx('render\\texture')
+  main_objs += cxx('render\\BaseRender')
+  main_objs += cxx('render\\Direct2D')
   main_objs += cxx('main_win')
   main_objs += rc('sg', implicit=['art\\sg.ico'])
   # No .libs for /incremental to work.

@@ -26,7 +26,7 @@ class Container : public Contents {
   }
 
   // Implementation of Contents.
-  virtual void Render(Gwen::Renderer::Base* renderer) OVERRIDE;
+  virtual void Render(Renderer::Base* renderer) OVERRIDE;
   virtual void SetScreenRect(const Rect& rect) OVERRIDE;
 
   virtual void AddChild(Contents* contents, const string16& title);
@@ -38,9 +38,9 @@ class Container : public Contents {
   virtual Contents* Child(size_t i) { return children_[i].contents; }
 
  protected:
-  void RenderChildren(Gwen::Renderer::Base* renderer);
-  void RenderBorders(Gwen::Renderer::Base* renderer);
-  void RenderFrame(Gwen::Renderer::Base* renderer, const Rect& rect);
+  void RenderChildren(Renderer::Base* renderer);
+  void RenderBorders(Renderer::Base* renderer);
+  void RenderFrame(Renderer::Base* renderer, const Rect& rect);
 
  private:
   void DoStandardLayout();

@@ -8,10 +8,8 @@
 #include <vector>
 
 #include "base/string16.h"
-#include "Gwen/Controls/Base.h"
-#include "Gwen/Font.h"
-#include "Gwen/Structures.h"
 #include "sg/backend/backend.h"
+#include "sg/render/font.h"
 #include "sg/ui/contents.h"
 
 namespace Gwen { namespace Skin { class Base; }}
@@ -21,7 +19,7 @@ class StackView : public Contents {
  public:
   explicit StackView(const Skin& skin);
 
-  virtual void Render(Gwen::Renderer::Base* renderer);
+  virtual void Render(Renderer::Base* renderer);
 
   virtual void SetData(const std::vector<FrameData>& frames, int active);
 
@@ -29,7 +27,7 @@ class StackView : public Contents {
   std::vector<string16> lines_;
   int active_;
 
-  Gwen::Font font_;
+  Font font_;
 };
 
 #endif  // SG_STACK_VIEW_H_

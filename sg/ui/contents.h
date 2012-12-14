@@ -7,7 +7,7 @@
 
 #include "base/basictypes.h"
 #include "base/compiler_specific.h"
-#include "Gwen/BaseRender.h"
+#include "sg/render/BaseRender.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/input.h"
 
@@ -18,7 +18,7 @@ class Contents : public InputHandler {
   explicit Contents(const Skin& skin);
   virtual ~Contents();
 
-  virtual void Render(Gwen::Renderer::Base* renderer) = 0;
+  virtual void Render(Renderer::Base* renderer) = 0;
 
   virtual void SetParent(Contents* parent);
   virtual Contents* GetParent() const;

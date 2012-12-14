@@ -12,11 +12,11 @@
 #include "base/string_number_conversions.h"
 #include "base/string_piece.h"
 #include "base/utf_string_conversions.h"
-#include "Gwen/Gwen.h"
-#include "Gwen/Texture.h"
 #include "sg/app_thread.h"
 #include "sg/cpp_lexer.h"
 #include "sg/lexer.h"
+#include "sg/render/texture.h"
+#include "sg/render/BaseRender.h"
 #include "sg/ui/skin.h"
 
 namespace {
@@ -24,8 +24,8 @@ namespace {
 // TODO(config):
 // TODO(rendering): Font line height.
 const int g_line_height = 17;
-Gwen::Texture g_pc_indicator_texture;
-Gwen::Texture g_breakpoint_texture;
+Texture g_pc_indicator_texture;
+Texture g_breakpoint_texture;
 
 
 // TODO(scottmg): Losing last line if doesn't end in \n.
@@ -68,8 +68,8 @@ SourceView::SourceView(const Skin& skin)
       program_counter_line_(-1) {
   font_.facename = L"Consolas";
   font_.size = 13.f;
-  g_pc_indicator_texture.name = "art/pc-location.png";
-  g_breakpoint_texture.name = "art/breakpoint.png";
+  g_pc_indicator_texture.name = L"art/pc-location.png";
+  g_breakpoint_texture.name = L"art/breakpoint.png";
 }
 
 void SourceView::SetData(const std::string& utf8_text) {
@@ -118,7 +118,7 @@ bool SourceView::LineInView(int line_number) {
 }
 
 // TODO(rendering): Brutal efficiency.
-void SourceView::Render(Gwen::Renderer::Base* renderer) {
+void SourceView::Render(Renderer::Base* renderer) {
   const Skin& skin = Contents::GetSkin();
 
   // TODO(rendering): Hacky.
@@ -135,7 +135,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
     Invalidate();
 
   renderer->SetDrawColor(skin.GetColorScheme().background());
-  renderer->DrawFilledRect(Gwen::Rect(0, 0, Width(), Height()));
+  renderer->DrawFilledRect(Rect(0, 0, Width(), Height()));
   int start_line = GetFirstLineInView();
 
   // Not quite right, but probably close enough.
@@ -148,7 +148,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
   static const int indicator_height = g_line_height;
   static const int indicator_and_margin = indicator_width + 5;
   renderer->SetDrawColor(skin.GetColorScheme().margin());
-  renderer->DrawFilledRect(Gwen::Rect(
+  renderer->DrawFilledRect(Rect(
       0, 0,
       left_margin + largest_numbers_width + right_margin + indicator_and_margin,
       Height()));
@@ -165,7 +165,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
     renderer->SetDrawColor(skin.GetColorScheme().margin_text());
     renderer->RenderText(
         &font_,
-        Gwen::Point(left_margin, i * g_line_height - y_pixel_scroll),
+        Point(left_margin, i * g_line_height - y_pixel_scroll),
         base::IntToString16(i + 1).c_str());
     size_t x = left_margin + largest_numbers_width + right_margin +
                indicator_and_margin;
@@ -175,7 +175,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
       renderer->SetDrawColor(ColorForTokenType(skin, lines_[i][j].type));
       renderer->RenderText(
           &font_,
-          Gwen::Point(x, i * g_line_height - y_pixel_scroll),
+          Point(x, i * g_line_height - y_pixel_scroll),
           lines_[i][j].text.c_str());
       x += renderer->MeasureText(
           &font_,
@@ -188,7 +188,7 @@ void SourceView::Render(Gwen::Renderer::Base* renderer) {
     renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
     renderer->DrawTexturedRect(
         &g_pc_indicator_texture,
-        Gwen::Rect(left_margin + largest_numbers_width + right_margin, y,
+        Rect(left_margin + largest_numbers_width + right_margin, y,
                    indicator_width, indicator_height),
         0, 0, 1, 1);
   }

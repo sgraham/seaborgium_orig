@@ -4,3 +4,4 @@ out/
 *.ilk
 build.ninja
 tags
+csearchindex

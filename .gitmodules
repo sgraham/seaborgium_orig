@@ -1,6 +1,3 @@
-[submodule "third_party/gwen"]
-	path = third_party/gwen
-	url = git@github.com:sgraham/gwen.git
 [submodule "third_party/ninja"]
 	path = third_party/ninja
 	url = git://github.com/martine/ninja.git

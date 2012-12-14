@@ -19,7 +19,7 @@
 #include "sg/ui/contents.h"
 #include "sg/workspace.h"
 
-#include "Gwen/Renderers/Direct2D.h"
+#include "sg/render/Direct2D.h"
 
 // Implementation of Gpu for Windows using Direct2D and DirectWrite.
 
@@ -149,7 +149,7 @@ class GpuSystem {
   }
 
   void CreateRenderer() {
-    renderer_ = new Gwen::Renderer::Direct2D(
+    renderer_ = new Renderer::Direct2D(
         render_target_, dwrite_factory_, wic_factory_);
   }
 
@@ -158,7 +158,7 @@ class GpuSystem {
   IDWriteFactory* dwrite_factory_;
   IWICImagingFactory* wic_factory_;
   ID2D1HwndRenderTarget* render_target_;
-  Gwen::Renderer::Direct2D* renderer_;
+  Renderer::Direct2D* renderer_;
   ApplicationWindow* application_window_;
   DebugPresenterNotify* debug_presenter_notify_;
 

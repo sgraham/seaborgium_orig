@@ -5,8 +5,6 @@
 #ifndef SG_BASIC_GEOMETRIC_TYPES_H_
 #define SG_BASIC_GEOMETRIC_TYPES_H_
 
-#include "Gwen/Structures.h"
-
 class Rect {
  public:
   Rect() : x(0), y(0), w(-1), h(-1) {}
@@ -35,11 +33,6 @@ class Color {
 
   Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
       : r(r), g(g), b(b), a(a) {
-  }
-
-  // TODO(scottmg): Temp during conversion.
-  operator Gwen::Color() const {
-    return Gwen::Color(r, g, b, a);
   }
 
   unsigned char r, g, b, a;

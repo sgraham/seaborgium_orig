@@ -5,13 +5,13 @@
 #include "sg/ui/container.h"
 
 #include "base/logging.h"
-#include "Gwen/Font.h"
-#include "sg/ui/skin.h"
+#include "sg/render/font.h"
 #include "sg/ui/focus.h"
+#include "sg/ui/skin.h"
 
 // TODO(globals)
 // TODO(rendering)
-Gwen::Font kUIFont(L"Segoe UI", 12.f);
+Font kUIFont(L"Segoe UI", 12.f);
 
 Container::Container(const Skin& skin)
     : Contents(skin),
@@ -24,7 +24,7 @@ Container::~Container() {
   }
 }
 
-void Container::Render(Gwen::Renderer::Base* renderer) {
+void Container::Render(Renderer::Base* renderer) {
   RenderChildren(renderer);
   RenderBorders(renderer);
 }
@@ -117,18 +117,18 @@ void Container::DoStandardLayout() {
   DCHECK(last_fraction == 1.0);
 }
 
-void Container::RenderChildren(Gwen::Renderer::Base* renderer) {
-  Gwen::Point old_render_offset = renderer->GetRenderOffset();
+void Container::RenderChildren(Renderer::Base* renderer) {
+  Point old_render_offset = renderer->GetRenderOffset();
   for (size_t i = 0; i < children_.size(); ++i) {
     const Rect& screen_rect = children_[i].contents->GetScreenRect();
-    renderer->SetRenderOffset(Gwen::Point(screen_rect.x, screen_rect.y));
+    renderer->SetRenderOffset(Point(screen_rect.x, screen_rect.y));
     // TODO(rendering): Clip too.
     children_[i].contents->Render(renderer);
   }
   renderer->SetRenderOffset(old_render_offset);
 }
 
-void Container::RenderBorders(Gwen::Renderer::Base* renderer) {
+void Container::RenderBorders(Renderer::Base* renderer) {
   const Skin& skin = GetSkin();
   Rect title_border_size(
       skin.border_size(), skin.border_size() + skin.title_bar_size(),
@@ -155,31 +155,31 @@ void Container::RenderBorders(Gwen::Renderer::Base* renderer) {
           skin.GetColorScheme().title_bar_text_inactive();
       renderer->SetDrawColor(title_bar_background);
       renderer->DrawFilledRect(
-          Gwen::Rect(rect.x + skin.border_size(), rect.y + skin.border_size(),
+          Rect(rect.x + skin.border_size(), rect.y + skin.border_size(),
                 rect.w - skin.border_size() * 2, skin.title_bar_size()));
 
       // TODO(rendering): Pass rect through to renderer.
       renderer->SetDrawColor(title_bar_text);
       renderer->RenderText(
           &kUIFont,
-          Gwen::Point(rect.x + skin.border_size() + 3,
+          Point(rect.x + skin.border_size() + 3,
                       rect.y + skin.border_size()),
           children_[0].title);
     }
   }
 }
 
-void Container::RenderFrame(Gwen::Renderer::Base* renderer, const Rect& rect) {
+void Container::RenderFrame(Renderer::Base* renderer, const Rect& rect) {
   const Skin& skin = GetSkin();
   renderer->SetDrawColor(skin.GetColorScheme().border());
   renderer->DrawFilledRect(
-      Gwen::Rect(rect.x, rect.y, rect.w, skin.border_size()));
+      Rect(rect.x, rect.y, rect.w, skin.border_size()));
   renderer->DrawFilledRect(
-      Gwen::Rect(rect.x, rect.y, skin.border_size(), rect.h));
-  renderer->DrawFilledRect(Gwen::Rect(
+      Rect(rect.x, rect.y, skin.border_size(), rect.h));
+  renderer->DrawFilledRect(Rect(
       rect.x + rect.w - skin.border_size(),
       rect.y, skin.border_size(), rect.h));
-  renderer->DrawFilledRect(Gwen::Rect(
+  renderer->DrawFilledRect(Rect(
       rect.x, rect.y + rect.h - skin.border_size(),
       rect.w, skin.border_size()));
 }

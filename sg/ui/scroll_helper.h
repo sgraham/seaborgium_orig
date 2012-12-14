@@ -8,6 +8,7 @@
 #include "base/bind.h"
 #include "base/string16.h"
 #include "sg/basic_geometric_types.h"
+#include "sg/render/BaseRender.h"
 
 class Skin;
 namespace Gwen { namespace Renderer { class Base; }}
@@ -31,7 +32,7 @@ class ScrollHelper {
   // Returns whether invalidation is required.
   bool Update();
 
-  void RenderScrollIndicators(Gwen::Renderer::Base* renderer);
+  void RenderScrollIndicators(Renderer::Base* renderer);
   int GetOffset() const { return y_pixel_scroll_; }
 
   // Returns "did move", i.e. whether invalidation is required.
