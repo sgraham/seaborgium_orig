@@ -92,7 +92,7 @@ class ApplicationWindowWin : public ApplicationWindow {
         return 0;
       case WM_CLOSE:
         // TODO(scottmg): Probably not where this should be.
-        MessageLoopForUI::current()->Quit();
+        MessageLoopForUI::current()->QuitNow();
         return 0;
 
       case WM_MOUSEMOVE: {

@@ -150,9 +150,9 @@ void Workspace::SetScreenRect(const Rect& rect) {
 
 void Workspace::Invalidate() {
   if (delegate_) {
-    AppThread::PostTask(AppThread::UI, FROM_HERE,
-                        base::Bind(&ApplicationWindow::Paint,
-                                   base::Unretained(delegate_)));
+    AppThread::PostDelayedTask(AppThread::UI, FROM_HERE,
+        base::Bind(&ApplicationWindow::Paint, base::Unretained(delegate_)),
+        base::TimeDelta::FromMilliseconds(10));
   }
 }
 
