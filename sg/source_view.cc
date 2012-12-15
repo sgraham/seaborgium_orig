@@ -208,6 +208,12 @@ bool SourceView::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
   return true;
 }
 
+bool SourceView::NotifyMouseButton(
+    int index, bool down, const InputModifiers& modifiers) {
+  // TODO(scottmg): Selection, data view, etc.
+  return false;
+}
+
 bool SourceView::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
   if (!down)

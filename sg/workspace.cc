@@ -200,6 +200,12 @@ bool Workspace::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
   return focused->NotifyMouseWheel(delta, modifiers);
 }
 
+bool Workspace::NotifyMouseButton(
+    int index, bool down, const InputModifiers& modifiers) {
+  // TODO(input): Something! Change focus, forward, etc.
+  return false;
+}
+
 bool Workspace::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
   Contents* focused = GetFocusedContents();

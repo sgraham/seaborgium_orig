@@ -48,6 +48,8 @@ void TreeViewHelper::RenderTree(Renderer* renderer) {
   Size screen_size = data_provider_->GetTreeViewScreenSize();
 
   int height_of_header = GetYOffsetToFirstRow();
+  renderer->SetDrawColor(skin_.GetColorScheme().margin());
+  renderer->DrawFilledRect(Rect(0, 0, screen_size.w, height_of_header));
   renderer->SetDrawColor(skin_.GetColorScheme().border());
   renderer->DrawFilledRect(Rect(0, 0, screen_size.w, 1));
   renderer->DrawFilledRect(Rect(0, height_of_header - 1, screen_size.w, 1));

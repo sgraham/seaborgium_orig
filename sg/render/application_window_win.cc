@@ -107,6 +107,30 @@ class ApplicationWindowWin : public ApplicationWindow {
         break;
       }
 
+      case WM_LBUTTONDOWN:
+      case WM_RBUTTONDOWN:
+      case WM_MBUTTONDOWN: {
+        SetCapture(hwnd_);
+        int index = msg == WM_LBUTTONDOWN ? 0 :
+                    msg == WM_RBUTTONDOWN ? 1 :
+                                            2;
+        DCHECK(workspace_->WantMouseEvents());
+        workspace_->NotifyMouseButton(index, true, GetInputModifiers());
+        break;
+      }
+
+      case WM_LBUTTONUP:
+      case WM_RBUTTONUP:
+      case WM_MBUTTONUP: {
+        ReleaseCapture();
+        int index = msg == WM_LBUTTONUP ? 0 :
+                    msg == WM_RBUTTONUP ? 1 :
+                                          2;
+        DCHECK(workspace_->WantMouseEvents());
+        workspace_->NotifyMouseButton(index, true, GetInputModifiers());
+        break;
+      }
+
       case WM_MOUSEWHEEL:
         DCHECK(workspace_->WantMouseEvents());
         workspace_->NotifyMouseWheel(

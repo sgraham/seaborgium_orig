@@ -76,6 +76,8 @@ class InputHandler {
   virtual bool NotifyMouseMoved(
       int x, int y, int dx, int dy, const InputModifiers& modifiers) = 0;
   virtual bool NotifyMouseWheel(int delta, const InputModifiers& modifiers) = 0;
+  virtual bool NotifyMouseButton(
+      int index, bool down, const InputModifiers& modifiers) = 0;
   virtual bool NotifyKey(
       InputKey key, bool down, const InputModifiers& modifiers) = 0;
 };

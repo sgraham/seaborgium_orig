@@ -38,6 +38,8 @@ class Workspace : public Container,
       int x, int y, int dx, int dy, const InputModifiers& modifiers) OVERRIDE;
   virtual bool NotifyMouseWheel(
       int delta, const InputModifiers& modifiers) OVERRIDE;
+  virtual bool NotifyMouseButton(
+      int index, bool down, const InputModifiers& modifiers) OVERRIDE;
   virtual bool NotifyKey(
       InputKey key, bool down, const InputModifiers& modifiers) OVERRIDE;
   virtual bool WantMouseEvents() OVERRIDE { return true; }

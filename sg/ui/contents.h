@@ -50,6 +50,10 @@ class Contents : public InputHandler {
       int delta, const InputModifiers& modifiers) OVERRIDE {
     return false;
   }
+  virtual bool NotifyMouseButton(
+      int index, bool down, const InputModifiers& modifiers) OVERRIDE {
+    return false;
+  }
   virtual bool NotifyKey(
       InputKey key, bool down, const InputModifiers& modifiers) OVERRIDE {
     return false;
