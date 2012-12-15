@@ -77,7 +77,7 @@ void Workspace::Init() {
     top->AddChild(source_view_container_);
     top->AddChild(middle);
     top->AddChild(views);
-    top->SetFraction(source_view_container_, .4);
+    top->SetFraction(source_view_container_, .375);
     top->SetFraction(middle, .65);
 
     middle->AddChild(stack_view_container_);

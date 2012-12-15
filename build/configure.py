@@ -338,6 +338,7 @@ def main():
                'ui/focus',
                'ui/scroll_helper',
                'ui/skin',
+               'ui/tree_view_helper',
                'workspace',
               ]:
     sg_objs += cxx(name)

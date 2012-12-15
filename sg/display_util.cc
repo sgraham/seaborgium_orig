@@ -6,6 +6,7 @@
 
 #include <string>
 
+#include "base/string_number_conversions.h"
 #include "base/utf_string_conversions.h"
 #include "re2/re2.h"
 
@@ -18,4 +19,13 @@ string16 TidyTypeName(const string16& type) {
   if (RE2::Replace(&utf8, "(.*?)\\s+(\\*+)", "\\1\\2"))
     return UTF8ToUTF16(utf8);
   return type;
+}
+
+string16 ToPlatformFileAndLine(const string16& filename, int line_number) {
+  // Probably really a config thing.
+#if defined(OS_WIN)
+  return filename + L"(" + base::IntToString16(line_number) + L")";
+#else
+  return filename + L":" + base::IntToString16(line_number);
+#endif
 }

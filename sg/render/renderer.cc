@@ -96,3 +96,10 @@ void Renderer::DrawTexturedRect(
     float u1, float v1, float u2, float v2) {
   DrawTexturedRectAlpha(texture, target_rect, 1.0, u1, v1, u2, v2);
 }
+
+void Renderer::DrawOutlineRect(Rect rect) {
+  DrawFilledRect(Rect(rect.x, rect.y, rect.w, 1));
+  DrawFilledRect(Rect(rect.x, rect.y + rect.h - 1, rect.w, 1));
+  DrawFilledRect(Rect(rect.x, rect.y, 1, rect.h));
+  DrawFilledRect(Rect(rect.x + rect.w - 1, rect.y, 1, rect.h));
+}

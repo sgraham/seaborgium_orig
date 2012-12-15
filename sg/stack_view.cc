@@ -22,12 +22,16 @@ Texture g_pc_indicator_texture;
 
 }  // namespace
 
-StackView::StackView(const Skin& skin) : Contents(skin), active_(-1) {
-  // TODO(rendering): Share with source view.
-  font_.facename = L"Consolas";
-  font_.size = 13.f;
+StackView::StackView(const Skin& skin)
+    : Contents(skin),
+      active_(-1),
+      tree_view_(skin, this, g_line_height, arraysize(column_widths_)) {
   // TODO(config): Share with source view.
   g_pc_indicator_texture.name = L"art/pc-location.png";
+  // TODO(config): Save this.
+  column_widths_[0] = .5;
+  column_widths_[1] = .80;
+  column_widths_[2] = 1.;
 }
 
 void StackView::SetData(const std::vector<FrameData>& frames, int active) {
@@ -46,10 +50,11 @@ void StackView::SetData(const std::vector<FrameData>& frames, int active) {
         arguments += L", ";
     }
     arguments += L")";
-    lines_.push_back(frame.function + arguments +
-                     L", " + frame.filename +
-                     L":" + base::IntToString16(frame.line_number) +
-                     L" @ " + string16(buf));
+    std::vector<string16> columns;
+    columns.push_back(frame.function + arguments);
+    columns.push_back(ToPlatformFileAndLine(frame.filename, frame.line_number));
+    columns.push_back(string16(buf));
+    lines_.push_back(columns);
   }
   active_ = 0;
   Invalidate();
@@ -68,25 +73,86 @@ void StackView::Render(Renderer* renderer) {
 
   static const int left_margin = 5;
   static const int right_margin = 5;
-  static const int indicator_width = g_line_height;
-  static const int indicator_height = g_line_height;
+  static const int indicator_width = tree_view_.GetRowHeight();
+  static const int indicator_height = tree_view_.GetRowHeight();
   static const int full_margin_width =
       left_margin + indicator_width + right_margin;
 
   renderer->SetDrawColor(skin.GetColorScheme().margin());
   renderer->DrawFilledRect(Rect(0, 0, full_margin_width, Height()));
 
+  renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
+  renderer->DrawTexturedRect(
+      &g_pc_indicator_texture,
+      Rect(left_margin,
+           active_ * g_line_height + tree_view_.GetYOffsetToFirstRow(),
+           indicator_width, indicator_height),
+      0, 0, 1, 1);
+
+  Point old_render_offset = renderer->GetRenderOffset();
+  renderer->AddRenderOffset(Point(full_margin_width, 0));
+  tree_view_screen_size_.w = GetScreenRect().w - full_margin_width;
+  tree_view_screen_size_.h = GetScreenRect().h;
+  tree_view_.RenderTree(renderer);
+  renderer->SetRenderOffset(old_render_offset);
+/*
   // TODO(rendering): Generic scroll pane.
   renderer->SetDrawColor(skin.GetColorScheme().text());
   for (size_t i = 0; i < lines_.size(); ++i) {
     renderer->RenderText(
         &font_, Point(full_margin_width, i * g_line_height), lines_[i]);
   }
+*/
+}
 
-  renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
-  renderer->DrawTexturedRect(
-      &g_pc_indicator_texture,
-      Rect(left_margin, active_ * g_line_height,
-                 indicator_width, indicator_height),
-      0, 0, 1, 1);
+double StackView::GetColumnWidth(int column) {
+  return column_widths_[column];
+}
+
+void StackView::SetColumnWidth(int column, double width) {
+  column_widths_[column] = width;
+}
+
+string16 StackView::GetColumnTitle(int column) {
+  switch (column) {
+    case 0:
+      return L"Function";
+    case 1:
+      return L"Location";
+    case 2:
+      return L"Address";
+    default:
+      NOTREACHED();
+      return L"";
+  }
+}
+
+int StackView::GetNodeChildCount(const std::string& node) {
+  if (node == "")
+    return static_cast<int>(lines_.size());
+  else
+    return 0;
+}
+
+std::string StackView::GetIdForChild(const std::string& node, int child) {
+  return base::IntToString(child);
+}
+
+string16 StackView::GetNodeDataForColumn(const std::string& node, int column) {
+  int node_index;
+  CHECK(base::StringToInt(node, &node_index));
+  return lines_[node_index][column];
+}
+
+NodeExpansionState StackView::GetNodeExpandability(const std::string& node) {
+  return kNotExpandable;
+}
+
+void StackView::SetNodeExpansionState(
+      const std::string& node, NodeExpansionState state) {
+  NOTREACHED();
+}
+
+Size StackView::GetTreeViewScreenSize() {
+  return tree_view_screen_size_;
 }

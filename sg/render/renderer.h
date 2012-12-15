@@ -75,10 +75,16 @@ class Renderer {
   // Can be modified if necessary, or falls back to reasonable implementation.
   virtual void DrawMissingImage(Rect target_rect);
 
+  // Can be done manually, or draws in terms of DrawFilledRect.
+  virtual void DrawOutlineRect(Rect rect);
 
   // Global offset applied to rendering (so that sub-controls can work only in
   // local space.
   void SetRenderOffset(const Point& offset) { render_offset_ = offset; }
+  void AddRenderOffset(const Point& offset) {
+    render_offset_.x += offset.x;
+    render_offset_.y += offset.y;
+  }
   const Point& GetRenderOffset() const { return render_offset_; }
   void TranslateByRenderOffset(int* x, int* y);
   void TranslateByRenderOffset(Rect* rect);
