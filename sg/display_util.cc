@@ -4,12 +4,14 @@
 
 #include "sg/display_util.h"
 
+#include <string>
+
 #include "base/utf_string_conversions.h"
 #include "re2/re2.h"
 
 string16 TidyTypeName(const string16& type) {
   // Change "char *" to "char*"
-  // TODO: References.
+  // TODO(scottmg): References.
   if (type.find(L"*") == string16::npos)  // Early out to avoid unnecessary RE.
     return type;
   std::string utf8 = UTF16ToUTF8(type);

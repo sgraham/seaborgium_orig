@@ -182,7 +182,7 @@ void Workspace::SetStackData(
 }
 
 void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
-  //locals_view_->SetData(locals_data);
+  // locals_view_->SetData(locals_data);
 }
 
 bool Workspace::NotifyMouseMoved(
