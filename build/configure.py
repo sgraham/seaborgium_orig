@@ -192,7 +192,7 @@ def main():
   def re2_src(filename):
     return os.path.normpath(os.path.join('third_party', 're2', filename))
   def built(filename):
-    return os.path.join('$builddir', 'obj', filename)
+    return os.path.normpath(os.path.join('$builddir', 'obj', filename))
   pch_name = built('sg.pch')
   pch_implicit = None
   pch_compile = ''
