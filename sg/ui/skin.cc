@@ -28,6 +28,7 @@ Color kGreen(133, 153, 0);
 
 ColorScheme::ColorScheme()
   : border_(0, 0, 0),
+    border_active_(kOrange),
     background_(kBase03),
     text_(kBase0),
     title_bar_active_(kBase00),

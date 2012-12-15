@@ -27,10 +27,11 @@ Container::~Container() {
 void Container::Render(Renderer* renderer) {
   RenderChildren(renderer);
   RenderBorders(renderer);
+  RenderHover(renderer);
 }
 
 void Container::SetScreenRect(const Rect& rect) {
-  set_screen_rect(rect);
+  Contents::SetScreenRect(rect);
   DoStandardLayout();
 }
 
@@ -74,6 +75,21 @@ void Container::SetFraction(Contents* contents, double fraction) {
     }
   }
   NOTREACHED() << "Child not found.";
+}
+
+Contents* Container::FindContentsAt(const Point& screen_point) {
+  for (size_t i = 0; i < children_.size(); ++i) {
+    Contents* contents = children_[i].contents;
+    if (contents->GetScreenRect().Contains(screen_point)) {
+      if (contents->IsLeaf()) {
+        return contents;
+      } else {
+        Container* as_container = reinterpret_cast<Container*>(contents);
+        return as_container->FindContentsAt(screen_point);
+      }
+    }
+  }
+  return NULL;
 }
 
 void Container::DoStandardLayout() {
@@ -128,22 +144,22 @@ void Container::RenderChildren(Renderer* renderer) {
   renderer->SetRenderOffset(old_render_offset);
 }
 
+Rect Container::GetTitleBorderSize() const {
+  // TODO(rendering): Cache.
+  const Skin& skin = GetSkin();
+  return Rect(skin.border_size(), skin.border_size() + skin.title_bar_size(),
+              skin.border_size(), skin.border_size());
+}
+
 void Container::RenderBorders(Renderer* renderer) {
   const Skin& skin = GetSkin();
-  Rect title_border_size(
-      skin.border_size(), skin.border_size() + skin.title_bar_size(),
-      skin.border_size(), skin.border_size());
   if (children_.size() == 1) {
     ChildData* child = &children_[0];
     if (child->contents->IsLeaf()) {
-      // TODO(rendering): We should have a GetRectRelativeTo(this).
-      Rect self_rect = GetScreenRect();
-      Rect child_rect = child->contents->GetScreenRect();
-      Rect relative_rect = Rect(child_rect.x - self_rect.x,
-                                child_rect.y - self_rect.y,
-                                child_rect.w, child_rect.h);
-      Rect rect = relative_rect.Expand(title_border_size);
-      RenderFrame(renderer, rect);
+      Rect relative_rect =
+          child->contents->GetScreenRect().RelativeTo(GetScreenRect());
+      Rect rect = relative_rect.Expand(GetTitleBorderSize());
+      RenderFrame(renderer, rect, skin.GetColorScheme().border());
 
       // And title bar.
       bool is_focused = GetFocusedContents() == child->contents;
@@ -156,22 +172,23 @@ void Container::RenderBorders(Renderer* renderer) {
       renderer->SetDrawColor(title_bar_background);
       renderer->DrawFilledRect(
           Rect(rect.x + skin.border_size(), rect.y + skin.border_size(),
-                rect.w - skin.border_size() * 2, skin.title_bar_size()));
+               rect.w - skin.border_size() * 2, skin.title_bar_size()));
 
       // TODO(rendering): Pass rect through to renderer.
       renderer->SetDrawColor(title_bar_text);
       renderer->RenderText(
           &kUIFont,
           Point(rect.x + skin.border_size() + 3,
-                      rect.y + skin.border_size()),
+                rect.y + skin.border_size()),
           children_[0].title);
     }
   }
 }
 
-void Container::RenderFrame(Renderer* renderer, const Rect& rect) {
+void Container::RenderFrame(
+    Renderer* renderer, const Rect& rect, const Color& color) {
+  renderer->SetDrawColor(color);
   const Skin& skin = GetSkin();
-  renderer->SetDrawColor(skin.GetColorScheme().border());
   renderer->DrawFilledRect(
       Rect(rect.x, rect.y, rect.w, skin.border_size()));
   renderer->DrawFilledRect(
@@ -182,4 +199,16 @@ void Container::RenderFrame(Renderer* renderer, const Rect& rect) {
   renderer->DrawFilledRect(Rect(
       rect.x, rect.y + rect.h - skin.border_size(),
       rect.w, skin.border_size()));
+}
+
+void Container::RenderHover(Renderer* renderer) {
+  Contents* contents = GetHoveredContents();
+  if (contents) {
+    const Skin& skin = GetSkin();
+    RenderFrame(renderer,
+                contents->GetScreenRect()
+                    .RelativeTo(GetScreenRect())
+                    .Expand(GetTitleBorderSize()),
+                skin.GetColorScheme().border_active());
+  }
 }

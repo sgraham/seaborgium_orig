@@ -132,7 +132,7 @@ void Workspace::SetDebugPresenterNotify(DebugPresenterNotify* debug_presenter) {
 }
 
 void Workspace::SetScreenRect(const Rect& rect) {
-  set_screen_rect(rect);
+  Contents::SetScreenRect(rect);
   if (!main_area_)
     Init();
   const Skin& skin = GetSkin();
@@ -187,6 +187,9 @@ void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
 
 bool Workspace::NotifyMouseMoved(
     int x, int y, int dx, int dy, const InputModifiers& modifiers) {
+  mouse_position_.x = x;
+  mouse_position_.y = y;
+  UpdateHovered();
   Contents* focused = GetFocusedContents();
   if (!focused || !focused->WantMouseEvents())
     return false;
@@ -214,4 +217,10 @@ bool Workspace::NotifyKey(
   if (focused->NotifyKey(key, down, modifiers))
     return true;
   return debug_presenter_notify_->NotifyKey(key, down, modifiers);
+}
+
+void Workspace::UpdateHovered() {
+  // TODO(scottmg): Dispatch a mouse-leave and a mouse-enter appropriately.
+  SetHoveredContents(FindContentsAt(mouse_position_));
+  Invalidate();
 }

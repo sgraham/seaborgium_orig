@@ -5,6 +5,8 @@
 #ifndef SG_BASIC_GEOMETRIC_TYPES_H_
 #define SG_BASIC_GEOMETRIC_TYPES_H_
 
+class Point;
+
 class Rect {
  public:
   Rect() : x(0), y(0), w(-1), h(-1) {}
@@ -14,6 +16,10 @@ class Rect {
   }
   Rect Contract(const Rect& by) const {
     return Rect(x + by.x, y + by.y, w - by.x - by.w, h - by.y - by.h);
+  }
+  bool Contains(const Point& point) const;
+  Rect RelativeTo(const Rect& other) const {
+    return Rect(x - other.x, y - other.y, w, h);
   }
   int x, y, w, h;
 };
@@ -44,5 +50,12 @@ class Color {
 
   unsigned char r, g, b, a;
 };
+
+inline bool Rect::Contains(const Point& point) const {
+  return point.x >= x &&
+         point.x < x + w &&
+         point.y >= y &&
+         point.y < y + h;
+}
 
 #endif  // SG_BASIC_GEOMETRIC_TYPES_H_

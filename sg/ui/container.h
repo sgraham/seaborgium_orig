@@ -36,14 +36,17 @@ class Container : public Contents {
   virtual bool IsLeaf() const { return false; }
   virtual size_t ChildCount() const { return children_.size(); }
   virtual Contents* Child(size_t i) { return children_[i].contents; }
+  Contents* FindContentsAt(const Point& screen_point);
 
  protected:
   void RenderChildren(Renderer* renderer);
   void RenderBorders(Renderer* renderer);
-  void RenderFrame(Renderer* renderer, const Rect& rect);
+  void RenderFrame(Renderer* renderer, const Rect& rect, const Color& color);
+  void RenderHover(Renderer* renderer);
 
  private:
   void DoStandardLayout();
+  Rect GetTitleBorderSize() const;
 
   struct ChildData {
     Contents* contents;

@@ -6,7 +6,11 @@
 #define SG_UI_FOCUS_H_
 
 class Contents;
+
 Contents* GetFocusedContents();
 void SetFocusedContents(Contents* contents);
+
+Contents* GetHoveredContents();
+void SetHoveredContents(Contents* contents);
 
 #endif  // SG_UI_FOCUS_H_

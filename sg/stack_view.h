@@ -5,6 +5,7 @@
 #ifndef SG_STACK_VIEW_H_
 #define SG_STACK_VIEW_H_
 
+#include <string>
 #include <vector>
 
 #include "base/string16.h"

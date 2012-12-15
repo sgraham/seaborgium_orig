@@ -57,6 +57,8 @@ class Workspace : public Container,
   virtual void SetRenderTime(double ms_per_frame) OVERRIDE;
 
  private:
+  void UpdateHovered();
+
   Skin skin_;
 
   Container* main_area_;
@@ -68,6 +70,8 @@ class Workspace : public Container,
   Container* stack_view_container_;
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;
+
+  Point mouse_position_;
 };
 
 #endif  // SG_WORKSPACE_H_

@@ -7,6 +7,7 @@
 namespace {
 
 Contents* g_focused;
+Contents* g_hovered;
 
 }  // namespace
 
@@ -18,4 +19,12 @@ Contents* GetFocusedContents() {
 
 void SetFocusedContents(Contents* contents) {
   g_focused = contents;
+}
+
+Contents* GetHoveredContents() {
+  return g_hovered;
+}
+
+void SetHoveredContents(Contents* contents) {
+  g_hovered = contents;
 }

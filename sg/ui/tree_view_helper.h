@@ -21,6 +21,8 @@ enum NodeExpansionState {
 
 class TreeViewHelperDataProvider {
  public:
+  virtual ~TreeViewHelperDataProvider() {}
+
   virtual double GetColumnWidth(int column) = 0;
   virtual void SetColumnWidth(int column, double width) = 0;
   virtual string16 GetColumnTitle(int column) = 0;
@@ -33,7 +35,7 @@ class TreeViewHelperDataProvider {
   virtual NodeExpansionState GetNodeExpandability(const std::string& node) = 0;
   virtual void SetNodeExpansionState(
       const std::string& node, NodeExpansionState state) = 0;
-  
+
   virtual Size GetTreeViewScreenSize() = 0;
 };
 

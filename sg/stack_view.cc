@@ -95,14 +95,6 @@ void StackView::Render(Renderer* renderer) {
   tree_view_screen_size_.h = GetScreenRect().h;
   tree_view_.RenderTree(renderer);
   renderer->SetRenderOffset(old_render_offset);
-/*
-  // TODO(rendering): Generic scroll pane.
-  renderer->SetDrawColor(skin.GetColorScheme().text());
-  for (size_t i = 0; i < lines_.size(); ++i) {
-    renderer->RenderText(
-        &font_, Point(full_margin_width, i * g_line_height), lines_[i]);
-  }
-*/
 }
 
 double StackView::GetColumnWidth(int column) {

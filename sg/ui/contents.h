@@ -31,7 +31,6 @@ class Contents : public InputHandler {
   virtual int Height() const { return rect_.h; }
 
   virtual void SetScreenRect(const Rect& rect);
-  void set_screen_rect(const Rect& rect) { rect_ = rect; }
   virtual const Rect& GetScreenRect() const { return rect_; }
   virtual Rect GetClientRect() const {
     return Rect(0, 0, rect_.w, rect_.h);
@@ -65,6 +64,7 @@ class Contents : public InputHandler {
   Contents* parent_;
   const Skin& skin_;
   Rect rect_;
+  Rect nc_rect_;
 
   DISALLOW_COPY_AND_ASSIGN(Contents);
 };
