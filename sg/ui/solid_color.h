@@ -15,10 +15,7 @@ class SolidColor : public Contents {
 
   virtual void Render(Renderer* renderer) OVERRIDE {
     renderer->SetDrawColor(color_);
-    // TODO(rendering): Conversion.
-    Rect client_rect = GetClientRect();
-    renderer->DrawFilledRect(
-        Rect(client_rect.x, client_rect.y, client_rect.w, client_rect.h));
+    renderer->DrawFilledRect(GetClientRect());
   }
 
  private:

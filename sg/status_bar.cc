@@ -34,10 +34,7 @@ void StatusBar::Render(Renderer* renderer) {
   const ColorScheme& color = skin.GetColorScheme();
 
   renderer->SetDrawColor(color.background());
-  // TODO(rendering): Conversion.
-  Rect client_rect = GetClientRect();
-  renderer->DrawFilledRect(
-      Rect(client_rect.x, client_rect.y, client_rect.w, client_rect.h));
+  renderer->DrawFilledRect(GetClientRect());
 
   const int kEdgeOffset = 3;
   renderer->SetDrawColor(color.text());
@@ -59,7 +56,7 @@ void StatusBar::Render(Renderer* renderer) {
                        debug_state_);
 
   renderer->SetDrawColor(color.border());
-  renderer->DrawFilledRect(Rect(separator_x, 0, 1, client_rect.h));
+  renderer->DrawFilledRect(Rect(separator_x, 0, 1, GetClientRect().h));
   x -= kItemPadding + 1;
-  renderer->DrawFilledRect(Rect(x, 0, 1, client_rect.h));
+  renderer->DrawFilledRect(Rect(x, 0, 1, GetClientRect().h));
 }
