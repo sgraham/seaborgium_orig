@@ -9,10 +9,10 @@
 
 #include "base/string16.h"
 
-class FrameArgumentData {
+class TypeNameValue {
  public:
-  string16 name;
   string16 type;
+  string16 name;
   string16 value;
 };
 
@@ -22,7 +22,7 @@ class FrameData {
   string16 function;
   string16 filename;
   int line_number;
-  std::vector<FrameArgumentData> arguments;
+  std::vector<TypeNameValue> arguments;
 };
 
 class StoppedAtBreakpointData {
@@ -42,6 +42,7 @@ class RetrievedStackData {
 
 class RetrievedLocalsData {
  public:
+  std::vector<TypeNameValue> locals;
 };
 
 class DebugNotification {

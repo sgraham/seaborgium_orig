@@ -49,6 +49,8 @@ class Workspace : public Container,
   virtual void SetProgramCounterLine(int line_number) OVERRIDE;
   virtual void SetStackData(
       const std::vector<FrameData>& frame_data, int active) OVERRIDE;
+  virtual void SetLocalsData(
+      const std::vector<TypeNameValue>& locals_data) OVERRIDE;
   virtual void SetDebugState(const string16& debug_state) OVERRIDE;
   virtual void SetRenderTime(double ms_per_frame) OVERRIDE;
 

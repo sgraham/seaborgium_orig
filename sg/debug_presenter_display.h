@@ -11,6 +11,7 @@
 #include "base/file_util.h"
 
 class FrameData;
+class TypeNameValue;
 
 // The interface that the DebugPresenter requires of its view.
 class DebugPresenterDisplay {
@@ -22,6 +23,7 @@ class DebugPresenterDisplay {
   virtual void SetProgramCounterLine(int line_number) = 0;
   virtual void SetStackData(const std::vector<FrameData>& frame_data,
                             int active) = 0;
+  virtual void SetLocalsData(const std::vector<TypeNameValue>& locals_data) = 0;
   virtual void SetDebugState(const string16& debug_state) = 0;
   virtual void SetRenderTime(double ms_per_frame) = 0;
 };

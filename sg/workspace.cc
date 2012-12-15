@@ -181,6 +181,10 @@ void Workspace::SetStackData(
   stack_view_->SetData(frame_data, active);
 }
 
+void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
+  //locals_view_->SetData(locals_data);
+}
+
 bool Workspace::NotifyMouseMoved(
     int x, int y, int dx, int dy, const InputModifiers& modifiers) {
   Contents* focused = GetFocusedContents();

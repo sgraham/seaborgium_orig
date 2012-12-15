@@ -106,3 +106,9 @@ STACK ARGS AND VALUES
 ^done,stack-args=[frame={level="0",args=[]},frame={level="1",args=[{name="argc",type="int",value="1"},{name="argv",type="char **",value="0x3b2c80"}]}]
 (gdb)
 q
+
+
+-stack-list-variables --simple-values
+^done,variables=[{name="f",type="double",value="42.432000000000002"},{name="result",type="int",value="440"},{name="argc",arg="1",type="int",value="1"},{name="argv",arg="1",type="char **",value="0x22e30"}]
+(gdb)
+

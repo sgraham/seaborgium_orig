@@ -95,6 +95,10 @@ void DebugPresenter::OnRetrievedStack(const RetrievedStackData& data) {
   display_->SetStackData(data.frames, 0);
 }
 
+void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
+  display_->SetLocalsData(data.locals);
+}
+
 void DebugPresenter::OnStoppedAfterStepping(
     const StoppedAfterSteppingData& data) {
   // TODO(scottmg): File change reload, etc.

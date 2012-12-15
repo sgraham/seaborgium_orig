@@ -31,4 +31,6 @@ RetrievedStackData MergeArgumentsIntoStackFrameData(
     const RetrievedStackData& just_stack,
     base::Value* list_value);
 
+RetrievedLocalsData RetrievedLocalsDataFromList(base::Value* list_value);
+
 #endif  // SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_

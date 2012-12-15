@@ -50,7 +50,7 @@ void StackView::SetData(const std::vector<FrameData>& frames, int active) {
     base::swprintf(buf, sizeof(buf), L"0x%lx", frame.address);
     string16 arguments = L"(";
     for (size_t j = 0; j < frame.arguments.size(); ++j) {
-      const FrameArgumentData& argument = frame.arguments[j];
+      const TypeNameValue& argument = frame.arguments[j];
       arguments += TidyTypeName(argument.type) + L" " +
                    argument.name;
       // Not currently including "= argument.value".

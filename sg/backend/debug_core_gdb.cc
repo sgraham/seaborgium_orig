@@ -122,6 +122,13 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
                              base::Unretained(debug_notification_), data));
               got_stack_frames_waiting_for_arguments_ = false;
               continue;
+            } else if (record->results().size() == 1 &&
+                       record->results()[0]->variable() == "variables") {
+              RetrievedLocalsData data =
+                  RetrievedLocalsDataFromList(record->results()[0]->value());
+              AppThread::PostTask(AppThread::UI, FROM_HERE,
+                  base::Bind(&DebugNotification::OnRetrievedLocals,
+                             base::Unretained(debug_notification_), data));
             }
             got_stack_frames_waiting_for_arguments_ = false;
           }
