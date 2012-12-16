@@ -21,17 +21,17 @@ class ContentPane : public Dockable {
 
 }  // namespace
 
-class DockingWorkspaceTest : public LeakCheckTest {
+class DockingTest : public LeakCheckTest {
 };
 
-TEST_F(DockingWorkspaceTest, Creation) {
+TEST_F(DockingTest, Creation) {
   DockingWorkspace workspace;
   workspace.SetRoot(new MainDocument);
   EXPECT_FALSE(workspace.GetRoot()->IsContainer());
   // Just checking for no leaks.
 }
 
-TEST_F(DockingWorkspaceTest, AddVerticalSplit) {
+TEST_F(DockingTest, AddVerticalSplit) {
   DockingWorkspace workspace;
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
@@ -45,7 +45,7 @@ TEST_F(DockingWorkspaceTest, AddVerticalSplit) {
             workspace.GetRoot()->AsDockingSplitContainer()->direction());
 }
 
-TEST_F(DockingWorkspaceTest, AddVerticalSplitOtherOrder) {
+TEST_F(DockingTest, AddVerticalSplitOtherOrder) {
   DockingWorkspace workspace;
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
@@ -59,7 +59,7 @@ TEST_F(DockingWorkspaceTest, AddVerticalSplitOtherOrder) {
             workspace.GetRoot()->AsDockingSplitContainer()->direction());
 }
 
-TEST_F(DockingWorkspaceTest, AddHorizontalSplit) {
+TEST_F(DockingTest, AddHorizontalSplit) {
   DockingWorkspace workspace;
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
@@ -73,7 +73,7 @@ TEST_F(DockingWorkspaceTest, AddHorizontalSplit) {
             workspace.GetRoot()->AsDockingSplitContainer()->direction());
 }
 
-TEST_F(DockingWorkspaceTest, SubSplit) {
+TEST_F(DockingTest, SubSplit) {
   DockingWorkspace workspace;
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
@@ -91,4 +91,7 @@ TEST_F(DockingWorkspaceTest, SubSplit) {
   EXPECT_EQ(pane1, subtree->left());
   EXPECT_EQ(pane2, subtree->right());
   EXPECT_EQ(kHorizontal, subtree->direction());
+}
+
+TEST_F(DockingTest, DragRight) {
 }
