@@ -7,6 +7,7 @@
 #include <string>
 
 #include "base/string_util.h"
+#include "sg/ui/docking_resizer.h"
 #include "sg/ui/docking_split_container.h"
 #include "sg/ui/docking_workspace.h"
 
@@ -26,6 +27,10 @@ std::string RectAsString(const Rect &r) {
   char buf[256];
   base::snprintf(buf, sizeof(buf), "%d,%d %dx%d", r.x, r.y, r.w, r.h);
   return buf;
+}
+
+Point CalculateDragPoint(const DockingResizer& resizer, int dx, int dy) {
+  return Point(0, 0);
 }
 
 }  // namespace
@@ -115,4 +120,21 @@ TEST_F(DockingTest, SetSizes) {
   EXPECT_EQ("0,0 498x1000", RectAsString(root->left()->GetScreenRect()));
   EXPECT_EQ(root->right(), pane);
   EXPECT_EQ("502,0 498x1000", RectAsString(root->right()->GetScreenRect()));
+}
+
+TEST_F(DockingTest, DragSplitter) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(4);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane = new ContentPane;
+  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
+  DockingResizer resizer(root);
+  resizer.Drag(CalculateDragPoint(resizer, -200, 10));
+  EXPECT_EQ(root->left(), main);
+  EXPECT_EQ("0,0 298x1000", RectAsString(root->left()->GetScreenRect()));
+  EXPECT_EQ(root->right(), pane);
+  EXPECT_EQ("302,0 698x1000", RectAsString(root->right()->GetScreenRect()));
 }
