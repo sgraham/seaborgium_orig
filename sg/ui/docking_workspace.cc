@@ -6,13 +6,22 @@
 
 #include "sg/ui/docking_split_container.h"
 
+DockingWorkspace::DockingWorkspace() {
+  root_.reset(new DockingSplitContainer(kSplitNoneRoot, NULL, NULL));
+}
+
+DockingWorkspace::~DockingWorkspace() {
+}
+
 void DockingWorkspace::SetRoot(Dockable* root) {
-  DockingSplitContainer* dummy =
-      new DockingSplitContainer(kUnknown, root, NULL);
-  root_.reset(dummy);
-  root->set_parent(dummy);
+  root_->ReplaceLeft(root);
+  root->set_parent(root_.get());
 }
 
 Dockable* DockingWorkspace::GetRoot() {
   return root_->left();
+}
+
+void DockingWorkspace::SetScreenRect(const Rect& rect) {
+  root_->SetScreenRect(rect);
 }

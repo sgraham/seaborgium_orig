@@ -4,6 +4,9 @@
 
 #include "sg/test.h"
 
+#include <string>
+
+#include "base/string_util.h"
 #include "sg/ui/docking_split_container.h"
 #include "sg/ui/docking_workspace.h"
 
@@ -18,6 +21,12 @@ class ContentPane : public Dockable {
  public:
   bool CanUndock() const OVERRIDE { return true; }
 };
+
+std::string RectAsString(const Rect &r) {
+  char buf[256];
+  base::snprintf(buf, sizeof(buf), "%d,%d %dx%d", r.x, r.y, r.w, r.h);
+  return buf;
+}
 
 }  // namespace
 
@@ -36,12 +45,12 @@ TEST_F(DockingTest, AddVerticalSplit) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kVertical, main, pane);
+  main->get_parent()->SplitChild(kSplitVertical, main, pane);
   EXPECT_TRUE(workspace.GetRoot()->IsContainer());
   EXPECT_EQ(main, workspace.GetRoot()->AsDockingSplitContainer()->left());
   EXPECT_EQ(pane, workspace.GetRoot()->AsDockingSplitContainer()->right());
   EXPECT_EQ(0.5, workspace.GetRoot()->AsDockingSplitContainer()->fraction());
-  EXPECT_EQ(kVertical,
+  EXPECT_EQ(kSplitVertical,
             workspace.GetRoot()->AsDockingSplitContainer()->direction());
 }
 
@@ -50,12 +59,12 @@ TEST_F(DockingTest, AddVerticalSplitOtherOrder) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kVertical, pane, main);
+  main->get_parent()->SplitChild(kSplitVertical, pane, main);
   EXPECT_TRUE(workspace.GetRoot()->IsContainer());
   EXPECT_EQ(pane, workspace.GetRoot()->AsDockingSplitContainer()->left());
   EXPECT_EQ(main, workspace.GetRoot()->AsDockingSplitContainer()->right());
   EXPECT_EQ(0.5, workspace.GetRoot()->AsDockingSplitContainer()->fraction());
-  EXPECT_EQ(kVertical,
+  EXPECT_EQ(kSplitVertical,
             workspace.GetRoot()->AsDockingSplitContainer()->direction());
 }
 
@@ -64,12 +73,12 @@ TEST_F(DockingTest, AddHorizontalSplit) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kHorizontal, main, pane);
+  main->get_parent()->SplitChild(kSplitHorizontal, main, pane);
   EXPECT_TRUE(workspace.GetRoot()->IsContainer());
   EXPECT_EQ(main, workspace.GetRoot()->AsDockingSplitContainer()->left());
   EXPECT_EQ(pane, workspace.GetRoot()->AsDockingSplitContainer()->right());
   EXPECT_EQ(0.5, workspace.GetRoot()->AsDockingSplitContainer()->fraction());
-  EXPECT_EQ(kHorizontal,
+  EXPECT_EQ(kSplitHorizontal,
             workspace.GetRoot()->AsDockingSplitContainer()->direction());
 }
 
@@ -79,8 +88,8 @@ TEST_F(DockingTest, SubSplit) {
   workspace.SetRoot(main);
   ContentPane* pane1 = new ContentPane;
   ContentPane* pane2 = new ContentPane;
-  main->get_parent()->SplitChild(kVertical, main, pane1);
-  pane1->get_parent()->SplitChild(kHorizontal, pane1, pane2);
+  main->get_parent()->SplitChild(kSplitVertical, main, pane1);
+  pane1->get_parent()->SplitChild(kSplitHorizontal, pane1, pane2);
   EXPECT_TRUE(workspace.GetRoot()->IsContainer());
   DockingSplitContainer* root_as_container =
       workspace.GetRoot()->AsDockingSplitContainer();
@@ -90,8 +99,20 @@ TEST_F(DockingTest, SubSplit) {
       root_as_container->right()->AsDockingSplitContainer();
   EXPECT_EQ(pane1, subtree->left());
   EXPECT_EQ(pane2, subtree->right());
-  EXPECT_EQ(kHorizontal, subtree->direction());
+  EXPECT_EQ(kSplitHorizontal, subtree->direction());
 }
 
-TEST_F(DockingTest, DragRight) {
+TEST_F(DockingTest, SetSizes) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(4);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane = new ContentPane;
+  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
+  EXPECT_EQ(root->left(), main);
+  EXPECT_EQ("0,0 498x1000", RectAsString(root->left()->GetScreenRect()));
+  EXPECT_EQ(root->right(), pane);
+  EXPECT_EQ("502,0 498x1000", RectAsString(root->right()->GetScreenRect()));
 }

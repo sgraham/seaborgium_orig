@@ -9,9 +9,9 @@
 #include "sg/ui/dockable.h"
 
 enum DockingSplitDirection {
-  kUnknown,
-  kVertical,
-  kHorizontal,
+  kSplitNoneRoot,
+  kSplitVertical,
+  kSplitHorizontal,
 };
 
 class DockingSplitContainer : public Dockable {
@@ -19,6 +19,9 @@ class DockingSplitContainer : public Dockable {
   DockingSplitContainer(DockingSplitDirection direction,
                         Dockable* left, Dockable* right);
   virtual ~DockingSplitContainer();
+
+  static void SetSplitterWidth(int width);
+  static int GetSplitterWidth();
 
   virtual bool IsContainer() const { return true; }
 
@@ -29,10 +32,15 @@ class DockingSplitContainer : public Dockable {
                   Dockable* left,
                   Dockable* right);
 
+  void SetScreenRect(const Rect& rect) OVERRIDE;
+
   DockingSplitDirection direction() const { return direction_; }
   double fraction() const { return fraction_; }
   Dockable* left() { return left_.get(); }
   Dockable* right() { return right_.get(); }
+
+  // Hokey method only used for DockingWorkspace that uses left as root.
+  void ReplaceLeft(Dockable* left);
 
  private:
   DockingSplitDirection direction_;

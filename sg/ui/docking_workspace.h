@@ -13,9 +13,14 @@ class DockingSplitContainer;
 // Top level container holding a tree of |Dockable|s.
 class DockingWorkspace {
  public:
+  DockingWorkspace();
+  virtual ~DockingWorkspace();
+
   // Takes ownership.
   void SetRoot(Dockable* root);
   Dockable* GetRoot();
+
+  void SetScreenRect(const Rect& rect);
 
  private:
   scoped_ptr<DockingSplitContainer> root_;

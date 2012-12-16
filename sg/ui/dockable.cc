@@ -18,3 +18,10 @@ DockingSplitContainer* Dockable::AsDockingSplitContainer() {
   return reinterpret_cast<DockingSplitContainer*>(this);
 }
 
+void Dockable::SetScreenRect(const Rect& rect) {
+  rect_ = rect;
+}
+
+const Rect& Dockable::GetScreenRect() const {
+  return rect_;
+}

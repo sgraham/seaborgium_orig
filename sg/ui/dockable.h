@@ -17,13 +17,16 @@ class Dockable {
   virtual bool CanUndock() const { return false; }
   virtual bool IsContainer() const { return false; }
   virtual DockingSplitContainer* AsDockingSplitContainer();
-  virtual void SetScreenRect(const Rect& rect) {}
+
+  virtual void SetScreenRect(const Rect& rect);
+  const Rect& GetScreenRect() const;
 
   void set_parent(DockingSplitContainer* parent) { parent_ = parent; }
   DockingSplitContainer* get_parent() { return parent_; }
 
  private:
   DockingSplitContainer* parent_;
+  Rect rect_;
 };
 
 #endif  // SG_UI_DOCKABLE_H_
