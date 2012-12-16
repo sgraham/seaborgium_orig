@@ -12,6 +12,7 @@
 #include "sg/stack_view.h"
 #include "sg/status_bar.h"
 #include "sg/ui/docking_split_container.h"
+#include "sg/ui/docking_tool_window.h"
 #include "sg/ui/focus.h"
 #include "sg/ui/skin.h"
 #include "sg/ui/solid_color.h"
@@ -19,7 +20,8 @@
 namespace {
 
 Dockable* Placeholder(const Skin& skin, const string16& name) {
-  return new SolidColor(skin.GetColorScheme().background());
+  return new DockingToolWindow(
+      new SolidColor(skin.GetColorScheme().background()), name);
 }
 
 }  // namespace
@@ -37,6 +39,7 @@ void Workspace::Init() {
   main_area_.reset(new DockingWorkspace);
   source_view_ = new SourceView;
   stack_view_ = new StackView;
+  stack_view_window_ = new DockingToolWindow(stack_view_, L"Stack");
   main_area_->SetRoot(source_view_);
   Dockable* watch = Placeholder(skin_, L"Watch");
   Dockable* locals = Placeholder(skin_, L"Locals");
@@ -49,14 +52,17 @@ void Workspace::Init() {
   output->parent()->SplitChild(kSplitVertical, output, log);
   output->parent()->SetFraction(.6);
 
-  source_view_->parent()->SplitChild(kSplitVertical, source_view_, stack_view_);
+  source_view_->parent()->SplitChild(
+      kSplitVertical, source_view_, stack_view_window_);
   source_view_->parent()->SetFraction(.375);
-  stack_view_->parent()->SplitChild(kSplitVertical, stack_view_, watch);
-  stack_view_->parent()->SetFraction(.4);
+  stack_view_window_->parent()->SplitChild(
+      kSplitVertical, stack_view_window_, watch);
+  stack_view_window_->parent()->SetFraction(.4);
   watch->parent()->SplitChild(kSplitHorizontal, watch, locals);
   watch->parent()->SetFraction(.65);
-  stack_view_->parent()->SplitChild(kSplitHorizontal, stack_view_, breakpoints);
-  stack_view_->parent()->SetFraction(.6);
+  stack_view_window_->parent()->SplitChild(
+      kSplitHorizontal, stack_view_window_, breakpoints);
+  stack_view_window_->parent()->SetFraction(.6);
   /*
   main_area_ = new Container(skin_);
   status_bar_ = new StatusBar(skin_);

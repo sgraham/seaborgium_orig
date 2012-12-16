@@ -336,6 +336,7 @@ def main():
                'ui/dockable',
                'ui/docking_resizer',
                'ui/docking_split_container',
+               'ui/docking_tool_window',
                'ui/docking_workspace',
                'ui/focus',
                'ui/scroll_helper',
