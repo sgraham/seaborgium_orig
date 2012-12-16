@@ -335,6 +335,9 @@ def main():
                'stack_view',
                'ui/container',
                'ui/contents',
+               'ui/dockable',
+               'ui/docking_split_container',
+               'ui/docking_workspace',
                'ui/focus',
                'ui/scroll_helper',
                'ui/skin',
@@ -432,6 +435,7 @@ def main():
                'backend/debug_core_gdb_test',
                'backend/gdb_mi_parse_test',
                'backend/subprocess_test',
+               'ui/docking_workspace_test',
               ]:
     test_objs += cxx(name, variables=[('cflags', test_cflags)])
 
