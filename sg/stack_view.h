@@ -9,19 +9,20 @@
 #include <vector>
 
 #include "base/string16.h"
+#include "base/compiler_specific.h"
 #include "sg/backend/backend.h"
 #include "sg/render/font.h"
-#include "sg/ui/contents.h"
+#include "sg/ui/dockable.h"
 #include "sg/ui/tree_view_helper.h"
 
 namespace Gwen { namespace Skin { class Base; }}
 class Skin;
 
-class StackView : public Contents, public TreeViewHelperDataProvider {
+class StackView : public Dockable, public TreeViewHelperDataProvider {
  public:
-  explicit StackView(const Skin& skin);
+  StackView();
 
-  virtual void Render(Renderer* renderer);
+  virtual void Render(Renderer* renderer, const Skin& skin);
 
   virtual void SetData(const std::vector<FrameData>& frames, int active);
 

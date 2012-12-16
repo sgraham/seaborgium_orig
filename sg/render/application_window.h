@@ -21,8 +21,8 @@ class ApplicationWindow {
   // should be user-configured anyway.
   virtual bool IsLandscape() = 0;
 
-  virtual void SetContents(Workspace* contents) = 0;
-  virtual Workspace* GetContents() = 0;
+  virtual void SetWorkspace(Workspace* contents) = 0;
+  virtual Workspace* GetWorkspace() = 0;
 
   virtual void SetDebugPresenterNotify(DebugPresenterNotify* notifier) = 0;
 

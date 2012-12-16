@@ -25,3 +25,8 @@ void Dockable::SetScreenRect(const Rect& rect) {
 const Rect& Dockable::GetScreenRect() const {
   return rect_;
 }
+
+void Dockable::Invalidate() {
+  if (parent())
+    parent()->Invalidate();
+}

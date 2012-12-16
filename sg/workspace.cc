@@ -11,33 +11,34 @@
 #include "sg/source_view.h"
 #include "sg/stack_view.h"
 #include "sg/status_bar.h"
-#include "sg/ui/container.h"
 #include "sg/ui/focus.h"
 #include "sg/ui/solid_color.h"
 
 namespace {
 
+  /*
 Container* Placeholder(const Skin& skin, const string16& name) {
   Container* container = new Container(skin);
   container->AddChild(new SolidColor(skin, skin.GetColorScheme().background()),
                       name);
   return container;
 }
+*/
 
 }  // namespace
 
 Workspace::Workspace()
-    : Container(this->skin_),
-      delegate_(NULL),
+    : delegate_(NULL),
       main_area_(NULL),
-      status_bar_(NULL),
+      status_bar_(NULL) /*,
       source_view_(NULL),
-      source_view_container_(NULL) {
+      source_view_container_(NULL)*/ {
   // Initialization deferred until Init when we know our window size.
 }
 
 void Workspace::Init() {
   DCHECK(!main_area_);
+  /*
   main_area_ = new Container(skin_);
   status_bar_ = new StatusBar(skin_);
   AddChild(main_area_);
@@ -118,6 +119,7 @@ void Workspace::Init() {
   }
 
   SetFocusedContents(source_view_container_->Child(0));
+  */
 }
 
 Workspace::~Workspace() {
@@ -132,6 +134,7 @@ void Workspace::SetDebugPresenterNotify(DebugPresenterNotify* debug_presenter) {
 }
 
 void Workspace::SetScreenRect(const Rect& rect) {
+  /*
   Contents::SetScreenRect(rect);
   if (!main_area_)
     Init();
@@ -146,6 +149,7 @@ void Workspace::SetScreenRect(const Rect& rect) {
   status_bar_->SetScreenRect(
       Rect(remaining.x, remaining.y + main_area_rect.h + skin.border_size(),
            remaining.w, skin.status_bar_size() - skin.border_size()));
+           */
 }
 
 void Workspace::Invalidate() {
@@ -156,16 +160,24 @@ void Workspace::Invalidate() {
   }
 }
 
+void Workspace::Render(Renderer* renderer) {
+}
+
 void Workspace::SetFileName(const FilePath& filename) {
-  source_view_container_->SetTitle(source_view_, filename.LossyDisplayName());
+  /*source_view_container_->SetTitle(source_view_, filename.LossyDisplayName());
+   */
 }
 
 void Workspace::SetProgramCounterLine(int line_number) {
+  /*
   source_view_->SetProgramCounterLine(line_number);
+  */
 }
 
 void Workspace::SetFileData(const std::string& utf8_text) {
+  /*
   source_view_->SetData(utf8_text);
+  */
 }
 
 void Workspace::SetDebugState(const string16& debug_state) {
@@ -178,7 +190,9 @@ void Workspace::SetRenderTime(double frame_time_in_ms) {
 
 void Workspace::SetStackData(
     const std::vector<FrameData>& frame_data, int active) {
+  /*
   stack_view_->SetData(frame_data, active);
+  */
 }
 
 void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
@@ -187,6 +201,7 @@ void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
 
 bool Workspace::NotifyMouseMoved(
     int x, int y, int dx, int dy, const InputModifiers& modifiers) {
+  /*
   mouse_position_.x = x;
   mouse_position_.y = y;
   UpdateHovered();
@@ -194,13 +209,18 @@ bool Workspace::NotifyMouseMoved(
   if (!focused || !focused->WantMouseEvents())
     return false;
   return focused->NotifyMouseMoved(x, y, dx, dy, modifiers);
+  */
+  return false;
 }
 
 bool Workspace::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
+  /*
   Contents* focused = GetFocusedContents();
   if (!focused || !focused->WantMouseEvents())
     return false;
   return focused->NotifyMouseWheel(delta, modifiers);
+  */
+  return false;
 }
 
 bool Workspace::NotifyMouseButton(
@@ -211,16 +231,21 @@ bool Workspace::NotifyMouseButton(
 
 bool Workspace::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
+  /*
   Contents* focused = GetFocusedContents();
   if (!focused || !focused->WantKeyEvents())
     return false;
   if (focused->NotifyKey(key, down, modifiers))
     return true;
   return debug_presenter_notify_->NotifyKey(key, down, modifiers);
+  */
+  return false;
 }
 
 void Workspace::UpdateHovered() {
+  /*
   // TODO(scottmg): Dispatch a mouse-leave and a mouse-enter appropriately.
   SetHoveredContents(FindContentsAt(mouse_position_));
   Invalidate();
+  */
 }

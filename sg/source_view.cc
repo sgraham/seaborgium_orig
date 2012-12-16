@@ -62,9 +62,8 @@ std::vector<Line> HighlightOnFILE(std::string utf8_text) {
 
 }  // namespace
 
-SourceView::SourceView(const Skin& skin)
-    : Contents(skin),
-      scroll_helper_(skin, this, g_line_height),
+SourceView::SourceView()
+    : scroll_helper_(this, g_line_height),
       program_counter_line_(-1) {
   font_.facename = L"Consolas";
   font_.size = 13.f;
@@ -118,9 +117,7 @@ bool SourceView::LineInView(int line_number) {
 }
 
 // TODO(rendering): Brutal efficiency.
-void SourceView::Render(Renderer* renderer) {
-  const Skin& skin = Contents::GetSkin();
-
+void SourceView::Render(Renderer* renderer, const Skin& skin) {
   // TODO(rendering): Hacky.
   if (!g_pc_indicator_texture.data) {
     renderer->LoadTexture(&g_pc_indicator_texture);
@@ -194,7 +191,7 @@ void SourceView::Render(Renderer* renderer) {
   }
 
   // Ease to target.
-  scroll_helper_.RenderScrollIndicators(renderer);
+  scroll_helper_.RenderScrollIndicators(renderer, skin);
 }
 
 bool SourceView::NotifyMouseMoved(
@@ -249,7 +246,7 @@ int SourceView::GetContentSize() {
 }
 
 const Rect& SourceView::GetScreenRect() {
-  return Contents::GetScreenRect();
+  return Dockable::GetScreenRect();
 }
 
 const Color& SourceView::ColorForTokenType(

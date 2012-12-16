@@ -7,13 +7,14 @@
 #include "base/string_number_conversions.h"
 #include "base/utf_string_conversions.h"
 #include "sg/render/font.h"
+#include "sg/render/renderer.h"
 #include "sg/ui/skin.h"
 
 // TODO(rendering)
 // TODO(config)
 Font kStatusBarFont(L"Segoe UI", 12.f);
 
-StatusBar::StatusBar(const Skin& skin) : Contents(skin) {
+StatusBar::StatusBar(const Skin& skin) : skin_(skin) {
   debug_state_ = L"";
   ms_per_frame_ = L"";
 }
@@ -30,8 +31,8 @@ void StatusBar::SetDebugState(const string16& status) {
 }
 
 void StatusBar::Render(Renderer* renderer) {
-  const Skin& skin = GetSkin();
-  const ColorScheme& color = skin.GetColorScheme();
+  /*
+  const ColorScheme& color = skin_.GetColorScheme();
 
   renderer->SetDrawColor(color.background());
   renderer->DrawFilledRect(GetClientRect());
@@ -59,4 +60,5 @@ void StatusBar::Render(Renderer* renderer) {
   renderer->DrawFilledRect(Rect(separator_x, 0, 1, GetClientRect().h));
   x -= kItemPadding + 1;
   renderer->DrawFilledRect(Rect(x, 0, 1, GetClientRect().h));
+  */
 }

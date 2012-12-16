@@ -16,7 +16,6 @@
 #include "sg/app_thread.h"
 #include "sg/debug_presenter_notify.h"
 #include "sg/render/application_window.h"
-#include "sg/ui/contents.h"
 #include "sg/workspace.h"
 
 #include "sg/render/direct2d_win.h"
@@ -68,9 +67,9 @@ class GpuSystem {
     if (SUCCEEDED(CreateDeviceResources())) {
       render_target_->BeginDraw();
       render_target_->SetTransform(D2D1::Matrix3x2F::Identity());
-      Contents* contents = application_window_->GetContents();
-      if (contents)
-        contents->Render(renderer_);
+      Workspace* workspace = application_window_->GetWorkspace();
+      if (workspace)
+        workspace->Render(renderer_);
       HRESULT hr = render_target_->EndDraw();
       if (hr == D2DERR_RECREATE_TARGET) {
         DiscardDeviceResources();
@@ -86,9 +85,9 @@ class GpuSystem {
   void Resize(const Rect& rect) {
     D2D1_SIZE_U size = D2D1::SizeU(rect.w, rect.h);
     render_target_->Resize(size);
-    Contents* contents = application_window_->GetContents();
-    if (contents) {
-      contents->SetScreenRect(rect);
+    Workspace* workspace = application_window_->GetWorkspace();
+    if (workspace) {
+      workspace->SetScreenRect(rect);
       Paint();
     }
   }

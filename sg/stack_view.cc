@@ -10,6 +10,7 @@
 #include "base/string_number_conversions.h"
 #include "base/string_util.h"
 #include "sg/display_util.h"
+#include "sg/render/renderer.h"
 #include "sg/render/texture.h"
 #include "sg/ui/skin.h"
 
@@ -22,10 +23,9 @@ Texture g_pc_indicator_texture;
 
 }  // namespace
 
-StackView::StackView(const Skin& skin)
-    : Contents(skin),
-      active_(-1),
-      tree_view_(skin, this, g_line_height, arraysize(column_widths_)) {
+StackView::StackView()
+    : active_(-1),
+      tree_view_(this, g_line_height, arraysize(column_widths_)) {
   // TODO(config): Share with source view.
   g_pc_indicator_texture.name = L"art/pc-location.png";
   // TODO(config): Save this.
@@ -60,9 +60,7 @@ void StackView::SetData(const std::vector<FrameData>& frames, int active) {
   Invalidate();
 }
 
-void StackView::Render(Renderer* renderer) {
-  const Skin& skin = Contents::GetSkin();
-
+void StackView::Render(Renderer* renderer, const Skin& skin) {
   // TODO(rendering): Hacky.
   if (!g_pc_indicator_texture.data) {
     renderer->LoadTexture(&g_pc_indicator_texture);
@@ -93,7 +91,7 @@ void StackView::Render(Renderer* renderer) {
   renderer->AddRenderOffset(Point(full_margin_width, 0));
   tree_view_screen_size_.w = GetScreenRect().w - full_margin_width;
   tree_view_screen_size_.h = GetScreenRect().h;
-  tree_view_.RenderTree(renderer);
+  tree_view_.RenderTree(renderer, skin);
   renderer->SetRenderOffset(old_render_offset);
 }
 

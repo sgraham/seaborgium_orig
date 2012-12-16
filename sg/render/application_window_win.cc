@@ -60,10 +60,10 @@ class ApplicationWindowWin : public ApplicationWindow {
     Gpu::SetDebugPresenterNotify(this, notifier);
   }
 
-  virtual void SetContents(Workspace* workspace) {
+  virtual void SetWorkspace(Workspace* workspace) {
     workspace_ = workspace;
   }
-  virtual Workspace* GetContents() { return workspace_; }
+  virtual Workspace* GetWorkspace() { return workspace_; }
 
   virtual bool IsLandscape() {
     // TODO(config): Probably wrong on multi mon, but should be removed anyway.

@@ -9,19 +9,17 @@
 #include <vector>
 
 #include "sg/debug_presenter_display.h"
-#include "sg/ui/container.h"
+#include "sg/ui/docking_workspace.h"
 #include "sg/ui/input.h"
 #include "sg/ui/skin.h"
 
 class ApplicationWindow;
-class Container;
 class DebugPresenterNotify;
 class SourceView;
 class StackView;
 class StatusBar;
 
-class Workspace : public Container,
-                  public DebugPresenterDisplay {
+class Workspace : public DebugPresenterDisplay, public InputHandler {
  public:
   Workspace();
   virtual ~Workspace();
@@ -30,8 +28,10 @@ class Workspace : public Container,
   virtual void SetDelegate(ApplicationWindow* delegate);
   virtual void SetDebugPresenterNotify(DebugPresenterNotify* debug_presenter);
 
-  virtual void SetScreenRect(const Rect& rect) OVERRIDE;
-  virtual void Invalidate() OVERRIDE;
+  virtual void SetScreenRect(const Rect& rect);
+  virtual void Invalidate();
+
+  virtual void Render(Renderer* renderer);
 
   // Implementation of InputHandler.
   virtual bool NotifyMouseMoved(
@@ -61,13 +61,15 @@ class Workspace : public Container,
 
   Skin skin_;
 
-  Container* main_area_;
+  DockingWorkspace* main_area_;
   StatusBar* status_bar_;
 
+  /*
   SourceView* source_view_;
   Container* source_view_container_;
   StackView* stack_view_;
   Container* stack_view_container_;
+  */
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;
 

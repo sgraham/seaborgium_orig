@@ -43,13 +43,12 @@ class TreeViewHelperDataProvider {
 // expand/collapsing.
 class TreeViewHelper {
  public:
-  TreeViewHelper(const Skin& skin,
-                 TreeViewHelperDataProvider* data_provider,
+  TreeViewHelper(TreeViewHelperDataProvider* data_provider,
                  int num_pixels_in_row,
                  int num_columns);
   virtual ~TreeViewHelper();
 
-  void RenderTree(Renderer* renderer);
+  void RenderTree(Renderer* renderer, const Skin& skin);
 
   int GetRowHeight() const { return num_pixels_in_row_; }
   int GetYOffsetToFirstRow() const;
@@ -63,7 +62,6 @@ class TreeViewHelper {
 
   Font font_;
 
-  const Skin& skin_;
   TreeViewHelperDataProvider* data_provider_;
   int num_pixels_in_row_;
   int num_columns_;

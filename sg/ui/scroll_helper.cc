@@ -20,8 +20,7 @@ const int kFadeOutOverTicks = 30;
 
 }  // namespace
 
-ScrollHelper::ScrollHelper(const Skin& skin,
-                           ScrollHelperDataProvider* data_provider,
+ScrollHelper::ScrollHelper(ScrollHelperDataProvider* data_provider,
                            int num_pixels_in_line)
     : y_pixel_scroll_(0),
       y_pixel_scroll_target_(0),
@@ -52,7 +51,8 @@ bool ScrollHelper::Update() {
   return true;
 }
 
-void ScrollHelper::RenderScrollIndicators(Renderer* renderer) {
+void ScrollHelper::RenderScrollIndicators(
+    Renderer* renderer, const Skin& skin) {
   // TODO(rendering)
   if (!g_vscrollbar_top.data) {
     renderer->LoadTexture(&g_vscrollbar_top);

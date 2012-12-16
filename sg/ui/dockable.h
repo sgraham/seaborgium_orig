@@ -5,11 +5,16 @@
 #ifndef SG_UI_DOCKABLE_H_
 #define SG_UI_DOCKABLE_H_
 
+#include "base/basictypes.h"
+#include "base/compiler_specific.h"
 #include "sg/basic_geometric_types.h"
+#include "sg/ui/input.h"
 
 class DockingSplitContainer;
+class Renderer;
+class Skin;
 
-class Dockable {
+class Dockable : public InputHandler {
  public:
   Dockable();
   virtual ~Dockable();
@@ -22,11 +27,44 @@ class Dockable {
   const Rect& GetScreenRect() const;
 
   void set_parent(DockingSplitContainer* parent) { parent_ = parent; }
-  DockingSplitContainer* get_parent() { return parent_; }
+  DockingSplitContainer* parent() { return parent_; }
+
+  virtual void Render(Renderer* renderer, const Skin& skin) {}
+  virtual void Invalidate();
+
+  virtual int X() const { return GetScreenRect().x; }
+  virtual int Y() const { return GetScreenRect().y; }
+  virtual int Width() const { return GetScreenRect().w; }
+  virtual int Height() const { return GetScreenRect().h; }
+  Rect GetClientRect() {
+    return Rect(0, 0, GetScreenRect().w, GetScreenRect().h);
+  }
+
+  // Default implementation of InputHandler.
+  virtual bool NotifyMouseMoved(
+      int x, int y, int dx, int dy, const InputModifiers& modifiers) OVERRIDE {
+    return false;
+  }
+  virtual bool NotifyMouseWheel(
+      int delta, const InputModifiers& modifiers) OVERRIDE {
+    return false;
+  }
+  virtual bool NotifyMouseButton(
+      int index, bool down, const InputModifiers& modifiers) OVERRIDE {
+    return false;
+  }
+  virtual bool NotifyKey(
+      InputKey key, bool down, const InputModifiers& modifiers) OVERRIDE {
+    return false;
+  }
+  virtual bool WantMouseEvents() { return false; }
+  virtual bool WantKeyEvents() { return false; }
 
  private:
   DockingSplitContainer* parent_;
   Rect rect_;
+
+  DISALLOW_COPY_AND_ASSIGN(Dockable);
 };
 
 #endif  // SG_UI_DOCKABLE_H_

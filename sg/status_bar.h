@@ -6,9 +6,11 @@
 #define SG_STATUS_BAR_H_
 
 #include "base/string16.h"
-#include "sg/ui/contents.h"
 
-class StatusBar : public Contents {
+class Renderer;
+class Skin;
+
+class StatusBar {
  public:
   explicit StatusBar(const Skin& skin);
   virtual ~StatusBar();
@@ -21,6 +23,7 @@ class StatusBar : public Contents {
  private:
   string16 ms_per_frame_;
   string16 debug_state_;
+  const Skin& skin_;
 };
 
 #endif  // SG_STATUS_BAR_H_

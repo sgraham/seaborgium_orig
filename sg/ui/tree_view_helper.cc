@@ -15,12 +15,10 @@ const int kFromSidePadding = 3;
 }  // namespace
 
 TreeViewHelper::TreeViewHelper(
-    const Skin& skin,
     TreeViewHelperDataProvider* data_provider,
     int num_pixels_in_row,
     int num_columns)
-    : skin_(skin),
-      data_provider_(data_provider),
+    : data_provider_(data_provider),
       num_pixels_in_row_(num_pixels_in_row),
       num_columns_(num_columns) {
   // TODO(config): Share with source view.
@@ -44,26 +42,26 @@ int TreeViewHelper::GetStartXForColumn(int column) {
   return offset;
 }
 
-void TreeViewHelper::RenderTree(Renderer* renderer) {
+void TreeViewHelper::RenderTree(Renderer* renderer, const Skin& skin) {
   Size screen_size = data_provider_->GetTreeViewScreenSize();
 
   int height_of_header = GetYOffsetToFirstRow();
-  renderer->SetDrawColor(skin_.GetColorScheme().margin());
+  renderer->SetDrawColor(skin.GetColorScheme().margin());
   renderer->DrawFilledRect(Rect(0, 0, screen_size.w, height_of_header));
-  renderer->SetDrawColor(skin_.GetColorScheme().border());
+  renderer->SetDrawColor(skin.GetColorScheme().border());
   renderer->DrawFilledRect(Rect(0, 0, screen_size.w, 1));
   renderer->DrawFilledRect(Rect(0, height_of_header - 1, screen_size.w, 1));
   for (int i = 0; i < num_columns_; ++i)
     renderer->DrawFilledRect(Rect(GetStartXForColumn(i), 0, 1, screen_size.h));
 
-  renderer->SetDrawColor(skin_.GetColorScheme().margin_text());
+  renderer->SetDrawColor(skin.GetColorScheme().margin_text());
   for (int i = 0; i < num_columns_; ++i) {
     int x = GetStartXForColumn(i) + kFromSidePadding;
     const string16& title = data_provider_->GetColumnTitle(i);
     renderer->RenderText(&font_, Point(x, kHeaderPadding), title);
   }
 
-  renderer->SetDrawColor(skin_.GetColorScheme().text());
+  renderer->SetDrawColor(skin.GetColorScheme().text());
   int y = height_of_header;
   RenderNodes(renderer, "", &y, 0);
 }

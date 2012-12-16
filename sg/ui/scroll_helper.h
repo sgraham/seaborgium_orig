@@ -23,15 +23,14 @@ class ScrollHelperDataProvider {
 // Handles scroll offsets and rendering of scroll indicators.
 class ScrollHelper {
  public:
-  ScrollHelper(const Skin& skin,
-               ScrollHelperDataProvider* data_provider,
+  ScrollHelper(ScrollHelperDataProvider* data_provider,
                int num_pixels_in_line);
   virtual ~ScrollHelper();
 
   // Returns whether invalidation is required.
   bool Update();
 
-  void RenderScrollIndicators(Renderer* renderer);
+  void RenderScrollIndicators(Renderer* renderer, const Skin& skin);
   int GetOffset() const { return y_pixel_scroll_; }
 
   // Returns "did move", i.e. whether invalidation is required.

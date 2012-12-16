@@ -3,17 +3,17 @@
 #ifndef SG_UI_SOLID_COLOR_H_
 #define SG_UI_SOLID_COLOR_H_
 
-#include "ui/contents.h"
+#include "sg/render/renderer.h"
+#include "sg/ui/dockable.h"
 
-class SolidColor : public Contents {
+class SolidColor : public Dockable {
  public:
-  SolidColor(const Skin& skin, const Color& color)
-      : Contents(skin),
-        color_(color) {
+  SolidColor(const Color& color)
+      : color_(color) {
   }
   virtual ~SolidColor() {}
 
-  virtual void Render(Renderer* renderer) OVERRIDE {
+  virtual void Render(Renderer* renderer, const Skin& skin) OVERRIDE {
     renderer->SetDrawColor(color_);
     renderer->DrawFilledRect(GetClientRect());
   }

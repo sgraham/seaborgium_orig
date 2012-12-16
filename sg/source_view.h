@@ -11,7 +11,7 @@
 #include "base/string16.h"
 #include "sg/lexer.h"
 #include "sg/render/font.h"
-#include "sg/ui/contents.h"
+#include "sg/ui/dockable.h"
 #include "sg/ui/scroll_helper.h"
 
 class Skin;
@@ -22,11 +22,11 @@ struct ColoredText {
 };
 typedef std::vector<ColoredText> Line;
 
-class SourceView : public Contents, public ScrollHelperDataProvider {
+class SourceView : public Dockable, public ScrollHelperDataProvider {
  public:
-  explicit SourceView(const Skin& skin);
+  SourceView();
 
-  virtual void Render(Renderer* renderer);
+  virtual void Render(Renderer* renderer, const Skin& skin) OVERRIDE;
 
   virtual void SetData(const std::string& utf8_text);
   // TODO(scottmg): Probably some sort of "margin indicator" abstraction.
