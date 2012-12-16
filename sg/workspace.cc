@@ -19,6 +19,8 @@
 
 namespace {
 
+Workspace* g_main_workspace;
+
 Dockable* Placeholder(const Skin& skin, const string16& name) {
   return new DockingToolWindow(
       new SolidColor(skin.GetColorScheme().background()), name);
@@ -32,6 +34,16 @@ Workspace::Workspace()
       source_view_(NULL),
       source_view_container_(NULL)*/ {
   // Initialization deferred until Init when we know our window size.
+
+  // This is just for Invalidate. TODO(scottmg): Maybe some sort of broadcast,
+  // observer, blablah.
+  CHECK(!g_main_workspace);
+  g_main_workspace = this;
+}
+
+Workspace::~Workspace() {
+  CHECK(g_main_workspace == this);
+  g_main_workspace = NULL;
 }
 
 void Workspace::Init() {
@@ -63,91 +75,10 @@ void Workspace::Init() {
   stack_view_window_->parent()->SplitChild(
       kSplitHorizontal, stack_view_window_, breakpoints);
   stack_view_window_->parent()->SetFraction(.6);
-  /*
-  main_area_ = new Container(skin_);
-  status_bar_ = new StatusBar(skin_);
-  AddChild(main_area_);
-  AddChild(status_bar_);
 
-  source_view_ = new SourceView(skin_);
-  source_view_container_ = new Container(skin_);
-  source_view_container_->AddChild(source_view_);
+  SetFocusedContents(source_view_);
 
-  stack_view_ = new StackView(skin_);
-  stack_view_container_ = new Container(skin_);
-  stack_view_container_->AddChild(stack_view_, L"Stack");
-
-  Contents* output = Placeholder(skin_, L"Output");
-  Contents* log = Placeholder(skin_, L"Log");
-  Contents* watch = Placeholder(skin_, L"Watch");
-  Contents* locals = Placeholder(skin_, L"Locals");
-  Contents* breakpoints = Placeholder(skin_, L"Breakpoints");
-
-  bool is_landscape = GetClientRect().w > GetClientRect().h;
-  if (is_landscape) {
-    Container* top = new Container(skin_);
-    Container* bottom = new Container(skin_);
-    main_area_->SetMode(Container::SplitVertical);
-    main_area_->Container::AddChild(top);
-    main_area_->Container::AddChild(bottom);
-    main_area_->SetFraction(top, .7);
-
-    bottom->AddChild(output);
-    bottom->AddChild(log);
-    bottom->SetFraction(output, .6);
-
-    Container* middle = new Container(skin_);
-    middle->SetMode(Container::SplitVertical);
-    Container* views = new Container(skin_);
-    views->SetMode(Container::SplitVertical);
-    top->AddChild(source_view_container_);
-    top->AddChild(middle);
-    top->AddChild(views);
-    top->SetFraction(source_view_container_, .375);
-    top->SetFraction(middle, .65);
-
-    middle->AddChild(stack_view_container_);
-    middle->AddChild(breakpoints);
-    middle->SetFraction(stack_view_container_, .75);
-
-    views->AddChild(watch);
-    views->AddChild(locals);
-    views->SetFraction(watch, .6);
-  } else {
-    Container* first_row = new Container(skin_);
-    Container* second_row = new Container(skin_);
-    Container* third_row = new Container(skin_);
-    main_area_->SetMode(Container::SplitVertical);
-    main_area_->AddChild(first_row);
-    main_area_->AddChild(second_row);
-    main_area_->AddChild(third_row);
-    main_area_->SetFraction(first_row, .5);
-    main_area_->SetFraction(second_row, .8);
-
-    Container* top_right = new Container(skin_);
-    top_right->SetMode(Container::SplitVertical);
-    top_right->AddChild(stack_view_container_);
-    top_right->AddChild(breakpoints);
-    first_row->AddChild(source_view_container_);
-    first_row->AddChild(top_right);
-    first_row->SetFraction(source_view_container_, .55);
-
-    Container* views = new Container(skin_);
-    views->SetMode(Container::SplitHorizontal);
-    second_row->AddChild(watch);
-    second_row->AddChild(locals);
-    second_row->SetFraction(watch, .6);
-
-    third_row->AddChild(output);
-    third_row->AddChild(log);
-    third_row->SetFraction(output, .7);
-  }
-
-  SetFocusedContents(source_view_container_->Child(0));
-  */
-}
-
-Workspace::~Workspace() {
+  // TODO(scottmg): Portrait.
 }
 
 void Workspace::SetDelegate(ApplicationWindow* delegate) {
@@ -179,6 +110,10 @@ void Workspace::SetScreenRect(const Rect& rect) {
 }
 
 void Workspace::Invalidate() {
+  g_main_workspace->InvalidateImpl();
+}
+
+void Workspace::InvalidateImpl() {
   if (delegate_) {
     AppThread::PostDelayedTask(AppThread::UI, FROM_HERE,
         base::Bind(&ApplicationWindow::Paint, base::Unretained(delegate_)),
@@ -196,15 +131,11 @@ void Workspace::SetFileName(const FilePath& filename) {
 }
 
 void Workspace::SetProgramCounterLine(int line_number) {
-  /*
   source_view_->SetProgramCounterLine(line_number);
-  */
 }
 
 void Workspace::SetFileData(const std::string& utf8_text) {
-  /*
   source_view_->SetData(utf8_text);
-  */
 }
 
 void Workspace::SetDebugState(const string16& debug_state) {
@@ -217,9 +148,7 @@ void Workspace::SetRenderTime(double frame_time_in_ms) {
 
 void Workspace::SetStackData(
     const std::vector<FrameData>& frame_data, int active) {
-  /*
   stack_view_->SetData(frame_data, active);
-  */
 }
 
 void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
@@ -228,26 +157,20 @@ void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
 
 bool Workspace::NotifyMouseMoved(
     int x, int y, int dx, int dy, const InputModifiers& modifiers) {
-  /*
   mouse_position_.x = x;
   mouse_position_.y = y;
-  UpdateHovered();
-  Contents* focused = GetFocusedContents();
+  Dockable* focused = GetFocusedContents();
   if (!focused || !focused->WantMouseEvents())
     return false;
   return focused->NotifyMouseMoved(x, y, dx, dy, modifiers);
-  */
   return false;
 }
 
 bool Workspace::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
-  /*
-  Contents* focused = GetFocusedContents();
+  Dockable* focused = GetFocusedContents();
   if (!focused || !focused->WantMouseEvents())
     return false;
   return focused->NotifyMouseWheel(delta, modifiers);
-  */
-  return false;
 }
 
 bool Workspace::NotifyMouseButton(
@@ -258,21 +181,10 @@ bool Workspace::NotifyMouseButton(
 
 bool Workspace::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
-  /*
-  Contents* focused = GetFocusedContents();
+  Dockable* focused = GetFocusedContents();
   if (!focused || !focused->WantKeyEvents())
     return false;
   if (focused->NotifyKey(key, down, modifiers))
     return true;
   return debug_presenter_notify_->NotifyKey(key, down, modifiers);
-  */
-  return false;
-}
-
-void Workspace::UpdateHovered() {
-  /*
-  // TODO(scottmg): Dispatch a mouse-leave and a mouse-enter appropriately.
-  SetHoveredContents(FindContentsAt(mouse_position_));
-  Invalidate();
-  */
 }

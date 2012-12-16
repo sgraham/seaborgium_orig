@@ -29,7 +29,7 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   virtual void SetDebugPresenterNotify(DebugPresenterNotify* debug_presenter);
 
   virtual void SetScreenRect(const Rect& rect);
-  virtual void Invalidate();
+  static void Invalidate();
 
   virtual void Render(Renderer* renderer);
 
@@ -57,7 +57,7 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   virtual void SetRenderTime(double ms_per_frame) OVERRIDE;
 
  private:
-  void UpdateHovered();
+  void InvalidateImpl();
 
   Skin skin_;
 

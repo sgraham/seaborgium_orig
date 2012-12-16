@@ -6,6 +6,7 @@
 
 #include "base/logging.h"
 #include "sg/ui/docking_split_container.h"
+#include "sg/workspace.h"
 
 Dockable::Dockable() : parent_(NULL) {
 }
@@ -27,6 +28,5 @@ const Rect& Dockable::GetScreenRect() const {
 }
 
 void Dockable::Invalidate() {
-  if (parent())
-    parent()->Invalidate();
+  Workspace::Invalidate();
 }
