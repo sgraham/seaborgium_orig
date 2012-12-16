@@ -16,6 +16,8 @@ class DockingWorkspace {
   DockingWorkspace();
   virtual ~DockingWorkspace();
 
+  void Render(Renderer* renderer, const Skin& skin);
+
   // Takes ownership.
   void SetRoot(Dockable* root);
   Dockable* GetRoot();

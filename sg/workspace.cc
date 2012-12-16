@@ -11,25 +11,21 @@
 #include "sg/source_view.h"
 #include "sg/stack_view.h"
 #include "sg/status_bar.h"
+#include "sg/ui/docking_split_container.h"
 #include "sg/ui/focus.h"
+#include "sg/ui/skin.h"
 #include "sg/ui/solid_color.h"
 
 namespace {
 
-  /*
-Container* Placeholder(const Skin& skin, const string16& name) {
-  Container* container = new Container(skin);
-  container->AddChild(new SolidColor(skin, skin.GetColorScheme().background()),
-                      name);
-  return container;
+Dockable* Placeholder(const Skin& skin, const string16& name) {
+  return new SolidColor(skin.GetColorScheme().background());
 }
-*/
 
 }  // namespace
 
 Workspace::Workspace()
     : delegate_(NULL),
-      main_area_(NULL),
       status_bar_(NULL) /*,
       source_view_(NULL),
       source_view_container_(NULL)*/ {
@@ -38,6 +34,29 @@ Workspace::Workspace()
 
 void Workspace::Init() {
   DCHECK(!main_area_);
+  main_area_.reset(new DockingWorkspace);
+  source_view_ = new SourceView;
+  stack_view_ = new StackView;
+  main_area_->SetRoot(source_view_);
+  Dockable* watch = Placeholder(skin_, L"Watch");
+  Dockable* locals = Placeholder(skin_, L"Locals");
+  Dockable* breakpoints = Placeholder(skin_, L"Breakpoints");
+  Dockable* output = Placeholder(skin_, L"Output");
+  Dockable* log = Placeholder(skin_, L"Log");
+
+  source_view_->parent()->SplitChild(kSplitHorizontal, source_view_, output);
+  source_view_->parent()->SetFraction(.7);
+  output->parent()->SplitChild(kSplitVertical, output, log);
+  output->parent()->SetFraction(.6);
+
+  source_view_->parent()->SplitChild(kSplitVertical, source_view_, stack_view_);
+  source_view_->parent()->SetFraction(.375);
+  stack_view_->parent()->SplitChild(kSplitVertical, stack_view_, watch);
+  stack_view_->parent()->SetFraction(.4);
+  watch->parent()->SplitChild(kSplitHorizontal, watch, locals);
+  watch->parent()->SetFraction(.65);
+  stack_view_->parent()->SplitChild(kSplitHorizontal, stack_view_, breakpoints);
+  stack_view_->parent()->SetFraction(.6);
   /*
   main_area_ = new Container(skin_);
   status_bar_ = new StatusBar(skin_);
@@ -134,10 +153,11 @@ void Workspace::SetDebugPresenterNotify(DebugPresenterNotify* debug_presenter) {
 }
 
 void Workspace::SetScreenRect(const Rect& rect) {
-  /*
-  Contents::SetScreenRect(rect);
   if (!main_area_)
     Init();
+  // TODO(scottmg): Space for status bar, etc.
+  main_area_->SetScreenRect(rect);
+  /*
   const Skin& skin = GetSkin();
   Rect outer_border_size(
       skin.border_size(), skin.border_size(),
@@ -161,6 +181,7 @@ void Workspace::Invalidate() {
 }
 
 void Workspace::Render(Renderer* renderer) {
+  main_area_->Render(renderer, skin_);
 }
 
 void Workspace::SetFileName(const FilePath& filename) {

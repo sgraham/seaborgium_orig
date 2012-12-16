@@ -33,6 +33,7 @@ class DockingSplitContainer : public Dockable {
                   Dockable* right);
 
   void SetScreenRect(const Rect& rect) OVERRIDE;
+  void Render(Renderer* renderer, const Skin& skin) OVERRIDE;
 
   DockingSplitDirection direction() const { return direction_; }
   double fraction() const { return fraction_; }
@@ -45,6 +46,8 @@ class DockingSplitContainer : public Dockable {
   void ReplaceLeft(Dockable* left);
 
  private:
+  Rect GetRectForSplitter();
+
   DockingSplitDirection direction_;
   double fraction_;
 

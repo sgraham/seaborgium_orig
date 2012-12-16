@@ -51,7 +51,7 @@ TEST_F(DockingTest, AddVerticalSplit) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  main->parent()->SplitChild(kSplitVertical, main, pane);
   EXPECT_TRUE(workspace.GetRoot()->IsContainer());
   EXPECT_EQ(main, workspace.GetRoot()->AsDockingSplitContainer()->left());
   EXPECT_EQ(pane, workspace.GetRoot()->AsDockingSplitContainer()->right());
@@ -65,7 +65,7 @@ TEST_F(DockingTest, AddVerticalSplitOtherOrder) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitVertical, pane, main);
+  main->parent()->SplitChild(kSplitVertical, pane, main);
   EXPECT_TRUE(workspace.GetRoot()->IsContainer());
   EXPECT_EQ(pane, workspace.GetRoot()->AsDockingSplitContainer()->left());
   EXPECT_EQ(main, workspace.GetRoot()->AsDockingSplitContainer()->right());
@@ -79,7 +79,7 @@ TEST_F(DockingTest, AddHorizontalSplit) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitHorizontal, main, pane);
+  main->parent()->SplitChild(kSplitHorizontal, main, pane);
   EXPECT_TRUE(workspace.GetRoot()->IsContainer());
   EXPECT_EQ(main, workspace.GetRoot()->AsDockingSplitContainer()->left());
   EXPECT_EQ(pane, workspace.GetRoot()->AsDockingSplitContainer()->right());
@@ -94,8 +94,8 @@ TEST_F(DockingTest, SubSplit) {
   workspace.SetRoot(main);
   ContentPane* pane1 = new ContentPane;
   ContentPane* pane2 = new ContentPane;
-  main->get_parent()->SplitChild(kSplitVertical, main, pane1);
-  pane1->get_parent()->SplitChild(kSplitHorizontal, pane1, pane2);
+  main->parent()->SplitChild(kSplitVertical, main, pane1);
+  pane1->parent()->SplitChild(kSplitHorizontal, pane1, pane2);
   EXPECT_TRUE(workspace.GetRoot()->IsContainer());
   DockingSplitContainer* root_as_container =
       workspace.GetRoot()->AsDockingSplitContainer();
@@ -115,7 +115,7 @@ TEST_F(DockingTest, SetSizes) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  main->parent()->SplitChild(kSplitVertical, main, pane);
   DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
   EXPECT_EQ(root->left(), main);
   EXPECT_EQ("0,0 498x1000", RectAsString(root->left()->GetScreenRect()));
@@ -130,7 +130,7 @@ TEST_F(DockingTest, DragSplitter) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  main->parent()->SplitChild(kSplitVertical, main, pane);
   DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
   DockingResizer resizer(root);
   resizer.Drag(CalculateDragPoint(resizer, -200, 10));
@@ -147,7 +147,7 @@ TEST_F(DockingTest, DragLeftAndThenRight) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  main->parent()->SplitChild(kSplitVertical, main, pane);
   DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
   DockingResizer resizer(root);
   resizer.Drag(CalculateDragPoint(resizer, -200, 10));
@@ -165,7 +165,7 @@ TEST_F(DockingTest, DragCancel) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  main->parent()->SplitChild(kSplitVertical, main, pane);
   DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
   DockingResizer resizer(root);
   resizer.Drag(CalculateDragPoint(resizer, -200, 10));
@@ -184,7 +184,7 @@ TEST_F(DockingTest, DragPastLeftEdge) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  main->parent()->SplitChild(kSplitVertical, main, pane);
   DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
   DockingResizer resizer(root);
   resizer.Drag(CalculateDragPoint(resizer, -600, 10));
@@ -203,7 +203,7 @@ TEST_F(DockingTest, DragPastRightEdge) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  main->parent()->SplitChild(kSplitVertical, main, pane);
   DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
   DockingResizer resizer(root);
   // Not past right edge.
@@ -221,7 +221,7 @@ TEST_F(DockingTest, DragUpDown) {
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
   ContentPane* pane = new ContentPane;
-  main->get_parent()->SplitChild(kSplitHorizontal, main, pane);
+  main->parent()->SplitChild(kSplitHorizontal, main, pane);
   DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
   DockingResizer resizer(root);
   resizer.Drag(CalculateDragPoint(resizer, 10, 100));

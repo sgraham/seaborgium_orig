@@ -61,15 +61,11 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
 
   Skin skin_;
 
-  DockingWorkspace* main_area_;
+  scoped_ptr<DockingWorkspace> main_area_;
   StatusBar* status_bar_;
 
-  /*
   SourceView* source_view_;
-  Container* source_view_container_;
   StackView* stack_view_;
-  Container* stack_view_container_;
-  */
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;
 

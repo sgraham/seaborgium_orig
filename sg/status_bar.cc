@@ -23,7 +23,9 @@ StatusBar::~StatusBar() {
 }
 
 void StatusBar::SetRenderTime(double ms_per_frame) {
+  /*
   ms_per_frame_ = UTF8ToUTF16(base::DoubleToString(ms_per_frame)) + L" ms";
+  */
 }
 
 void StatusBar::SetDebugState(const string16& status) {

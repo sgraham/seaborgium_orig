@@ -13,6 +13,11 @@ DockingWorkspace::DockingWorkspace() {
 DockingWorkspace::~DockingWorkspace() {
 }
 
+void DockingWorkspace::Render(Renderer* renderer, const Skin& skin) {
+  if (root_->left())
+    root_->left()->Render(renderer, skin);
+}
+
 void DockingWorkspace::SetRoot(Dockable* root) {
   root_->ReplaceLeft(root);
   root->set_parent(root_.get());
