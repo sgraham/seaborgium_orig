@@ -39,6 +39,8 @@ class DockingSplitContainer : public Dockable {
   Dockable* left() { return left_.get(); }
   Dockable* right() { return right_.get(); }
 
+  void SetFraction(double fraction);
+
   // Hokey method only used for DockingWorkspace that uses left as root.
   void ReplaceLeft(Dockable* left);
 

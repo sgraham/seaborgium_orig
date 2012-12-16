@@ -74,6 +74,12 @@ void DockingSplitContainer::SetScreenRect(const Rect& rect) {
   }
 }
 
+void DockingSplitContainer::SetFraction(double fraction) {
+  fraction_ = fraction;
+  // Propagate fraction changes to children.
+  SetScreenRect(GetScreenRect());
+}
+
 void DockingSplitContainer::ReplaceLeft(Dockable* left) {
   CHECK(direction_ == kSplitNoneRoot && !right_.get());
   left_.reset(left);

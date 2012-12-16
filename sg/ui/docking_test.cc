@@ -30,7 +30,8 @@ std::string RectAsString(const Rect &r) {
 }
 
 Point CalculateDragPoint(const DockingResizer& resizer, int dx, int dy) {
-  return Point(0, 0);
+  const Point& location = resizer.GetInitialLocationForTest();
+  return Point(location.x + dx, location.y + dy);
 }
 
 }  // namespace
@@ -124,7 +125,7 @@ TEST_F(DockingTest, SetSizes) {
 
 TEST_F(DockingTest, DragSplitter) {
   DockingWorkspace workspace;
-  DockingSplitContainer::SetSplitterWidth(4);
+  DockingSplitContainer::SetSplitterWidth(10);
   workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
   MainDocument* main = new MainDocument;
   workspace.SetRoot(main);
@@ -134,7 +135,98 @@ TEST_F(DockingTest, DragSplitter) {
   DockingResizer resizer(root);
   resizer.Drag(CalculateDragPoint(resizer, -200, 10));
   EXPECT_EQ(root->left(), main);
-  EXPECT_EQ("0,0 298x1000", RectAsString(root->left()->GetScreenRect()));
+  EXPECT_EQ("0,0 295x1000", RectAsString(root->left()->GetScreenRect()));
   EXPECT_EQ(root->right(), pane);
-  EXPECT_EQ("302,0 698x1000", RectAsString(root->right()->GetScreenRect()));
+  EXPECT_EQ("305,0 695x1000", RectAsString(root->right()->GetScreenRect()));
+}
+
+TEST_F(DockingTest, DragLeftAndThenRight) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(4);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane = new ContentPane;
+  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
+  DockingResizer resizer(root);
+  resizer.Drag(CalculateDragPoint(resizer, -200, 10));
+  resizer.Drag(CalculateDragPoint(resizer, -150, 10));
+  EXPECT_EQ(root->left(), main);
+  EXPECT_EQ("0,0 348x1000", RectAsString(root->left()->GetScreenRect()));
+  EXPECT_EQ(root->right(), pane);
+  EXPECT_EQ("352,0 648x1000", RectAsString(root->right()->GetScreenRect()));
+}
+
+TEST_F(DockingTest, DragCancel) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(4);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane = new ContentPane;
+  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
+  DockingResizer resizer(root);
+  resizer.Drag(CalculateDragPoint(resizer, -200, 10));
+  resizer.Drag(CalculateDragPoint(resizer, -150, 10));
+  resizer.CancelDrag();
+  EXPECT_EQ(root->left(), main);
+  EXPECT_EQ("0,0 498x1000", RectAsString(root->left()->GetScreenRect()));
+  EXPECT_EQ(root->right(), pane);
+  EXPECT_EQ("502,0 498x1000", RectAsString(root->right()->GetScreenRect()));
+}
+
+TEST_F(DockingTest, DragPastLeftEdge) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(20);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane = new ContentPane;
+  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
+  DockingResizer resizer(root);
+  resizer.Drag(CalculateDragPoint(resizer, -600, 10));
+  // Not past left edge, with only the splitter remaining on the left. Note
+  // large setting for splitter width in this test.
+  EXPECT_EQ(root->left(), main);
+  EXPECT_EQ("0,0 0x1000", RectAsString(root->left()->GetScreenRect()));
+  EXPECT_EQ(root->right(), pane);
+  EXPECT_EQ("20,0 980x1000", RectAsString(root->right()->GetScreenRect()));
+}
+
+TEST_F(DockingTest, DragPastRightEdge) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(20);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane = new ContentPane;
+  main->get_parent()->SplitChild(kSplitVertical, main, pane);
+  DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
+  DockingResizer resizer(root);
+  // Not past right edge.
+  resizer.Drag(CalculateDragPoint(resizer, 900, 10));
+  EXPECT_EQ(root->left(), main);
+  EXPECT_EQ("0,0 980x1000", RectAsString(root->left()->GetScreenRect()));
+  EXPECT_EQ(root->right(), pane);
+  EXPECT_EQ("1000,0 0x1000", RectAsString(root->right()->GetScreenRect()));
+}
+
+TEST_F(DockingTest, DragUpDown) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(20);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane = new ContentPane;
+  main->get_parent()->SplitChild(kSplitHorizontal, main, pane);
+  DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
+  DockingResizer resizer(root);
+  resizer.Drag(CalculateDragPoint(resizer, 10, 100));
+  EXPECT_EQ(root->left(), main);
+  EXPECT_EQ("0,0 1000x590", RectAsString(root->left()->GetScreenRect()));
+  EXPECT_EQ(root->right(), pane);
+  EXPECT_EQ("0,610 1000x390", RectAsString(root->right()->GetScreenRect()));
 }
