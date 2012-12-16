@@ -27,5 +27,9 @@ void DockingSplitContainer::SplitChild(
     to_replace = &right_;
   }
   to_replace->release(); // We're going re-own this pointer on the next line.
-  to_replace->reset(new DockingSplitContainer(direction, left, right));
+  DockingSplitContainer* replacement =
+    new DockingSplitContainer(direction, left, right);
+  to_replace->reset(replacement);
+  left->set_parent(replacement);
+  right->set_parent(replacement);
 }

@@ -29,9 +29,10 @@ class DockingSplitContainer : public Dockable {
                   Dockable* left,
                   Dockable* right);
 
+  DockingSplitDirection direction() const { return direction_; }
+  double fraction() const { return fraction_; }
   Dockable* left() { return left_.get(); }
   Dockable* right() { return right_.get(); }
-  double fraction() const { return fraction_; }
 
  private:
   DockingSplitDirection direction_;
