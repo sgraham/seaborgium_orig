@@ -17,7 +17,7 @@ class DockingWorkspace {
   DockingWorkspace();
   virtual ~DockingWorkspace();
 
-  void Render(Renderer* renderer, const Skin& skin);
+  void Render(Renderer* renderer);
   bool CouldStartDrag(
       const Point& screen_position,
       DragDirection* direction,

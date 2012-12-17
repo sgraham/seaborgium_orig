@@ -13,7 +13,7 @@ class SolidColor : public Dockable {
   }
   virtual ~SolidColor() {}
 
-  virtual void Render(Renderer* renderer, const Skin& skin) OVERRIDE {
+  virtual void Render(Renderer* renderer) OVERRIDE {
     renderer->SetDrawColor(color_);
     renderer->DrawFilledRect(GetClientRect());
   }

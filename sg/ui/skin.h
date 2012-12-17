@@ -71,6 +71,8 @@ class Skin {
   int border_size() const { return border_size_; }
   int status_bar_size() const { return status_bar_size_; }
 
+  static const Skin& current();
+
  private:
   ColorScheme color_scheme_;
 

@@ -22,9 +22,9 @@ namespace {
 
 Workspace* g_main_workspace;
 
-Dockable* Placeholder(const Skin& skin, const string16& name) {
+Dockable* Placeholder(const string16& name) {
   return new DockingToolWindow(
-      new SolidColor(skin.GetColorScheme().background()), name);
+      new SolidColor(Skin::current().GetColorScheme().background()), name);
 }
 
 }  // namespace
@@ -54,11 +54,11 @@ void Workspace::Init() {
   stack_view_ = new StackView;
   stack_view_window_ = new DockingToolWindow(stack_view_, L"Stack");
   main_area_->SetRoot(source_view_);
-  Dockable* watch = Placeholder(skin_, L"Watch");
-  Dockable* locals = Placeholder(skin_, L"Locals");
-  Dockable* breakpoints = Placeholder(skin_, L"Breakpoints");
-  Dockable* output = Placeholder(skin_, L"Output");
-  Dockable* log = Placeholder(skin_, L"Log");
+  Dockable* watch = Placeholder(L"Watch");
+  Dockable* locals = Placeholder(L"Locals");
+  Dockable* breakpoints = Placeholder(L"Breakpoints");
+  Dockable* output = Placeholder(L"Output");
+  Dockable* log = Placeholder(L"Log");
 
   source_view_->parent()->SplitChild(kSplitHorizontal, source_view_, output);
   source_view_->parent()->SetFraction(.7);
@@ -123,13 +123,13 @@ void Workspace::InvalidateImpl() {
 }
 
 void Workspace::Render(Renderer* renderer) {
-  main_area_->Render(renderer, skin_);
+  main_area_->Render(renderer);
   // If doing dock drag:
   scoped_ptr<RenderToTextureRenderer> render_to_texture(
       renderer->CreateRenderToTextureRenderer(
           stack_view_window_->GetScreenRect().w,
           stack_view_window_->GetScreenRect().h));
-  stack_view_window_->Render(render_to_texture.get(), skin_);
+  stack_view_window_->Render(render_to_texture.get());
   renderer->DrawRenderToTextureResult(
       render_to_texture.get(),
       Rect(100, 100,

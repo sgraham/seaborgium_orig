@@ -60,8 +60,6 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
  private:
   void InvalidateImpl();
 
-  Skin skin_;
-
   scoped_ptr<DockingWorkspace> main_area_;
   StatusBar* status_bar_;
 

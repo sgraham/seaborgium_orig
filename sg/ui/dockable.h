@@ -13,7 +13,6 @@
 
 class DockingSplitContainer;
 class Renderer;
-class Skin;
 
 class Dockable : public InputHandler {
  public:
@@ -30,7 +29,7 @@ class Dockable : public InputHandler {
   void set_parent(DockingSplitContainer* parent) { parent_ = parent; }
   DockingSplitContainer* parent() { return parent_; }
 
-  virtual void Render(Renderer* renderer, const Skin& skin) {}
+  virtual void Render(Renderer* renderer) {}
   virtual void Invalidate();
   virtual bool CouldStartDrag(
       const Point& screen_position,

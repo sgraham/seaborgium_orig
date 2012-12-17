@@ -117,7 +117,7 @@ bool SourceView::LineInView(int line_number) {
 }
 
 // TODO(rendering): Brutal efficiency.
-void SourceView::Render(Renderer* renderer, const Skin& skin) {
+void SourceView::Render(Renderer* renderer) {
   // TODO(rendering): Hacky.
   if (!g_pc_indicator_texture.data) {
     renderer->LoadTexture(&g_pc_indicator_texture);
@@ -125,6 +125,8 @@ void SourceView::Render(Renderer* renderer, const Skin& skin) {
   if (!g_breakpoint_texture.data) {
     renderer->LoadTexture(&g_breakpoint_texture);
   }
+
+  const Skin& skin = Skin::current();
 
   // TODO(rendering): Need to separate Update/Render.
   bool invalidate = scroll_helper_.Update();

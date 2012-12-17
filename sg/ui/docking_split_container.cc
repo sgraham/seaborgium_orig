@@ -90,23 +90,23 @@ Rect DockingSplitContainer::GetRectForSplitter() {
   return Rect();
 }
 
-void DockingSplitContainer::Render(Renderer* renderer, const Skin& skin) {
+void DockingSplitContainer::Render(Renderer* renderer) {
   Point old_offset = renderer->GetRenderOffset();
 
   {
     ScopedRenderOffset left_offset(renderer, this, left_.get());
-    left_->Render(renderer, skin);
+    left_->Render(renderer);
   }
 
   if (right_.get()) {
     ScopedRenderOffset right_offset(renderer, this, right_.get());
-    right_->Render(renderer, skin);
+    right_->Render(renderer);
   } else {
     CHECK(direction_ == kSplitNoneRoot);
   }
 
   if (direction_ == kSplitVertical || direction_ == kSplitHorizontal) {
-    renderer->SetDrawColor(skin.GetColorScheme().border());
+    renderer->SetDrawColor(Skin::current().GetColorScheme().border());
     renderer->DrawFilledRect(GetRectForSplitter());
   }
 }

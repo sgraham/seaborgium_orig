@@ -16,8 +16,12 @@ class DockingToolWindow : public Dockable {
   DockingToolWindow(Dockable* dockable, const string16& title);
   virtual ~DockingToolWindow();
 
-  virtual void Render(Renderer* renderer, const Skin& skin) OVERRIDE;
+  virtual void Render(Renderer* renderer) OVERRIDE;
   virtual void SetScreenRect(const Rect& rect) OVERRIDE;
+  virtual bool CouldStartDrag(
+      const Point& screen_position,
+      DragDirection* direction,
+      DockingSplitContainer** target) OVERRIDE;
 
  private:
   Dockable* contents_;

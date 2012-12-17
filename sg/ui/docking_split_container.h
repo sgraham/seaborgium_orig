@@ -33,7 +33,7 @@ class DockingSplitContainer : public Dockable {
                   Dockable* right);
 
   void SetScreenRect(const Rect& rect) OVERRIDE;
-  void Render(Renderer* renderer, const Skin& skin) OVERRIDE;
+  void Render(Renderer* renderer) OVERRIDE;
   bool CouldStartDrag(
       const Point& screen_position,
       DragDirection* direction,

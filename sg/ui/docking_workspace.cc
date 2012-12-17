@@ -13,9 +13,9 @@ DockingWorkspace::DockingWorkspace() {
 DockingWorkspace::~DockingWorkspace() {
 }
 
-void DockingWorkspace::Render(Renderer* renderer, const Skin& skin) {
+void DockingWorkspace::Render(Renderer* renderer) {
   if (root_->left())
-    root_->left()->Render(renderer, skin);
+    root_->left()->Render(renderer);
 }
 
 void DockingWorkspace::SetRoot(Dockable* root) {

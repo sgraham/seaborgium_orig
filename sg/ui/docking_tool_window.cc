@@ -24,22 +24,28 @@ DockingToolWindow::DockingToolWindow(Dockable* contents, const string16& title)
 DockingToolWindow::~DockingToolWindow() {
 }
 
-void DockingToolWindow::Render(Renderer* renderer, const Skin& skin) {
+void DockingToolWindow::Render(Renderer* renderer) {
+  const Skin& skin = Skin::current();
   renderer->SetDrawColor(skin.GetColorScheme().title_bar_inactive());
   renderer->DrawFilledRect(Rect(0, 0, Width(), skin.title_bar_size()));
   renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_inactive());
   renderer->RenderText(&kUIFont, Point(kTitleOffset, 0), title_);
-  //renderer->RenderChild(base::Bind(Dockabe
   ScopedRenderOffset offset(renderer, this, contents_);
-  contents_->Render(renderer, skin);
+  contents_->Render(renderer);
 }
 
 void DockingToolWindow::SetScreenRect(const Rect& rect) {
   Dockable::SetScreenRect(rect);
   Rect contents_rect = rect;
-  // F.
-  //rect.y += skin.title_bar_size();
-  contents_rect.y += 19;
-  contents_rect.h -= 19;
+  const Skin& skin = Skin::current();
+  contents_rect.y += skin.title_bar_size();
+  contents_rect.h -= skin.title_bar_size();
   contents_->SetScreenRect(contents_rect);
+}
+
+bool DockingToolWindow::CouldStartDrag(
+      const Point& screen_position,
+      DragDirection* direction,
+      DockingSplitContainer** target) {
+  return false;
 }

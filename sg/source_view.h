@@ -26,7 +26,7 @@ class SourceView : public Dockable, public ScrollHelperDataProvider {
  public:
   SourceView();
 
-  virtual void Render(Renderer* renderer, const Skin& skin) OVERRIDE;
+  virtual void Render(Renderer* renderer) OVERRIDE;
 
   virtual void SetData(const std::string& utf8_text);
   // TODO(scottmg): Probably some sort of "margin indicator" abstraction.

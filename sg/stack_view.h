@@ -22,7 +22,7 @@ class StackView : public Dockable, public TreeViewHelperDataProvider {
  public:
   StackView();
 
-  virtual void Render(Renderer* renderer, const Skin& skin);
+  virtual void Render(Renderer* renderer) OVERRIDE;
 
   virtual void SetData(const std::vector<FrameData>& frames, int active);
 

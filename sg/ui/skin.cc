@@ -24,6 +24,8 @@ Color kBlue(38, 139, 210);
 Color kCyan(42, 161, 152);
 Color kGreen(133, 153, 0);
 
+Skin g_skin;
+
 }  // namespace
 
 ColorScheme::ColorScheme()
@@ -49,4 +51,9 @@ ColorScheme::ColorScheme()
 }
 
 Skin::Skin() : title_bar_size_(19), border_size_(3), status_bar_size_(26) {
+}
+
+// static
+const Skin& Skin::current() {
+  return g_skin;
 }

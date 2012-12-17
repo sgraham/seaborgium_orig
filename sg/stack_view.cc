@@ -60,11 +60,13 @@ void StackView::SetData(const std::vector<FrameData>& frames, int active) {
   Invalidate();
 }
 
-void StackView::Render(Renderer* renderer, const Skin& skin) {
+void StackView::Render(Renderer* renderer) {
   // TODO(rendering): Hacky.
   if (!g_pc_indicator_texture.data) {
     renderer->LoadTexture(&g_pc_indicator_texture);
   }
+
+  const Skin& skin = Skin::current();
 
   renderer->SetDrawColor(skin.GetColorScheme().background());
   renderer->DrawFilledRect(Rect(0, 0, Width(), Height()));
