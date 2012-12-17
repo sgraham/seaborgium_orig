@@ -31,10 +31,11 @@ void DockingWorkspace::SetScreenRect(const Rect& rect) {
   root_->SetScreenRect(rect);
 }
 
-bool DockingWorkspace::CouldStartDrag(
-    const Point& screen_position,
-    DragDirection* direction,
-    scoped_ptr<Draggable>* draggable) {
-  return root_->CouldStartDrag(screen_position, direction, draggable);
+Rect DockingWorkspace::GetScreenRect() {
+  return root_->GetScreenRect();
+}
+
+bool DockingWorkspace::CouldStartDrag(DragSetup* drag_setup) {
+  return root_->CouldStartDrag(drag_setup);
 }
 

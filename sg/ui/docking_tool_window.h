@@ -18,10 +18,7 @@ class DockingToolWindow : public Dockable {
 
   virtual void Render(Renderer* renderer) OVERRIDE;
   virtual void SetScreenRect(const Rect& rect) OVERRIDE;
-  virtual bool CouldStartDrag(
-      const Point& screen_position,
-      DragDirection* direction,
-      scoped_ptr<Draggable>* draggable) OVERRIDE;
+  virtual bool CouldStartDrag(DragSetup* drag_setup) OVERRIDE;
 
  private:
   Rect RectForTitleBar();

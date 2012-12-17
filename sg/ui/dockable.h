@@ -9,12 +9,13 @@
 #include "base/compiler_specific.h"
 #include "base/memory/scoped_ptr.h"
 #include "sg/basic_geometric_types.h"
-#include "sg/ui/drag_direction.h"
+#include "sg/ui/drag_setup.h"
 #include "sg/ui/input.h"
 
 class DockingSplitContainer;
 class Draggable;
 class Renderer;
+class Workspace;
 
 class Dockable : public InputHandler {
  public:
@@ -33,10 +34,7 @@ class Dockable : public InputHandler {
 
   virtual void Render(Renderer* renderer) {}
   virtual void Invalidate();
-  virtual bool CouldStartDrag(
-      const Point& screen_position,
-      DragDirection* direction,
-      scoped_ptr<Draggable>* draggable) {
+  virtual bool CouldStartDrag(DragSetup* drag_setup) {
     return false;
   }
 

@@ -30,6 +30,7 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   virtual void SetDebugPresenterNotify(DebugPresenterNotify* debug_presenter);
 
   virtual void SetScreenRect(const Rect& rect);
+  Rect GetScreenRect();
   static void Invalidate();
 
   virtual void Render(Renderer* renderer);

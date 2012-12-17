@@ -112,25 +112,22 @@ void DockingSplitContainer::Render(Renderer* renderer) {
   }
 }
 
-bool DockingSplitContainer::CouldStartDrag(
-    const Point& screen_position,
-    DragDirection* direction,
-    scoped_ptr<Draggable>* draggable) {
-  Point client_position = ToClient(screen_position);
+bool DockingSplitContainer::CouldStartDrag(DragSetup* drag_setup) {
+  Point client_position = ToClient(drag_setup->screen_position);
   if (GetRectForSplitter().Contains(client_position)) {
-    if (draggable)
-      draggable->reset(new DockingResizer(this));
+    if (drag_setup->draggable)
+      drag_setup->draggable->reset(new DockingResizer(this));
     if (direction_ == kSplitVertical)
-      *direction = kDragDirectionLeftRight;
+      drag_setup->drag_direction = kDragDirectionLeftRight;
     else if (direction_ == kSplitHorizontal)
-      *direction = kDragDirectionUpDown;
+      drag_setup->drag_direction = kDragDirectionUpDown;
     return true;
   } else {
-    if (left_->GetScreenRect().Contains(screen_position))
-      return left_->CouldStartDrag(screen_position, direction, draggable);
+    if (left_->GetScreenRect().Contains(drag_setup->screen_position))
+      return left_->CouldStartDrag(drag_setup);
     if (right_.get()) {
-      if (right_->GetScreenRect().Contains(screen_position))
-        return right_->CouldStartDrag(screen_position, direction, draggable);
+      if (right_->GetScreenRect().Contains(drag_setup->screen_position))
+        return right_->CouldStartDrag(drag_setup);
     }
   }
   return false;

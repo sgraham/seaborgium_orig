@@ -49,14 +49,11 @@ void DockingToolWindow::SetScreenRect(const Rect& rect) {
   contents_->SetScreenRect(contents_rect);
 }
 
-bool DockingToolWindow::CouldStartDrag(
-      const Point& screen_position,
-      DragDirection* direction,
-      scoped_ptr<Draggable>* draggable) {
-  if (RectForTitleBar().Contains(ToClient(screen_position))) {
-    *direction = kDragDirectionAll;
-    if (draggable)
-      draggable->reset(new ToolWindowDragger(this, screen_position));
+bool DockingToolWindow::CouldStartDrag(DragSetup* drag_setup) {
+  if (RectForTitleBar().Contains(ToClient(drag_setup->screen_position))) {
+    drag_setup->drag_direction = kDragDirectionAll;
+    if (drag_setup->draggable)
+      drag_setup->draggable->reset(new ToolWindowDragger(this, drag_setup));
     return true;
   }
   return false;

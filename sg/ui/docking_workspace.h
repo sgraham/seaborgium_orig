@@ -18,16 +18,14 @@ class DockingWorkspace {
   virtual ~DockingWorkspace();
 
   void Render(Renderer* renderer);
-  bool CouldStartDrag(
-      const Point& screen_position,
-      DragDirection* direction,
-      scoped_ptr<Draggable>* draggable);
+  bool CouldStartDrag(DragSetup* drag_setup);
 
   // Takes ownership.
   void SetRoot(Dockable* root);
   Dockable* GetRoot();
 
   void SetScreenRect(const Rect& rect);
+  Rect GetScreenRect();
 
  private:
   scoped_ptr<DockingSplitContainer> root_;

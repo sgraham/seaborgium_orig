@@ -11,12 +11,23 @@
 #include "sg/ui/draggable.h"
 
 class DockingToolWindow;
+class DockingWorkspace;
+class DragSetup;
 class Renderer;
 class RenderToTextureRenderer;
+class Texture;
+class Workspace;
+
+struct DropTargetIndicator {
+  Texture* texture;
+  Rect rect;
+};
 
 class ToolWindowDragger : public Draggable {
  public:
-  ToolWindowDragger(DockingToolWindow* dragging, const Point& screen_position);
+  ToolWindowDragger(
+      DockingToolWindow* dragging,
+      DragSetup* drag_setup);
   virtual ~ToolWindowDragger();
 
   virtual void Drag(const Point& screen_point) OVERRIDE;
@@ -27,7 +38,10 @@ class ToolWindowDragger : public Draggable {
   DockingToolWindow* dragging_;
   Point pick_up_offset_;
   Point current_position_;
-  scoped_ptr<RenderToTextureRenderer> render_to_texture_renderer_;
+  Rect initial_screen_rect_;
+  bool on_drop_target_;
+  DockingWorkspace* docking_workspace_;
+  std::vector<DropTargetIndicator> targets_;
 };
 
 #endif  // SG_UI_TOOL_WINDOW_DRAGGER_H_

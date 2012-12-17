@@ -36,8 +36,8 @@ Workspace::Workspace()
       source_view_container_(NULL)*/ {
   // Initialization deferred until Init when we know our window size.
 
-  // This is just for Invalidate. TODO(scottmg): Maybe some sort of broadcast,
-  // observer, blablah.
+  // For Invalidate, and interaction with dragger. Could use some sort of
+  // broadcast for Invalidate (and coalesce there) and could pass to dragger.
   CHECK(!g_main_workspace);
   g_main_workspace = this;
 }
@@ -167,13 +167,13 @@ bool Workspace::NotifyMouseMoved(
     InvalidateImpl();
     return true;
   }
-  DragDirection drag_direction = kDragDirectionNone;
-  if (main_area_->CouldStartDrag(mouse_position_, &drag_direction, NULL)) {
-    if (drag_direction == kDragDirectionLeftRight)
+  DragSetup drag_setup(mouse_position_, main_area_.get());
+  if (main_area_->CouldStartDrag(&drag_setup)) {
+    if (drag_setup.drag_direction == kDragDirectionLeftRight)
       SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-    else if (drag_direction == kDragDirectionUpDown)
+    else if (drag_setup.drag_direction == kDragDirectionUpDown)
       SetCursor(LoadCursor(NULL, IDC_SIZENS));
-    else if (drag_direction == kDragDirectionAll)
+    else if (drag_setup.drag_direction == kDragDirectionAll)
       SetCursor(LoadCursor(NULL, IDC_SIZEALL));
   } else {
     SetCursor(LoadCursor(NULL, IDC_ARROW));
@@ -193,14 +193,16 @@ bool Workspace::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
 
 bool Workspace::NotifyMouseButton(
     int index, bool down, const InputModifiers& modifiers) {
-  DragDirection drag_direction;
+  DragSetup drag_setup(mouse_position_, main_area_.get());
+  drag_setup.draggable = &draggable_;
   if (draggable_.get() && index == 0 && !down) {
     draggable_.reset();
     SetCursor(LoadCursor(NULL, IDC_ARROW));
     Invalidate();
-  } else if (index == 0 && down &&
-             main_area_->CouldStartDrag(
-                 mouse_position_, &drag_direction, &draggable_)) {
+    return true;
+  } else if (index == 0 && down && main_area_->CouldStartDrag(&drag_setup)) {
+    Invalidate();
+    return true;
   }
   return false;
 }
