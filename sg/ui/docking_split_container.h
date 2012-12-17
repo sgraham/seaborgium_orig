@@ -37,7 +37,7 @@ class DockingSplitContainer : public Dockable {
   bool CouldStartDrag(
       const Point& screen_position,
       DragDirection* direction,
-      DockingSplitContainer** target) OVERRIDE;
+      scoped_ptr<Draggable>* draggable) OVERRIDE;
 
   DockingSplitDirection direction() const { return direction_; }
   double fraction() const { return fraction_; }

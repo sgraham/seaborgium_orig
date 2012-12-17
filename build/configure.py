@@ -342,6 +342,7 @@ def main():
                'ui/focus',
                'ui/scroll_helper',
                'ui/skin',
+               'ui/tool_window_dragger',
                'ui/tree_view_helper',
                'workspace',
               ]:

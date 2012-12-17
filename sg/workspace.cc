@@ -124,19 +124,8 @@ void Workspace::InvalidateImpl() {
 
 void Workspace::Render(Renderer* renderer) {
   main_area_->Render(renderer);
-  // If doing dock drag:
-  scoped_ptr<RenderToTextureRenderer> render_to_texture(
-      renderer->CreateRenderToTextureRenderer(
-          stack_view_window_->GetScreenRect().w,
-          stack_view_window_->GetScreenRect().h));
-  stack_view_window_->Render(render_to_texture.get());
-  renderer->DrawRenderToTextureResult(
-      render_to_texture.get(),
-      Rect(100, 100,
-           static_cast<int>(stack_view_window_->GetClientRect().w * .7f),
-           static_cast<int>(stack_view_window_->GetClientRect().h * .7f)),
-      0.7f,
-      0.f, 0.f, 1.f, 1.f);
+  if (draggable_.get())
+    draggable_->Render(renderer);
 }
 
 void Workspace::SetFileName(const FilePath& filename) {
@@ -173,10 +162,8 @@ bool Workspace::NotifyMouseMoved(
     int x, int y, int dx, int dy, const InputModifiers& modifiers) {
   mouse_position_.x = x;
   mouse_position_.y = y;
-  if (docking_resizer_.get()) {
-    Point client_position =
-        docking_resizer_->Resizing()->ToClient(mouse_position_);
-    docking_resizer_->Drag(client_position);
+  if (draggable_.get()) {
+    draggable_->Drag(mouse_position_);
     InvalidateImpl();
     return true;
   }
@@ -186,6 +173,8 @@ bool Workspace::NotifyMouseMoved(
       SetCursor(LoadCursor(NULL, IDC_SIZEWE));
     else if (drag_direction == kDragDirectionUpDown)
       SetCursor(LoadCursor(NULL, IDC_SIZENS));
+    else if (drag_direction == kDragDirectionAll)
+      SetCursor(LoadCursor(NULL, IDC_SIZEALL));
   } else {
     SetCursor(LoadCursor(NULL, IDC_ARROW));
   }
@@ -205,13 +194,13 @@ bool Workspace::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
 bool Workspace::NotifyMouseButton(
     int index, bool down, const InputModifiers& modifiers) {
   DragDirection drag_direction;
-  DockingSplitContainer* target = NULL;
-  if (docking_resizer_.get() && index == 0 && !down) {
-    docking_resizer_.reset();
+  if (draggable_.get() && index == 0 && !down) {
+    draggable_.reset();
     SetCursor(LoadCursor(NULL, IDC_ARROW));
+    Invalidate();
   } else if (index == 0 && down &&
-      main_area_->CouldStartDrag(mouse_position_, &drag_direction, &target)) {
-    docking_resizer_.reset(new DockingResizer(target));
+             main_area_->CouldStartDrag(
+                 mouse_position_, &drag_direction, &draggable_)) {
   }
   return false;
 }

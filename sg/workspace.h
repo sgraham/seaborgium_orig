@@ -70,7 +70,7 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;
 
-  scoped_ptr<DockingResizer> docking_resizer_;
+  scoped_ptr<Draggable> draggable_;
 
   Point mouse_position_;
 };

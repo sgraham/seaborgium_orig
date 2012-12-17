@@ -34,7 +34,7 @@ void DockingWorkspace::SetScreenRect(const Rect& rect) {
 bool DockingWorkspace::CouldStartDrag(
     const Point& screen_position,
     DragDirection* direction,
-    DockingSplitContainer** target) {
-  return root_->CouldStartDrag(screen_position, direction, target);
+    scoped_ptr<Draggable>* draggable) {
+  return root_->CouldStartDrag(screen_position, direction, draggable);
 }
 

@@ -20,9 +20,10 @@ DockingResizer::DockingResizer(DockingSplitContainer* resizing)
 DockingResizer::~DockingResizer() {
 }
 
-void DockingResizer::Drag(const Point& point) {
+void DockingResizer::Drag(const Point& screen_point) {
+  Point point_in_parent = resizing_->ToClient(screen_point);
   int parent_size = ParentSize();
-  int clamped = std::min(std::max(ComponentForDirection(point), 0),
+  int clamped = std::min(std::max(ComponentForDirection(point_in_parent), 0),
                          parent_size);
   resizing_->SetFraction(static_cast<double>(clamped) / parent_size);
 }
@@ -31,6 +32,10 @@ void DockingResizer::CancelDrag() {
   int parent_size = ParentSize();
   resizing_->SetFraction(
       static_cast<double>(initial_location_.x) / parent_size);
+}
+
+void DockingResizer::Render(Renderer* renderer) {
+  // Nothing to do, we apply directly.
 }
 
 int DockingResizer::ParentSize() {

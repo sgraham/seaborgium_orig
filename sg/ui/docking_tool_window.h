@@ -21,9 +21,11 @@ class DockingToolWindow : public Dockable {
   virtual bool CouldStartDrag(
       const Point& screen_position,
       DragDirection* direction,
-      DockingSplitContainer** target) OVERRIDE;
+      scoped_ptr<Draggable>* draggable) OVERRIDE;
 
  private:
+  Rect RectForTitleBar();
+
   Dockable* contents_;
   string16 title_;
 };

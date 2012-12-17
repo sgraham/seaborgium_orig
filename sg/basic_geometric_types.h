@@ -28,6 +28,12 @@ class Point {
  public:
   Point() : x(0), y(0) {}
   Point(int x, int y) : x(x), y(y) {}
+  Point Subtract(const Point& other) const {
+    return Point(x - other.x, y - other.y);
+  }
+  Point Scale(float scale) const {
+    return Point(x * scale, y * scale);
+  }
   int x, y;
 };
 

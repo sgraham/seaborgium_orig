@@ -21,7 +21,7 @@ class DockingWorkspace {
   bool CouldStartDrag(
       const Point& screen_position,
       DragDirection* direction,
-      DockingSplitContainer** target);
+      scoped_ptr<Draggable>* draggable);
 
   // Takes ownership.
   void SetRoot(Dockable* root);

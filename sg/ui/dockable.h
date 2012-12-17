@@ -7,11 +7,13 @@
 
 #include "base/basictypes.h"
 #include "base/compiler_specific.h"
+#include "base/memory/scoped_ptr.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/drag_direction.h"
 #include "sg/ui/input.h"
 
 class DockingSplitContainer;
+class Draggable;
 class Renderer;
 
 class Dockable : public InputHandler {
@@ -34,7 +36,7 @@ class Dockable : public InputHandler {
   virtual bool CouldStartDrag(
       const Point& screen_position,
       DragDirection* direction,
-      DockingSplitContainer** target) {
+      scoped_ptr<Draggable>* draggable) {
     return false;
   }
 

@@ -5,21 +5,22 @@
 #ifndef SG_UI_DOCKING_RESIZER_H_
 #define SG_UI_DOCKING_RESIZER_H_
 
+#include "base/compiler_specific.h"
 #include "sg/basic_geometric_types.h"
+#include "sg/ui/draggable.h"
 
 class DockingSplitContainer;
 
-class DockingResizer {
+class DockingResizer : public Draggable {
  public:
   DockingResizer(DockingSplitContainer* resizing);
   virtual ~DockingResizer();
 
-  void Drag(const Point& point);
-  void CancelDrag();
+  virtual void Drag(const Point& screen_point) OVERRIDE;
+  virtual void CancelDrag() OVERRIDE;
+  virtual void Render(Renderer* renderer) OVERRIDE;
 
   const Point& GetInitialLocationForTest() const { return initial_location_; }
-
-  DockingSplitContainer* Resizing() { return resizing_; }
 
  private:
   int ParentSize();

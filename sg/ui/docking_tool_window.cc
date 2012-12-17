@@ -7,7 +7,9 @@
 #include "sg/render/font.h"
 #include "sg/render/renderer.h"
 #include "sg/render/scoped_render_offset.h"
+#include "sg/ui/draggable.h"
 #include "sg/ui/skin.h"
+#include "sg/ui/tool_window_dragger.h"
 
 namespace {
 
@@ -24,10 +26,14 @@ DockingToolWindow::DockingToolWindow(Dockable* contents, const string16& title)
 DockingToolWindow::~DockingToolWindow() {
 }
 
+Rect DockingToolWindow::RectForTitleBar() {
+  return Rect(0, 0, Width(), Skin::current().title_bar_size());
+}
+
 void DockingToolWindow::Render(Renderer* renderer) {
   const Skin& skin = Skin::current();
   renderer->SetDrawColor(skin.GetColorScheme().title_bar_inactive());
-  renderer->DrawFilledRect(Rect(0, 0, Width(), skin.title_bar_size()));
+  renderer->DrawFilledRect(RectForTitleBar());
   renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_inactive());
   renderer->RenderText(&kUIFont, Point(kTitleOffset, 0), title_);
   ScopedRenderOffset offset(renderer, this, contents_);
@@ -46,6 +52,12 @@ void DockingToolWindow::SetScreenRect(const Rect& rect) {
 bool DockingToolWindow::CouldStartDrag(
       const Point& screen_position,
       DragDirection* direction,
-      DockingSplitContainer** target) {
+      scoped_ptr<Draggable>* draggable) {
+  if (RectForTitleBar().Contains(ToClient(screen_position))) {
+    *direction = kDragDirectionAll;
+    if (draggable)
+      draggable->reset(new ToolWindowDragger(this, screen_position));
+    return true;
+  }
   return false;
 }

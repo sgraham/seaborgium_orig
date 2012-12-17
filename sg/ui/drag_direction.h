@@ -9,6 +9,7 @@ enum DragDirection {
   kDragDirectionNone,
   kDragDirectionLeftRight,
   kDragDirectionUpDown,
+  kDragDirectionAll,
 };
 
 #endif  // SG_UI_DRAG_DIRECTION_H_

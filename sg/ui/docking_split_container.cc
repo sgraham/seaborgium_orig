@@ -7,6 +7,7 @@
 #include "base/logging.h"
 #include "sg/render/renderer.h"
 #include "sg/render/scoped_render_offset.h"
+#include "sg/ui/docking_resizer.h"
 #include "sg/ui/skin.h"
 
 namespace {
@@ -114,11 +115,11 @@ void DockingSplitContainer::Render(Renderer* renderer) {
 bool DockingSplitContainer::CouldStartDrag(
     const Point& screen_position,
     DragDirection* direction,
-    DockingSplitContainer** target) {
+    scoped_ptr<Draggable>* draggable) {
   Point client_position = ToClient(screen_position);
   if (GetRectForSplitter().Contains(client_position)) {
-    if (target)
-      *target = this;
+    if (draggable)
+      draggable->reset(new DockingResizer(this));
     if (direction_ == kSplitVertical)
       *direction = kDragDirectionLeftRight;
     else if (direction_ == kSplitHorizontal)
@@ -126,10 +127,10 @@ bool DockingSplitContainer::CouldStartDrag(
     return true;
   } else {
     if (left_->GetScreenRect().Contains(screen_position))
-      return left_->CouldStartDrag(screen_position, direction, target);
+      return left_->CouldStartDrag(screen_position, direction, draggable);
     if (right_.get()) {
       if (right_->GetScreenRect().Contains(screen_position))
-        return right_->CouldStartDrag(screen_position, direction, target);
+        return right_->CouldStartDrag(screen_position, direction, draggable);
     }
   }
   return false;
