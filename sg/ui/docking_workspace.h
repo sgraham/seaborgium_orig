@@ -5,6 +5,8 @@
 #ifndef SG_UI_DOCKING_WORKSPACE_H_
 #define SG_UI_DOCKING_WORKSPACE_H_
 
+#include <vector>
+
 #include "base/memory/scoped_ptr.h"
 #include "sg/ui/dockable.h"
 #include "sg/ui/drag_direction.h"
@@ -27,7 +29,13 @@ class DockingWorkspace {
   void SetScreenRect(const Rect& rect);
   Rect GetScreenRect();
 
+  // All non-container children that have an immediate parent of a
+  // DockingSplitContainer. I think.
+  std::vector<Dockable*> GetAllDockTargets();
+
  private:
+  void GetDockTargets(Dockable* root, std::vector<Dockable*>* into);
+
   scoped_ptr<DockingSplitContainer> root_;
 };
 

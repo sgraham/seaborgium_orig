@@ -10,6 +10,7 @@
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/draggable.h"
 
+class Dockable;
 class DockingToolWindow;
 class DockingWorkspace;
 class DragSetup;
@@ -19,6 +20,7 @@ class Texture;
 class Workspace;
 
 struct DropTargetIndicator {
+  Dockable* dockable;
   const Texture* texture;
   Rect rect;
 };
@@ -38,6 +40,8 @@ class ToolWindowDragger : public Draggable {
   DockingToolWindow* dragging_;
   Point pick_up_offset_;
   Point current_position_;
+  float current_alpha_;
+  int alpha_animate_ticks_;
   Rect initial_screen_rect_;
   bool on_drop_target_;
   DockingWorkspace* docking_workspace_;
