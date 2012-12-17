@@ -55,11 +55,25 @@ void DockingSplitContainer::SplitChild(
   replacement->SetScreenRect(GetScreenRect());
 }
 
-void DockingSplitContainer::RemoveChild(Dockable* child) {
+void DockingSplitContainer::DeleteChild(Dockable* child) {
   if (left_.get() == child)
     parent()->Replace(this, right_.release());
   else if (right_.get() == child)
     parent()->Replace(this, left_.release());
+}
+
+Dockable* DockingSplitContainer::ReleaseChild(Dockable* child) {
+  Dockable* result = NULL;
+  if (left_.get() == child) {
+    result = left_.release();
+    parent()->Replace(this, right_.release());
+    // |this| has been deleted here.
+  } else if (right_.get() == child) {
+    result = right_.release();
+    parent()->Replace(this, left_.release());
+    // |this| has been deleted here.
+  }
+  return result;
 }
 
 void DockingSplitContainer::Replace(Dockable* target, Dockable* with) {

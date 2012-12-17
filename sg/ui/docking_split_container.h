@@ -32,7 +32,11 @@ class DockingSplitContainer : public Dockable {
                   Dockable* left,
                   Dockable* right);
 
-  void RemoveChild(Dockable* child);
+  // Both of these remove |child| and replace |this| with the sibling of
+  // |child|. Delete cleans the child up, Release gives ownership to the
+  // caller.
+  void DeleteChild(Dockable* child);
+  Dockable* ReleaseChild(Dockable* child);
 
   // Replaces either left or right child matching |target|, with |with|.
   void Replace(Dockable* target, Dockable* with);

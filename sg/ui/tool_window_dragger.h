@@ -39,7 +39,7 @@ class ToolWindowDragger : public Draggable {
   virtual void Render(Renderer* renderer) OVERRIDE;
 
  private:
-  DockingToolWindow* dragging_;
+  scoped_ptr<DockingToolWindow> dragging_;
   Point pick_up_offset_;
   Point current_position_;
   float current_alpha_;

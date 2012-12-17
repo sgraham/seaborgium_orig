@@ -230,7 +230,7 @@ TEST_F(DockingTest, DragUpDown) {
   EXPECT_EQ("0,610 1000x390", RectAsString(root->right()->GetScreenRect()));
 }
 
-TEST_F(DockingTest, AddAndRemove) {
+TEST_F(DockingTest, AddAndDelete) {
   DockingWorkspace workspace;
   DockingSplitContainer::SetSplitterWidth(4);
   workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
@@ -244,7 +244,28 @@ TEST_F(DockingTest, AddAndRemove) {
   EXPECT_EQ(root->right(), pane);
   EXPECT_EQ("502,0 498x1000", RectAsString(root->right()->GetScreenRect()));
 
-  pane->parent()->RemoveChild(pane);
+  pane->parent()->DeleteChild(pane);
+  EXPECT_FALSE(workspace.GetRoot()->IsContainer());
+  EXPECT_EQ(main, workspace.GetRoot());
+  EXPECT_EQ("0,0 1000x1000",
+            RectAsString(workspace.GetRoot()->GetScreenRect()));
+}
+
+TEST_F(DockingTest, AddAndRelease) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(4);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane = new ContentPane;
+  main->parent()->SplitChild(kSplitVertical, main, pane);
+  DockingSplitContainer* root = workspace.GetRoot()->AsDockingSplitContainer();
+  EXPECT_EQ(root->left(), main);
+  EXPECT_EQ("0,0 498x1000", RectAsString(root->left()->GetScreenRect()));
+  EXPECT_EQ(root->right(), pane);
+  EXPECT_EQ("502,0 498x1000", RectAsString(root->right()->GetScreenRect()));
+
+  scoped_ptr<Dockable> result(pane->parent()->ReleaseChild(pane));
   EXPECT_FALSE(workspace.GetRoot()->IsContainer());
   EXPECT_EQ(main, workspace.GetRoot());
   EXPECT_EQ("0,0 1000x1000",

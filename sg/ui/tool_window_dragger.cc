@@ -6,6 +6,7 @@
 
 #include "sg/render/renderer.h"
 #include "sg/render/texture.h"
+#include "sg/ui/docking_split_container.h"
 #include "sg/ui/docking_tool_window.h"
 #include "sg/workspace.h"
 
@@ -89,26 +90,28 @@ ToolWindowDragger::ToolWindowDragger(
     : dragging_(dragging),
       on_drop_target_(NULL),
       docking_workspace_(drag_setup->docking_workspace) {
-  pick_up_offset_ = dragging_->ToClient(drag_setup->screen_position);
-  initial_screen_rect_ = dragging_->GetScreenRect();
+  pick_up_offset_ = dragging->ToClient(drag_setup->screen_position);
+  initial_screen_rect_ = dragging->GetScreenRect();
   current_position_ = drag_setup->screen_position;
   current_alpha_ = kHoveringAlphaLow;
   alpha_animate_ticks_ = 0;
 
-  // TODO(drag):
-  // - Remove from tree
-  // - Save target, split direction, fraction for cancel.
-  // - Find all possible target split containers:
-  //    All direct children of DockingSplitContainers
-  // - Make a list of drag targets + icons of those plus root.
+  // TODO(drag): Save target, split direction, fraction for cancel.
+  // Should be the sibling of dragging.
 
+  // Remove from tree
+  dragging->parent()->ReleaseChild(dragging);
+  dragging_.reset(dragging);
+
+  // Find all possible target split containers and make a list of drag targets
+  // and icons of those, plus ones for the root.
   Rect workspace_rect = docking_workspace_->GetScreenRect();
   PlaceIndicatorsAroundEdge(
       workspace_rect, &targets_, docking_workspace_->GetRoot());
   std::vector<Dockable*> dock_targets =
       docking_workspace_->GetAllDockTargets();
   for (size_t i = 0; i < dock_targets.size(); ++i) {
-    if (dock_targets[i] != dragging_) {
+    if (dock_targets[i] != dragging_.get()) {
       PlaceIndicatorsAtCenter(
           dock_targets[i]->GetScreenRect(), &targets_, dock_targets[i]);
     }
