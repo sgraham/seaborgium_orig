@@ -13,8 +13,7 @@
 namespace {
 
 float kDetachedScale = 0.8f;
-float kHoveringAlphaLow = 0.6f;
-float kHoveringAlphaHigh = 0.8f;
+float kHoveringAlpha = 0.75f;
 float kDropTargetAlpha = 0.6f;
 
 DropTargetIndicator IndicatorAt(
@@ -107,8 +106,6 @@ ToolWindowDragger::ToolWindowDragger(
   pick_up_offset_ = dragging->ToClient(drag_setup->screen_position);
   initial_screen_rect_ = dragging->GetScreenRect();
   current_position_ = drag_setup->screen_position;
-  current_alpha_ = kHoveringAlphaLow;
-  alpha_animate_ticks_ = 0;
 
   // TODO(drag): Save target, split direction, fraction for cancel.
   // Should be the sibling of dragging.
@@ -197,12 +194,6 @@ void ToolWindowDragger::Render(Renderer* renderer) {
         dti.texture, dti.rect, kDropTargetAlpha, 0, 0, 1, 1);
   }
 
-  // TODO(rendering): Another update/render.
-  if ((alpha_animate_ticks_++ / 30) % 2 == 0)
-    current_alpha_ += (kHoveringAlphaHigh - current_alpha_) * 0.05f;
-  else
-    current_alpha_ += (kHoveringAlphaLow - current_alpha_) * 0.05f;
-
   Rect draw_rect;
   if (on_drop_target_) {
     draw_rect = dragging_->GetScreenRect();
@@ -217,9 +208,9 @@ void ToolWindowDragger::Render(Renderer* renderer) {
   renderer->DrawRenderToTextureResult(
       render_to_texture_renderer.get(),
       draw_rect,
-      current_alpha_,
+      kHoveringAlpha,
       0.f, 0.f, 1.f, 1.f);
-  renderer->SetDrawColor(Color(0, 128, 128, current_alpha_ * 128));
+  renderer->SetDrawColor(Color(0, 128, 128, kHoveringAlpha * 128));
   renderer->DrawFilledRect(draw_rect);
 
   Workspace::Invalidate();

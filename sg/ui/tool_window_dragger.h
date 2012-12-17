@@ -47,8 +47,6 @@ class ToolWindowDragger : public Draggable {
   scoped_ptr<DockingToolWindow> dragging_;
   Point pick_up_offset_;
   Point current_position_;
-  float current_alpha_;
-  int alpha_animate_ticks_;
   Rect initial_screen_rect_;
   DropTargetIndicator* on_drop_target_;
   DockingWorkspace* docking_workspace_;
