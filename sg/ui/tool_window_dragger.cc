@@ -87,7 +87,7 @@ ToolWindowDragger::ToolWindowDragger(
     DockingToolWindow* dragging,
     DragSetup* drag_setup)
     : dragging_(dragging),
-      on_drop_target_(false),
+      on_drop_target_(NULL),
       docking_workspace_(drag_setup->docking_workspace) {
   pick_up_offset_ = dragging_->ToClient(drag_setup->screen_position);
   initial_screen_rect_ = dragging_->GetScreenRect();
@@ -127,6 +127,15 @@ void ToolWindowDragger::Drag(const Point& screen_point) {
   // -   Restore initial rect for detached draw
   // -   Render detached.
   current_position_ = screen_point;
+
+  on_drop_target_ = NULL;
+  for (size_t i = 0; i < targets_.size(); ++i) {
+    DropTargetIndicator& dti = targets_[i];
+    if (dti.rect.Contains(current_position_)) {
+      on_drop_target_ = &dti;
+      break;
+    }
+  }
 }
 
 void ToolWindowDragger::CancelDrag() {

@@ -45,7 +45,7 @@ class ToolWindowDragger : public Draggable {
   float current_alpha_;
   int alpha_animate_ticks_;
   Rect initial_screen_rect_;
-  bool on_drop_target_;
+  DropTargetIndicator* on_drop_target_;
   DockingWorkspace* docking_workspace_;
   std::vector<DropTargetIndicator> targets_;
 };
