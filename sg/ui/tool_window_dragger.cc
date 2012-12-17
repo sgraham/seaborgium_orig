@@ -32,17 +32,20 @@ void ToolWindowDragger::CancelDrag() {
 }
 
 void ToolWindowDragger::Render(Renderer* renderer) {
-  if (!render_to_texture_renderer_.get()) {
-    render_to_texture_renderer_.reset(
-        renderer->CreateRenderToTextureRenderer(
-            dragging_->GetScreenRect().w,
-            dragging_->GetScreenRect().h));
-  }
-  dragging_->Render(render_to_texture_renderer_.get());
+  // TODO(rendering): Not much practical reason to re-render this every frame
+  // during drag. Investigate if it makes anything snappier if it's cached
+  // after the first render.
+  scoped_ptr<RenderToTextureRenderer> render_to_texture_renderer(
+      renderer->CreateRenderToTextureRenderer(
+          dragging_->GetScreenRect().w,
+          dragging_->GetScreenRect().h));
+  dragging_->Render(render_to_texture_renderer.get());
+
   Point draw_at = current_position_.Subtract(
       pick_up_offset_.Scale(kDetachedScale));
+
   renderer->DrawRenderToTextureResult(
-      render_to_texture_renderer_.get(),
+      render_to_texture_renderer.get(),
       Rect(draw_at.x, draw_at.y,
            static_cast<int>(dragging_->GetClientRect().w * kDetachedScale),
            static_cast<int>(dragging_->GetClientRect().h * kDetachedScale)),
