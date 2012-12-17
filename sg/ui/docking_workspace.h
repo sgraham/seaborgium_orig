@@ -7,6 +7,7 @@
 
 #include "base/memory/scoped_ptr.h"
 #include "sg/ui/dockable.h"
+#include "sg/ui/drag_direction.h"
 
 class DockingSplitContainer;
 
@@ -17,7 +18,10 @@ class DockingWorkspace {
   virtual ~DockingWorkspace();
 
   void Render(Renderer* renderer, const Skin& skin);
-  void UpdateCursor(const Point& screen_position);
+  bool CouldStartDrag(
+      const Point& screen_position,
+      DragDirection* direction,
+      DockingSplitContainer** target);
 
   // Takes ownership.
   void SetRoot(Dockable* root);

@@ -8,6 +8,7 @@
 #include "base/basictypes.h"
 #include "base/compiler_specific.h"
 #include "sg/basic_geometric_types.h"
+#include "sg/ui/drag_direction.h"
 #include "sg/ui/input.h"
 
 class DockingSplitContainer;
@@ -31,7 +32,12 @@ class Dockable : public InputHandler {
 
   virtual void Render(Renderer* renderer, const Skin& skin) {}
   virtual void Invalidate();
-  virtual void UpdateCursor(const Point& point);
+  virtual bool CouldStartDrag(
+      const Point& screen_position,
+      DragDirection* direction,
+      DockingSplitContainer** target) {
+    return false;
+  }
 
   virtual int X() const { return GetScreenRect().x; }
   virtual int Y() const { return GetScreenRect().y; }

@@ -31,7 +31,10 @@ void DockingWorkspace::SetScreenRect(const Rect& rect) {
   root_->SetScreenRect(rect);
 }
 
-void DockingWorkspace::UpdateCursor(const Point& screen_position) {
-  root_->UpdateCursor(screen_position);
+bool DockingWorkspace::CouldStartDrag(
+    const Point& screen_position,
+    DragDirection* direction,
+    DockingSplitContainer** target) {
+  return root_->CouldStartDrag(screen_position, direction, target);
 }
 

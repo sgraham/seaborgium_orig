@@ -12,6 +12,7 @@
 #include "sg/stack_view.h"
 #include "sg/status_bar.h"
 #include "sg/ui/docking_split_container.h"
+#include "sg/ui/docking_resizer.h"
 #include "sg/ui/docking_tool_window.h"
 #include "sg/ui/focus.h"
 #include "sg/ui/skin.h"
@@ -159,7 +160,20 @@ bool Workspace::NotifyMouseMoved(
     int x, int y, int dx, int dy, const InputModifiers& modifiers) {
   mouse_position_.x = x;
   mouse_position_.y = y;
-  main_area_->UpdateCursor(mouse_position_);
+  if (docking_resizer_.get()) {
+    docking_resizer_->Drag(mouse_position_);
+    InvalidateImpl();
+    return true;
+  }
+  DragDirection drag_direction = kDragDirectionNone;
+  if (main_area_->CouldStartDrag(mouse_position_, &drag_direction, NULL)) {
+    if (drag_direction == kDragDirectionLeftRight)
+      SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+    else if (drag_direction == kDragDirectionUpDown)
+      SetCursor(LoadCursor(NULL, IDC_SIZENS));
+  } else {
+    SetCursor(LoadCursor(NULL, IDC_ARROW));
+  }
   Dockable* focused = GetFocusedContents();
   if (!focused || !focused->WantMouseEvents())
     return false;
@@ -175,7 +189,15 @@ bool Workspace::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
 
 bool Workspace::NotifyMouseButton(
     int index, bool down, const InputModifiers& modifiers) {
-  // TODO(input): Something! Change focus, forward, etc.
+  DragDirection drag_direction;
+  DockingSplitContainer* target = NULL;
+  if (docking_resizer_.get() && index == 0 && !down) {
+    docking_resizer_.reset();
+    SetCursor(LoadCursor(NULL, IDC_ARROW));
+  } else if (index == 0 && down &&
+      main_area_->CouldStartDrag(mouse_position_, &drag_direction, &target)) {
+    docking_resizer_.reset(new DockingResizer(target));
+  }
   return false;
 }
 

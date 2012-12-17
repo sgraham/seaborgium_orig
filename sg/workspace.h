@@ -15,6 +15,7 @@
 
 class ApplicationWindow;
 class DebugPresenterNotify;
+class DockingResizer;
 class SourceView;
 class StackView;
 class StatusBar;
@@ -69,6 +70,8 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   Dockable* stack_view_window_;
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;
+
+  scoped_ptr<DockingResizer> docking_resizer_;
 
   Point mouse_position_;
 };

@@ -110,19 +110,28 @@ void DockingSplitContainer::Render(Renderer* renderer, const Skin& skin) {
   }
 }
 
-void DockingSplitContainer::UpdateCursor(const Point& screen_position) {
-  // TODO(dispatch)
+bool DockingSplitContainer::CouldStartDrag(
+    const Point& screen_position,
+    DragDirection* direction,
+    DockingSplitContainer** target) {
   Point client_position = ToClient(screen_position);
   if (GetRectForSplitter().Contains(client_position)) {
+    if (target)
+      *target = this;
     if (direction_ == kSplitVertical)
-      SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+      *direction = kDragDirectionLeftRight;
     else if (direction_ == kSplitHorizontal)
-      SetCursor(LoadCursor(NULL, IDC_SIZENS));
+      *direction = kDragDirectionUpDown;
+    return true;
   } else {
-    left_->UpdateCursor(screen_position);
-    if (right_.get())
-      right_->UpdateCursor(screen_position);
+    if (left_->GetScreenRect().Contains(screen_position))
+      return left_->CouldStartDrag(screen_position, direction, target);
+    if (right_.get()) {
+      if (right_->GetScreenRect().Contains(screen_position))
+        return right_->CouldStartDrag(screen_position, direction, target);
+    }
   }
+  return false;
 }
 
 void DockingSplitContainer::SetFraction(double fraction) {

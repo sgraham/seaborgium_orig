@@ -128,7 +128,7 @@ class ApplicationWindowWin : public ApplicationWindow {
                     msg == WM_RBUTTONUP ? 1 :
                                           2;
         DCHECK(workspace_->WantMouseEvents());
-        workspace_->NotifyMouseButton(index, true, GetInputModifiers());
+        workspace_->NotifyMouseButton(index, false, GetInputModifiers());
         break;
       }
 
