@@ -9,7 +9,7 @@
 
 #include "base/string16.h"
 #include "sg/basic_geometric_types.h"
-#include "sg/render/font.h"
+class Font;
 class Renderer;
 class Skin;
 
@@ -56,11 +56,10 @@ class TreeViewHelper {
  private:
   int GetStartXForColumn(int column);
   void RenderNodes(Renderer* renderer,
+                   const Skin& skin,
                    const std::string& root,
                    int* y,
                    int indent);
-
-  Font font_;
 
   TreeViewHelperDataProvider* data_provider_;
   int num_pixels_in_row_;

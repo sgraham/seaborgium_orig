@@ -17,7 +17,7 @@ class Font {
 
   string16 facename;
   float size;
-  void* data;
+  mutable void* data;
   bool bold;
 };
 

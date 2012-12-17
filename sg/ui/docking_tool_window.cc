@@ -14,7 +14,6 @@
 namespace {
 
 const int kTitleOffset = 3;
-Font kUIFont(L"Segoe UI", 12.f);
 
 }
 
@@ -35,7 +34,7 @@ void DockingToolWindow::Render(Renderer* renderer) {
   renderer->SetDrawColor(skin.GetColorScheme().title_bar_inactive());
   renderer->DrawFilledRect(RectForTitleBar());
   renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_inactive());
-  renderer->RenderText(&kUIFont, Point(kTitleOffset, 0), title_);
+  renderer->RenderText(skin.ui_font(), Point(kTitleOffset, 0), title_);
   ScopedRenderOffset offset(renderer, this, contents_);
   contents_->Render(renderer);
 }

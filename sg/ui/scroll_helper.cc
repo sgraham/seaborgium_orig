@@ -9,12 +9,10 @@
 #include "base/logging.h"
 #include "sg/render/renderer.h"
 #include "sg/render/texture.h"
+#include "sg/ui/skin.h"
 
 namespace {
 
-Texture g_vscrollbar_top;
-Texture g_vscrollbar_bottom;
-Texture g_vscrollbar_middle;
 const int kFadeOutAfterTicks = 90;
 const int kFadeOutOverTicks = 30;
 
@@ -28,10 +26,6 @@ ScrollHelper::ScrollHelper(ScrollHelperDataProvider* data_provider,
       ticks_since_stopped_moving_(kFadeOutAfterTicks + kFadeOutOverTicks),
       num_pixels_in_line_(num_pixels_in_line),
       data_provider_(data_provider) {
-  // TODO(rendering): skin for these.
-  g_vscrollbar_top.name = L"art/scrollbar-top.png";
-  g_vscrollbar_bottom.name = L"art/scrollbar-bottom.png";
-  g_vscrollbar_middle.name = L"art/scrollbar-middle.png";
 }
 
 ScrollHelper::~ScrollHelper() {
@@ -53,13 +47,6 @@ bool ScrollHelper::Update() {
 
 void ScrollHelper::RenderScrollIndicators(
     Renderer* renderer, const Skin& skin) {
-  // TODO(rendering)
-  if (!g_vscrollbar_top.data) {
-    renderer->LoadTexture(&g_vscrollbar_top);
-    renderer->LoadTexture(&g_vscrollbar_bottom);
-    renderer->LoadTexture(&g_vscrollbar_middle);
-  }
-
   int scrollable_height = data_provider_->GetContentSize() +
                           data_provider_->GetScreenRect().h -
                           num_pixels_in_line_;
@@ -79,25 +66,28 @@ void ScrollHelper::RenderScrollIndicators(
         ticks_since_stopped_moving_ - kFadeOutAfterTicks) / kFadeOutOverTicks;
   }
 
+  const Texture* top_texture = skin.vscrollbar_top_texture();
+  const Texture* middle_texture = skin.vscrollbar_middle_texture();
+  const Texture* bottom_texture = skin.vscrollbar_bottom_texture();
   int scrollbar_middle_height =
-      scrollbar_height - g_vscrollbar_top.height - g_vscrollbar_bottom.height;
-  int x = screen_rect.w - g_vscrollbar_middle.width;
+      scrollbar_height - top_texture->height - bottom_texture->height;
+  int x = screen_rect.w - middle_texture->width;
   int y = scrollbar_offset;
   renderer->DrawTexturedRectAlpha(
-      &g_vscrollbar_top,
-      Rect(x, y, g_vscrollbar_top.width, g_vscrollbar_top.height),
+      top_texture,
+      Rect(x, y, top_texture->width, top_texture->height),
       alpha,
       0, 0, 1, 1);
-  y += g_vscrollbar_top.height;
+  y += top_texture->height;
   renderer->DrawTexturedRectAlpha(
-      &g_vscrollbar_middle,
-      Rect(x, y, g_vscrollbar_middle.width, scrollbar_middle_height),
+      middle_texture,
+      Rect(x, y, middle_texture->width, scrollbar_middle_height),
       alpha,
       0, 0, 1, 1);
   y += scrollbar_middle_height;
   renderer->DrawTexturedRectAlpha(
-      &g_vscrollbar_bottom,
-      Rect(x, y, g_vscrollbar_bottom.width, g_vscrollbar_bottom.height),
+      bottom_texture,
+      Rect(x, y, bottom_texture->width, bottom_texture->height),
       alpha,
       0, 0, 1, 1);
 }

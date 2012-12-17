@@ -14,12 +14,7 @@ namespace {
 float kDetachedScale = 0.6f;
 float kHoveringAlpha = 0.8f;
 
-Texture kDockIndicatorTop;
-Texture kDockIndicatorLeft;
-Texture kDockIndicatorRight;
-Texture kDockIndicatorBottom;
-
-DropTargetIndicator IndicatorAt(Texture* texture, int x, int y) {
+DropTargetIndicator IndicatorAt(const Texture* texture, int x, int y) {
   DropTargetIndicator target;
   target.texture = texture;
   target.rect = Rect(x, y, texture->width, texture->height);
@@ -29,22 +24,23 @@ DropTargetIndicator IndicatorAt(Texture* texture, int x, int y) {
 void PlaceIndicatorsAroundEdge(
     const Rect& rect,
     std::vector<DropTargetIndicator>* into) {
+  const Skin& skin = Skin::current();
   into->push_back(IndicatorAt(
-      &kDockIndicatorTop,
-      rect.x + rect.w / 2 - kDockIndicatorTop.width / 2,
+      skin.dock_top_texture(),
+      rect.x + rect.w / 2 - skin.dock_top_texture()->width / 2,
       rect.y));
   into->push_back(IndicatorAt(
-      &kDockIndicatorLeft,
+      skin.dock_left_texture(),
       rect.x,
-      rect.y + rect.h / 2 - kDockIndicatorLeft.height / 2));
+      rect.y + rect.h / 2 - skin.dock_left_texture()->height / 2));
   into->push_back(IndicatorAt(
-      &kDockIndicatorRight,
-      rect.x - kDockIndicatorRight.width,
-      rect.y + rect.h / 2 - kDockIndicatorRight.height / 2));
+      skin.dock_right_texture(),
+      rect.x - skin.dock_right_texture()->width,
+      rect.y + rect.h / 2 - skin.dock_right_texture()->height / 2));
   into->push_back(IndicatorAt(
-      &kDockIndicatorBottom,
-      rect.x + rect.w / 2 - kDockIndicatorBottom.width / 2,
-      rect.y - kDockIndicatorBottom.height));
+      skin.dock_bottom_texture(),
+      rect.x + rect.w / 2 - skin.dock_bottom_texture()->width / 2,
+      rect.y - skin.dock_bottom_texture()->height));
 }
 
 }  // namespace
@@ -55,10 +51,6 @@ ToolWindowDragger::ToolWindowDragger(
     : dragging_(dragging),
       on_drop_target_(false),
       docking_workspace_(drag_setup->docking_workspace) {
-  kDockIndicatorTop.name = L"art/dock-indicator-top.png";
-  kDockIndicatorLeft.name = L"art/dock-indicator-left.png";
-  kDockIndicatorRight.name = L"art/dock-indicator-right.png";
-  kDockIndicatorBottom.name = L"art/dock-indicator-bottom.png";
   pick_up_offset_ = dragging_->ToClient(drag_setup->screen_position);
   initial_screen_rect_ = dragging_->GetScreenRect();
   current_position_ = drag_setup->screen_position;
@@ -93,16 +85,6 @@ void ToolWindowDragger::CancelDrag() {
 }
 
 void ToolWindowDragger::Render(Renderer* renderer) {
-  // TODO(rendering): Hacky.
-  if (!kDockIndicatorTop.data)
-    renderer->LoadTexture(&kDockIndicatorTop);
-  if (!kDockIndicatorLeft.data)
-    renderer->LoadTexture(&kDockIndicatorLeft);
-  if (!kDockIndicatorRight.data)
-    renderer->LoadTexture(&kDockIndicatorRight);
-  if (!kDockIndicatorBottom.data)
-    renderer->LoadTexture(&kDockIndicatorBottom);
-
   // TODO(rendering): Not much practical reason to re-render this every frame
   // during drag. Investigate if it makes anything snappier if it's cached
   // after the first render.

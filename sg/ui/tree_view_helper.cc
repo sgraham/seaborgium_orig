@@ -21,9 +21,6 @@ TreeViewHelper::TreeViewHelper(
     : data_provider_(data_provider),
       num_pixels_in_row_(num_pixels_in_row),
       num_columns_(num_columns) {
-  // TODO(config): Share with source view.
-  font_.facename = L"Segoe UI";
-  font_.size = 12.f;
   indent_size_ = num_pixels_in_row_;
 }
 
@@ -58,16 +55,20 @@ void TreeViewHelper::RenderTree(Renderer* renderer, const Skin& skin) {
   for (int i = 0; i < num_columns_; ++i) {
     int x = GetStartXForColumn(i) + kFromSidePadding;
     const string16& title = data_provider_->GetColumnTitle(i);
-    renderer->RenderText(&font_, Point(x, kHeaderPadding), title);
+    renderer->RenderText(skin.ui_font(), Point(x, kHeaderPadding), title);
   }
 
   renderer->SetDrawColor(skin.GetColorScheme().text());
   int y = height_of_header;
-  RenderNodes(renderer, "", &y, 0);
+  RenderNodes(renderer, skin, "", &y, 0);
 }
 
 void TreeViewHelper::RenderNodes(
-    Renderer* renderer, const std::string& root, int* y, int indent) {
+    Renderer* renderer,
+    const Skin& skin,
+    const std::string& root,
+    int* y,
+    int indent) {
   int count = data_provider_->GetNodeChildCount(root);
   for (int i = 0; i < count; ++i) {
     std::string child_id = data_provider_->GetIdForChild(root, i);
@@ -75,12 +76,12 @@ void TreeViewHelper::RenderNodes(
       // TODO(rendering): Perhaps dispatch out to customizers here.
       // TODO(rendering): Clip.
       renderer->RenderText(
-          &font_,
+          skin.ui_font(),
           Point(GetStartXForColumn(j) + kFromSidePadding, *y),
           data_provider_->GetNodeDataForColumn(child_id, j));
     }
     *y += num_pixels_in_row_;
     if (data_provider_->GetNodeExpandability(child_id) == kExpanded)
-      RenderNodes(renderer, child_id, y, indent + indent_size_);
+      RenderNodes(renderer, skin, child_id, y, indent + indent_size_);
   }
 }

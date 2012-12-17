@@ -4,6 +4,8 @@
 
 #include "sg/ui/skin.h"
 
+#include "sg/render/renderer.h"
+
 // Temp manual config; Solarized Dark
 namespace {
 
@@ -55,9 +57,38 @@ Skin::Skin()
       border_size_(3),
       status_bar_size_(26),
       text_line_height_(17) {
+  mono_font_.facename = L"Consolas";
+  mono_font_.size = 13.f;
+  ui_font_.facename = L"Segoe UI";
+  ui_font_.size = 12.f;
+  pc_indicator_texture_.name = L"art/pc-location.png";
+  breakpoint_texture_.name = L"art/breakpoint.png";
+  dock_top_texture_.name = L"art/dock-indicator-top.png";
+  dock_left_texture_.name = L"art/dock-indicator-left.png";
+  dock_right_texture_.name = L"art/dock-indicator-right.png";
+  dock_bottom_texture_.name = L"art/dock-indicator-bottom.png";
+  vscrollbar_top_texture_.name = L"art/scrollbar-top.png";
+  vscrollbar_middle_texture_.name = L"art/scrollbar-middle.png";
+  vscrollbar_bottom_texture_.name = L"art/scrollbar-bottom.png";
 }
 
 // static
 const Skin& Skin::current() {
   return g_skin;
+}
+
+// static
+void Skin::EnsureTexturesLoaded(Renderer* renderer) {
+  if (g_skin.pc_indicator_texture_.data)
+    return;
+
+  renderer->LoadTexture(&g_skin.pc_indicator_texture_);
+  renderer->LoadTexture(&g_skin.breakpoint_texture_);
+  renderer->LoadTexture(&g_skin.dock_top_texture_);
+  renderer->LoadTexture(&g_skin.dock_left_texture_);
+  renderer->LoadTexture(&g_skin.dock_right_texture_);
+  renderer->LoadTexture(&g_skin.dock_bottom_texture_);
+  renderer->LoadTexture(&g_skin.vscrollbar_top_texture_);
+  renderer->LoadTexture(&g_skin.vscrollbar_middle_texture_);
+  renderer->LoadTexture(&g_skin.vscrollbar_bottom_texture_);
 }

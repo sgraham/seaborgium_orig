@@ -18,9 +18,9 @@ class Texture {
   void Free(Renderer* renderer);
 
   string16 name;
-  void* data;
-  int width, height;
-  bool failed;
+  mutable void* data;
+  mutable int width, height;
+  mutable bool failed;
 };
 
 #endif  // SG_RENDER_TEXTURE_H_

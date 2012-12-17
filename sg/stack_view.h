@@ -15,9 +15,6 @@
 #include "sg/ui/dockable.h"
 #include "sg/ui/tree_view_helper.h"
 
-namespace Gwen { namespace Skin { class Base; }}
-class Skin;
-
 class StackView : public Dockable, public TreeViewHelperDataProvider {
  public:
   StackView();

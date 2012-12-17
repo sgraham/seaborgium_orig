@@ -10,7 +10,6 @@
 
 #include "base/string16.h"
 #include "sg/lexer.h"
-#include "sg/render/font.h"
 #include "sg/ui/dockable.h"
 #include "sg/ui/scroll_helper.h"
 
@@ -59,7 +58,6 @@ class SourceView : public Dockable, public ScrollHelperDataProvider {
   float y_pixel_scroll_target_;
 
   std::vector<Line> lines_;
-  Font font_;
 
   ScrollHelper scroll_helper_;
 

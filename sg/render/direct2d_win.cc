@@ -77,7 +77,7 @@ void Direct2DRenderer::SetDrawColor(Color color) {
   solid_color_brush_->SetColor(color_);
 }
 
-bool Direct2DRenderer::InternalLoadFont(Font* font) {
+bool Direct2DRenderer::InternalLoadFont(const Font* font) {
   IDWriteTextFormat* text_format = NULL;
 
   HRESULT hr = dwrite_factory_->CreateTextFormat(
@@ -105,9 +105,10 @@ void Direct2DRenderer::LoadFont(Font* font) {
     font_list_.push_back(font);
 }
 
-void Direct2DRenderer::InternalFreeFont(Font* font, bool bRemove) {
-  if (bRemove)
-    font_list_.remove(font);
+void Direct2DRenderer::InternalFreeFont(const Font* font, bool remove) {
+  // TODO(scottmg): const_cast
+  if (remove)
+    font_list_.remove(const_cast<Font*>(font));
 
   if (!font->data)
     return;
@@ -122,7 +123,8 @@ void Direct2DRenderer::FreeFont(Font* font) {
   InternalFreeFont(font);
 }
 
-void Direct2DRenderer::RenderText(Font* font, Point pos, const string16& text) {
+void Direct2DRenderer::RenderText(
+    const Font* font, Point pos, const string16& text) {
   // If the font doesn't exist, or the font size should be changed
   if (!font->data) {
     InternalFreeFont(font, false);
@@ -143,7 +145,7 @@ void Direct2DRenderer::RenderText(Font* font, Point pos, const string16& text) {
   }
 }
 
-Point Direct2DRenderer::MeasureText(Font* font, const string16& text) {
+Point Direct2DRenderer::MeasureText(const Font* font, const string16& text) {
   // If the font doesn't exist.
   if (!font->data) {
     InternalFreeFont(font, false);
@@ -209,7 +211,7 @@ void Direct2DRenderer::EndClip() {
 }
 
 void Direct2DRenderer::DrawTexturedRectAlpha(
-    Texture* texture,
+    const Texture* texture,
     Rect rect,
     float alpha,
     float u1, float v1, float u2, float v2) {
@@ -231,7 +233,7 @@ void Direct2DRenderer::DrawTexturedRectAlpha(
                   v2 * texture->height));
 }
 
-bool Direct2DRenderer::InternalLoadTexture(Texture* texture) {
+bool Direct2DRenderer::InternalLoadTexture(const Texture* texture) {
   IWICBitmapDecoder* pDecoder = NULL;
   IWICBitmapFrameDecode* pSource = NULL;
   IWICFormatConverter* pConverter = NULL;
@@ -297,9 +299,11 @@ void Direct2DRenderer::LoadTexture(Texture* texture) {
     texture_list_.push_back(texture);
 }
 
-void Direct2DRenderer::InternalFreeTexture(Texture* texture, bool bRemove) {
-  if (bRemove)
-    texture_list_.remove(texture);
+void Direct2DRenderer::InternalFreeTexture(
+    const Texture* texture, bool remove) {
+  // TODO(scottmg): const_cast
+  if (remove)
+    texture_list_.remove(const_cast<Texture*>(texture));
 
   if (texture->data != NULL) {
     TextureData* tex_data = reinterpret_cast<TextureData*>(texture->data);
@@ -407,7 +411,7 @@ void Direct2DRenderToTextureRenderer::FreeTexture(Texture* texture) {
 }
 
 void Direct2DRenderToTextureRenderer::DrawTexturedRectAlpha(
-    Texture* texture,
+    const Texture* texture,
     Rect rect,
     float alpha,
     float u1, float v1, float u2, float v2) {
@@ -440,7 +444,7 @@ void Direct2DRenderToTextureRenderer::FreeFont(Font* font) {
 }
 
 void Direct2DRenderToTextureRenderer::RenderText(
-    Font* font, Point pos, const string16& text) {
+    const Font* font, Point pos, const string16& text) {
   FontData* font_data = reinterpret_cast<FontData*>(font->data);
   TranslateByRenderOffset(&pos.x, &pos.y);
   if (solid_color_brush_) {
@@ -454,7 +458,7 @@ void Direct2DRenderToTextureRenderer::RenderText(
 }
 
 Point Direct2DRenderToTextureRenderer::MeasureText(
-    Font* font, const string16& text) {
+    const Font* font, const string16& text) {
   return main_renderer_->MeasureText(font, text);
 }
 

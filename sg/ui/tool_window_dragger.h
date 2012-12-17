@@ -19,7 +19,7 @@ class Texture;
 class Workspace;
 
 struct DropTargetIndicator {
-  Texture* texture;
+  const Texture* texture;
   Rect rect;
 };
 

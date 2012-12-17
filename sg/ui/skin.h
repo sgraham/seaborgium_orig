@@ -6,6 +6,8 @@
 #define SG_UI_SKIN_H_
 
 #include "sg/basic_geometric_types.h"
+#include "sg/render/font.h"
+#include "sg/render/texture.h"
 
 class ColorScheme {
  public:
@@ -72,7 +74,27 @@ class Skin {
   int status_bar_size() const { return status_bar_size_; }
   int text_line_height() const { return text_line_height_; }
 
+  const Font* mono_font() const { return &mono_font_; }
+  const Font* ui_font() const { return &ui_font_; }
+
+  const Texture* pc_indicator_texture() const { return &pc_indicator_texture_; }
+  const Texture* breakpoint_texture() const { return &breakpoint_texture_; }
+  const Texture* dock_top_texture() const { return &dock_top_texture_; }
+  const Texture* dock_left_texture() const { return &dock_left_texture_; }
+  const Texture* dock_right_texture() const { return &dock_right_texture_; }
+  const Texture* dock_bottom_texture() const { return &dock_bottom_texture_; }
+  const Texture* vscrollbar_top_texture() const {
+    return &vscrollbar_top_texture_;
+  }
+  const Texture* vscrollbar_middle_texture() const {
+    return &vscrollbar_middle_texture_;
+  }
+  const Texture* vscrollbar_bottom_texture() const {
+    return &vscrollbar_bottom_texture_;
+  }
+
   static const Skin& current();
+  static void EnsureTexturesLoaded(Renderer* renderer);
 
  private:
   ColorScheme color_scheme_;
@@ -81,6 +103,19 @@ class Skin {
   int border_size_;
   int status_bar_size_;
   int text_line_height_;
+
+  Font mono_font_;
+  Font ui_font_;
+
+  Texture pc_indicator_texture_;
+  Texture breakpoint_texture_;
+  Texture dock_top_texture_;
+  Texture dock_left_texture_;
+  Texture dock_right_texture_;
+  Texture dock_bottom_texture_;
+  Texture vscrollbar_top_texture_;
+  Texture vscrollbar_middle_texture_;
+  Texture vscrollbar_bottom_texture_;
 };
 
 #endif  // SG_UI_SKIN_H_

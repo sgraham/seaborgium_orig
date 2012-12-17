@@ -12,12 +12,9 @@
 #include "sg/render/font.h"
 #include "sg/ui/contents.h"
 
-namespace Gwen { namespace Skin { class Base; }}
-class Skin;
-
 class LocalsView : public Contents {
  public:
-  explicit LocalsView(const Skin& skin);
+  LocalsView();
 
   virtual void Render(Renderer* renderer);
 
@@ -25,8 +22,6 @@ class LocalsView : public Contents {
 
  private:
   std::vector<string16> lines_;
-
-  Font font_;
 };
 
 #endif  // SG_LOCALS_VIEW_H_

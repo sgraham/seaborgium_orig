@@ -63,7 +63,7 @@ class Direct2DRenderToTextureRenderer : public RenderToTextureRenderer {
   virtual void LoadTexture(Texture* texture) OVERRIDE;
   virtual void FreeTexture(Texture* texture) OVERRIDE;
   virtual void DrawTexturedRectAlpha(
-      Texture* texture,
+      const Texture* texture,
       Rect target_rect,
       float alpha,
       float u1, float v1, float u2, float v2) OVERRIDE;
@@ -76,8 +76,9 @@ class Direct2DRenderToTextureRenderer : public RenderToTextureRenderer {
 
   virtual void LoadFont(Font* font) OVERRIDE;
   virtual void FreeFont(Font* font) OVERRIDE;
-  virtual void RenderText(Font* font, Point pos, const string16& text) OVERRIDE;
-  virtual Point MeasureText(Font* font, const string16& text) OVERRIDE;
+  virtual void RenderText(
+      const Font* font, Point pos, const string16& text) OVERRIDE;
+  virtual Point MeasureText(const Font* font, const string16& text) OVERRIDE;
 
   virtual RenderToTextureRenderer* CreateRenderToTextureRenderer(
       int width, int height) OVERRIDE;
@@ -113,8 +114,9 @@ class Direct2DRenderer : public Renderer {
 
   virtual void LoadFont(Font* font) OVERRIDE;
   virtual void FreeFont(Font* font) OVERRIDE;
-  virtual void RenderText(Font* font, Point pos, const string16& text) OVERRIDE;
-  virtual Point MeasureText(Font* font, const string16& text) OVERRIDE;
+  virtual void RenderText(
+      const Font* font, Point pos, const string16& text) OVERRIDE;
+  virtual Point MeasureText(const Font* font, const string16& text) OVERRIDE;
 
   virtual void DeviceLost();
   virtual void DeviceAcquired(ID2D1RenderTarget* rt);
@@ -123,7 +125,7 @@ class Direct2DRenderer : public Renderer {
   void EndClip() OVERRIDE;
 
   void DrawTexturedRectAlpha(
-      Texture* texture,
+      const Texture* texture,
       Rect target_rect,
       float alpha,
       float u1, float v1, float u2, float v2) OVERRIDE;
@@ -142,11 +144,11 @@ class Direct2DRenderer : public Renderer {
  private:
   friend class Direct2DRenderToTextureRenderer;
 
-  bool InternalLoadTexture(Texture* texture);
-  bool InternalLoadFont(Font* texture);
+  bool InternalLoadTexture(const Texture* texture);
+  bool InternalLoadFont(const Font* texture);
 
-  void InternalFreeFont(Font* texture, bool bRemove = true);
-  void InternalFreeTexture(Texture* texture, bool bRemove = true);
+  void InternalFreeFont(const Font* texture, bool remove = true);
+  void InternalFreeTexture(const Texture* texture, bool remove = true);
 
   ID2D1RenderTarget* render_target() { return rt_; }
 

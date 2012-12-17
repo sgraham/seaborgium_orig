@@ -14,21 +14,11 @@
 #include "sg/render/texture.h"
 #include "sg/ui/skin.h"
 
-namespace {
-
-// TODO(config):
-// TODO(rendering): Font line height.
-Texture g_pc_indicator_texture;
-
-}  // namespace
-
 StackView::StackView()
     : active_(-1),
       tree_view_(this,
                  Skin::current().text_line_height(),
                  arraysize(column_widths_)) {
-  // TODO(config): Share with source view.
-  g_pc_indicator_texture.name = L"art/pc-location.png";
   // TODO(config): Save this.
   column_widths_[0] = .5;
   column_widths_[1] = .80;
@@ -62,11 +52,6 @@ void StackView::SetData(const std::vector<FrameData>& frames, int active) {
 }
 
 void StackView::Render(Renderer* renderer) {
-  // TODO(rendering): Hacky.
-  if (!g_pc_indicator_texture.data) {
-    renderer->LoadTexture(&g_pc_indicator_texture);
-  }
-
   const Skin& skin = Skin::current();
 
   renderer->SetDrawColor(skin.GetColorScheme().background());
@@ -85,7 +70,7 @@ void StackView::Render(Renderer* renderer) {
   renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
   int line_height = skin.text_line_height();
   renderer->DrawTexturedRect(
-      &g_pc_indicator_texture,
+      skin.pc_indicator_texture(),
       Rect(left_margin,
            active_ * line_height + tree_view_.GetYOffsetToFirstRow(),
            indicator_width, indicator_height),

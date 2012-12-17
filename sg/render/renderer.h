@@ -56,7 +56,7 @@ class Renderer {
   virtual void LoadTexture(Texture* texture) = 0;
   virtual void FreeTexture(Texture* texture) = 0;
   virtual void DrawTexturedRectAlpha(
-      Texture* texture,
+      const Texture* texture,
       Rect target_rect,
       float alpha,
       float u1, float v1, float u2, float v2) = 0;
@@ -69,8 +69,9 @@ class Renderer {
 
   virtual void LoadFont(Font* font) = 0;
   virtual void FreeFont(Font* font) = 0;
-  virtual void RenderText(Font* font, Point pos, const string16& text) = 0;
-  virtual Point MeasureText(Font* font, const string16& text) = 0;
+  virtual void RenderText(
+      const Font* font, Point pos, const string16& text) = 0;
+  virtual Point MeasureText(const Font* font, const string16& text) = 0;
 
   virtual RenderToTextureRenderer* CreateRenderToTextureRenderer(
       int width, int height) = 0;
@@ -80,7 +81,7 @@ class Renderer {
   // Can be written directly if needed, but by default calls through to
   // DrawTexturedRectAlpha.
   virtual void DrawTexturedRect(
-      Texture* texture,
+      const Texture* texture,
       Rect target_rect,
       float u1, float v1, float u2, float v2);
 

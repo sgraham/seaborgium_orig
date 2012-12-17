@@ -123,6 +123,7 @@ void Workspace::InvalidateImpl() {
 }
 
 void Workspace::Render(Renderer* renderer) {
+  Skin::EnsureTexturesLoaded(renderer);
   main_area_->Render(renderer);
   if (draggable_.get())
     draggable_->Render(renderer);

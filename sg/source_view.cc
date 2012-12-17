@@ -21,10 +21,6 @@
 
 namespace {
 
-// TODO(config):
-Texture g_pc_indicator_texture;
-Texture g_breakpoint_texture;
-
 
 // TODO(scottmg): Losing last line if doesn't end in \n.
 void SyntaxHighlight(const std::string& input, std::vector<Line>* lines) {
@@ -63,10 +59,6 @@ std::vector<Line> HighlightOnFILE(std::string utf8_text) {
 SourceView::SourceView()
     : scroll_helper_(this, Skin::current().text_line_height()),
       program_counter_line_(-1) {
-  font_.facename = L"Consolas";
-  font_.size = 13.f;
-  g_pc_indicator_texture.name = L"art/pc-location.png";
-  g_breakpoint_texture.name = L"art/breakpoint.png";
 }
 
 void SourceView::SetData(const std::string& utf8_text) {
@@ -117,14 +109,6 @@ bool SourceView::LineInView(int line_number) {
 
 // TODO(rendering): Brutal efficiency.
 void SourceView::Render(Renderer* renderer) {
-  // TODO(rendering): Hacky.
-  if (!g_pc_indicator_texture.data) {
-    renderer->LoadTexture(&g_pc_indicator_texture);
-  }
-  if (!g_breakpoint_texture.data) {
-    renderer->LoadTexture(&g_breakpoint_texture);
-  }
-
   const Skin& skin = Skin::current();
   int line_height = skin.text_line_height();
 
@@ -139,7 +123,7 @@ void SourceView::Render(Renderer* renderer) {
 
   // Not quite right, but probably close enough.
   int largest_numbers_width = renderer->MeasureText(
-      &font_,
+      skin.mono_font(),
       base::IntToString16(lines_.size()).c_str()).x;
   static const int left_margin = 5;
   static const int right_margin = 10;
@@ -163,7 +147,7 @@ void SourceView::Render(Renderer* renderer) {
     // Line numbers.
     renderer->SetDrawColor(skin.GetColorScheme().margin_text());
     renderer->RenderText(
-        &font_,
+        skin.mono_font(),
         Point(left_margin, i * line_height - y_pixel_scroll),
         base::IntToString16(i + 1).c_str());
     size_t x = left_margin + largest_numbers_width + right_margin +
@@ -173,11 +157,11 @@ void SourceView::Render(Renderer* renderer) {
     for (size_t j = 0; j < lines_[i].size(); ++j) {
       renderer->SetDrawColor(ColorForTokenType(skin, lines_[i][j].type));
       renderer->RenderText(
-          &font_,
+          skin.mono_font(),
           Point(x, i * line_height - y_pixel_scroll),
           lines_[i][j].text.c_str());
       x += renderer->MeasureText(
-          &font_,
+          skin.mono_font(),
           lines_[i][j].text.c_str()).x;
     }
   }
@@ -186,7 +170,7 @@ void SourceView::Render(Renderer* renderer) {
     int y = program_counter_line_ * line_height - y_pixel_scroll;
     renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
     renderer->DrawTexturedRect(
-        &g_pc_indicator_texture,
+        skin.pc_indicator_texture(),
         Rect(left_margin + largest_numbers_width + right_margin, y,
                    indicator_width, indicator_height),
         0, 0, 1, 1);
