@@ -329,6 +329,7 @@ def main():
                'lexer_state',
                #'locals_view',
                'main_loop',
+               'render/scoped_render_offset',
                'source_files',
                'source_view',
                'status_bar',

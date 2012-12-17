@@ -6,6 +6,7 @@
 
 #include "base/logging.h"
 #include "sg/render/renderer.h"
+#include "sg/render/scoped_render_offset.h"
 #include "sg/ui/skin.h"
 
 namespace {
@@ -92,14 +93,14 @@ Rect DockingSplitContainer::GetRectForSplitter() {
 void DockingSplitContainer::Render(Renderer* renderer, const Skin& skin) {
   Point old_offset = renderer->GetRenderOffset();
 
-  renderer->SetRenderOffset(Point(left_->X(), left_->Y()));
-  left_->Render(renderer, skin);
-  renderer->SetRenderOffset(old_offset);
+  {
+    ScopedRenderOffset left_offset(renderer, this, left_.get());
+    left_->Render(renderer, skin);
+  }
 
   if (right_.get()) {
-    renderer->SetRenderOffset(Point(right_->X(), right_->Y()));
+    ScopedRenderOffset right_offset(renderer, this, right_.get());
     right_->Render(renderer, skin);
-    renderer->SetRenderOffset(old_offset);
   } else {
     CHECK(direction_ == kSplitNoneRoot);
   }

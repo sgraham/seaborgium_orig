@@ -6,6 +6,7 @@
 
 #include "sg/render/font.h"
 #include "sg/render/renderer.h"
+#include "sg/render/scoped_render_offset.h"
 #include "sg/ui/skin.h"
 
 namespace {
@@ -29,10 +30,8 @@ void DockingToolWindow::Render(Renderer* renderer, const Skin& skin) {
   renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_inactive());
   renderer->RenderText(&kUIFont, Point(kTitleOffset, 0), title_);
   //renderer->RenderChild(base::Bind(Dockabe
-  Point old_offset = renderer->GetRenderOffset();
-  renderer->SetRenderOffset(Point(contents_->X(), contents_->Y()));
+  ScopedRenderOffset offset(renderer, this, contents_);
   contents_->Render(renderer, skin);
-  renderer->SetRenderOffset(old_offset);
 }
 
 void DockingToolWindow::SetScreenRect(const Rect& rect) {
