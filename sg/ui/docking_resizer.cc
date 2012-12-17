@@ -4,6 +4,8 @@
 
 #include "sg/ui/docking_resizer.h"
 
+#include <algorithm>
+
 #include "base/logging.h"
 #include "sg/ui/docking_split_container.h"
 

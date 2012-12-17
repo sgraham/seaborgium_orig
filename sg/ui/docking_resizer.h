@@ -13,7 +13,7 @@ class DockingSplitContainer;
 
 class DockingResizer : public Draggable {
  public:
-  DockingResizer(DockingSplitContainer* resizing);
+  explicit DockingResizer(DockingSplitContainer* resizing);
   virtual ~DockingResizer();
 
   virtual void Drag(const Point& screen_point) OVERRIDE;

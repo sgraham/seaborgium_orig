@@ -15,7 +15,7 @@ namespace {
 
 const int kTitleOffset = 3;
 
-}
+}  // namespace
 
 DockingToolWindow::DockingToolWindow(Dockable* contents, const string16& title)
     : contents_(contents),

@@ -95,7 +95,7 @@ ToolWindowDragger::ToolWindowDragger(
   current_alpha_ = kHoveringAlphaLow;
   alpha_animate_ticks_ = 0;
 
-  // TODO:
+  // TODO(drag):
   // - Remove from tree
   // - Save target, split direction, fraction for cancel.
   // - Find all possible target split containers:
@@ -119,7 +119,7 @@ ToolWindowDragger::~ToolWindowDragger() {
 }
 
 void ToolWindowDragger::Drag(const Point& screen_point) {
-  // TODO:
+  // TODO(drag):
   // - If over a drag target, figure out the space we would on an insert
   // -   SetScreenRect for target to that rect
   // -   Render at that rect, still alpha, but full size
@@ -130,7 +130,8 @@ void ToolWindowDragger::Drag(const Point& screen_point) {
 }
 
 void ToolWindowDragger::CancelDrag() {
-  // TODO: Reinsert at "old" location. Save sibling, split direction, fraction.
+  // TODO(drag):
+  // Reinsert at "old" location. Save sibling, split direction, fraction.
 }
 
 void ToolWindowDragger::Render(Renderer* renderer) {

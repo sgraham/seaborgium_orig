@@ -44,7 +44,7 @@ void DockingSplitContainer::SplitChild(
     CHECK(right_.get() == left || right_.get() == right);
     to_replace = &right_;
   }
-  to_replace->release(); // We're going re-own this pointer on the next line.
+  to_replace->release();  // We're going re-own this pointer on the next line.
   DockingSplitContainer* replacement =
     new DockingSplitContainer(direction, left, right);
   to_replace->reset(replacement);

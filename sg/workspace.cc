@@ -31,9 +31,7 @@ Dockable* Placeholder(const string16& name) {
 
 Workspace::Workspace()
     : delegate_(NULL),
-      status_bar_(NULL) /*,
-      source_view_(NULL),
-      source_view_container_(NULL)*/ {
+      status_bar_(NULL) {
   // Initialization deferred until Init when we know our window size.
 
   // For Invalidate, and interaction with dragger. Could use some sort of

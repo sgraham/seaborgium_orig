@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sg/test.h"
-
 #include <string>
 
 #include "base/string_util.h"
+#include "sg/test.h"
 #include "sg/ui/docking_resizer.h"
 #include "sg/ui/docking_split_container.h"
 #include "sg/ui/docking_workspace.h"

@@ -5,6 +5,8 @@
 #ifndef SG_UI_TOOL_WINDOW_DRAGGER_H_
 #define SG_UI_TOOL_WINDOW_DRAGGER_H_
 
+#include <vector>
+
 #include "base/compiler_specific.h"
 #include "base/memory/scoped_ptr.h"
 #include "sg/basic_geometric_types.h"

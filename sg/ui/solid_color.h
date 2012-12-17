@@ -8,7 +8,7 @@
 
 class SolidColor : public Dockable {
  public:
-  SolidColor(const Color& color)
+  explicit SolidColor(const Color& color)
       : color_(color) {
   }
   virtual ~SolidColor() {}
