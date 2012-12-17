@@ -56,7 +56,7 @@ void Workspace::Init() {
   main_area_->SetRoot(source_view_);
   Dockable* watch = Placeholder(skin_, L"Watch");
   Dockable* locals = Placeholder(skin_, L"Locals");
-  breakpoints_ = Placeholder(skin_, L"Breakpoints");
+  Dockable* breakpoints = Placeholder(skin_, L"Breakpoints");
   Dockable* output = Placeholder(skin_, L"Output");
   Dockable* log = Placeholder(skin_, L"Log");
 
@@ -74,7 +74,7 @@ void Workspace::Init() {
   watch->parent()->SplitChild(kSplitHorizontal, watch, locals);
   watch->parent()->SetFraction(.65);
   stack_view_window_->parent()->SplitChild(
-      kSplitHorizontal, stack_view_window_, breakpoints_);
+      kSplitHorizontal, stack_view_window_, breakpoints);
   stack_view_window_->parent()->SetFraction(.6);
 
   SetFocusedContents(source_view_);
@@ -127,10 +127,16 @@ void Workspace::Render(Renderer* renderer) {
   // If doing dock drag:
   scoped_ptr<RenderToTextureRenderer> render_to_texture(
       renderer->CreateRenderToTextureRenderer(
-          breakpoints_->GetScreenRect().w, breakpoints_->GetScreenRect().h));
-  breakpoints_->Render(render_to_texture.get(), skin_);
+          stack_view_window_->GetScreenRect().w,
+          stack_view_window_->GetScreenRect().h));
+  stack_view_window_->Render(render_to_texture.get(), skin_);
   renderer->DrawRenderToTextureResult(
-      render_to_texture.get(), Rect(100, 100, 200, 200), 0.5);
+      render_to_texture.get(),
+      Rect(100, 100,
+           static_cast<int>(stack_view_window_->GetClientRect().w * .7f),
+           static_cast<int>(stack_view_window_->GetClientRect().h * .7f)),
+      0.7f,
+      0.f, 0.f, 1.f, 1.f);
 }
 
 void Workspace::SetFileName(const FilePath& filename) {

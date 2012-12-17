@@ -68,7 +68,6 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   SourceView* source_view_;
   StackView* stack_view_;
   Dockable* stack_view_window_;
-  Dockable* breakpoints_;
 
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;

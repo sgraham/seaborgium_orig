@@ -32,6 +32,7 @@
 #ifndef SG_RENDER_RENDERER_H_
 #define SG_RENDER_RENDERER_H_
 
+#include "base/callback.h"
 #include "base/string16.h"
 #include "sg/basic_geometric_types.h"
 
@@ -61,7 +62,10 @@ class Renderer {
       float u1, float v1, float u2, float v2) = 0;
 
   virtual void DrawRenderToTextureResult(
-      RenderToTextureRenderer* renderer, Rect target_rect, float alpha) = 0;
+      RenderToTextureRenderer* renderer,
+      Rect target_rect,
+      float alpha,
+      float u1, float v1, float u2, float v2) = 0;
 
   virtual void LoadFont(Font* font) = 0;
   virtual void FreeFont(Font* font) = 0;
@@ -96,6 +100,8 @@ class Renderer {
   const Point& GetRenderOffset() const { return render_offset_; }
   void TranslateByRenderOffset(int* x, int* y);
   void TranslateByRenderOffset(Rect* rect);
+
+  void RenderChild(base::Closure render_function);
 
   // Clip region. UNTESTED.
   void SetClipRegion(Rect rect);

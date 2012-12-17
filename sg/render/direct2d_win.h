@@ -49,7 +49,8 @@ class Texture;
 
 class Direct2DRenderToTextureRenderer : public RenderToTextureRenderer {
  public:
-  Direct2DRenderToTextureRenderer(Direct2DRenderer* main_renderer);
+  Direct2DRenderToTextureRenderer(
+      Direct2DRenderer* main_renderer, int width, int height);
   virtual ~Direct2DRenderToTextureRenderer();
 
   virtual void StartClip() OVERRIDE;
@@ -70,7 +71,8 @@ class Direct2DRenderToTextureRenderer : public RenderToTextureRenderer {
   virtual void DrawRenderToTextureResult(
       RenderToTextureRenderer* renderer,
       Rect target_rect,
-      float alpha) OVERRIDE;
+      float alpha,
+      float u1, float v1, float u2, float v2) OVERRIDE;
 
   virtual void LoadFont(Font* font) OVERRIDE;
   virtual void FreeFont(Font* font) OVERRIDE;
@@ -81,7 +83,19 @@ class Direct2DRenderToTextureRenderer : public RenderToTextureRenderer {
       int width, int height) OVERRIDE;
 
  private:
+  friend class Direct2DRenderer;
+
+  ID2D1Bitmap* FinishAndGetBitmap();
+  int width() const { return width_; }
+  int height() const { return height_; }
+
+  ID2D1SolidColorBrush* solid_color_brush_;
+  D2D1::ColorF color_;
+
   Direct2DRenderer* main_renderer_;
+  ID2D1BitmapRenderTarget* rt_;
+  int width_;
+  int height_;
 };
 
 class Direct2DRenderer : public Renderer {
@@ -119,17 +133,22 @@ class Direct2DRenderer : public Renderer {
   virtual void DrawRenderToTextureResult(
       RenderToTextureRenderer* renderer,
       Rect target_rect,
-      float alpha) OVERRIDE;
+      float alpha,
+      float u1, float v1, float u2, float v2) OVERRIDE;
 
   virtual Direct2DRenderToTextureRenderer* CreateRenderToTextureRenderer(
       int width, int height) OVERRIDE;
 
  private:
+  friend class Direct2DRenderToTextureRenderer;
+
   bool InternalLoadTexture(Texture* texture);
   bool InternalLoadFont(Font* texture);
 
   void InternalFreeFont(Font* texture, bool bRemove = true);
   void InternalFreeTexture(Texture* texture, bool bRemove = true);
+
+  ID2D1RenderTarget* render_target() { return rt_; }
 
   IDWriteFactory* dwrite_factory_;
   IWICImagingFactory* wic_factory_;

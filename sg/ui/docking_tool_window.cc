@@ -28,6 +28,7 @@ void DockingToolWindow::Render(Renderer* renderer, const Skin& skin) {
   renderer->DrawFilledRect(Rect(0, 0, Width(), skin.title_bar_size()));
   renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_inactive());
   renderer->RenderText(&kUIFont, Point(kTitleOffset, 0), title_);
+  //renderer->RenderChild(base::Bind(Dockabe
   Point old_offset = renderer->GetRenderOffset();
   renderer->SetRenderOffset(Point(contents_->X(), contents_->Y()));
   contents_->Render(renderer, skin);

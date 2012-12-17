@@ -91,9 +91,9 @@ bool Direct2DRenderer::InternalLoadFont(Font* font) {
       &text_format);
 
   if (SUCCEEDED(hr)) {
-    FontData* fontData = new FontData();
-    fontData->text_format = text_format;
-    font->data = fontData;
+    FontData* font_data = new FontData();
+    font_data->text_format = text_format;
+    font->data = font_data;
     return true;
   }
 
@@ -112,9 +112,9 @@ void Direct2DRenderer::InternalFreeFont(Font* font, bool bRemove) {
   if (!font->data)
     return;
 
-  FontData* fontData = reinterpret_cast<FontData*>(font->data);
-  fontData->text_format->Release();
-  delete fontData;
+  FontData* font_data = reinterpret_cast<FontData*>(font->data);
+  font_data->text_format->Release();
+  delete font_data;
   font->data = NULL;
 }
 
@@ -129,7 +129,7 @@ void Direct2DRenderer::RenderText(Font* font, Point pos, const string16& text) {
     InternalLoadFont(font);
   }
 
-  FontData* fontData = reinterpret_cast<FontData*>(font->data);
+  FontData* font_data = reinterpret_cast<FontData*>(font->data);
 
   TranslateByRenderOffset(&pos.x, &pos.y);
 
@@ -137,7 +137,7 @@ void Direct2DRenderer::RenderText(Font* font, Point pos, const string16& text) {
     rt_->DrawTextW(
         text.c_str(),
         text.length(),
-        fontData->text_format,
+        font_data->text_format,
         D2D1::RectF(pos.x, pos.y, pos.x + 50000, pos.y + 50000),
         solid_color_brush_);
   }
@@ -150,7 +150,7 @@ Point Direct2DRenderer::MeasureText(Font* font, const string16& text) {
     InternalLoadFont(font);
   }
 
-  FontData* fontData = reinterpret_cast<FontData*>(font->data);
+  FontData* font_data = reinterpret_cast<FontData*>(font->data);
 
   Point size;
   IDWriteTextLayout* pLayout;
@@ -159,7 +159,7 @@ Point Direct2DRenderer::MeasureText(Font* font, const string16& text) {
   dwrite_factory_->CreateTextLayout(
       text.c_str(),
       text.length(),
-      fontData->text_format,
+      font_data->text_format,
       50000,
       50000,
       &pLayout);
@@ -331,17 +331,46 @@ void Direct2DRenderer::Release() {
 
 void Direct2DRenderer::DrawRenderToTextureResult(
     RenderToTextureRenderer* renderer,
-    Rect target_rect,
-    float alpha) {
+    Rect rect,
+    float alpha,
+    float u1, float v1, float u2, float v2) {
+  TranslateByRenderOffset(&rect);
+
+  Direct2DRenderToTextureRenderer* as_d2d =
+      reinterpret_cast<Direct2DRenderToTextureRenderer*>(renderer);
+  ID2D1Bitmap* bitmap = as_d2d->FinishAndGetBitmap();
+
+  rt_->DrawBitmap(bitmap,
+      D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h),
+      alpha,
+      D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+      D2D1::RectF(u1 * as_d2d->width(),
+                  v1 * as_d2d->height(),
+                  u2 * as_d2d->width(),
+                  v2 * as_d2d->height()));
 }
 
 Direct2DRenderToTextureRenderer*
     Direct2DRenderer::CreateRenderToTextureRenderer(int width, int height) {
-  return new Direct2DRenderToTextureRenderer(this);
+  return new Direct2DRenderToTextureRenderer(this, width, height);
 }
 
 Direct2DRenderToTextureRenderer::Direct2DRenderToTextureRenderer(
-    Direct2DRenderer* main_renderer) : main_renderer_(main_renderer) {
+    Direct2DRenderer* main_renderer,
+    int width,
+    int height)
+    : main_renderer_(main_renderer),
+      color_(D2D1::ColorF::White),
+      width_(width),
+      height_(height) {
+  HRESULT hr = main_renderer_->render_target()->CreateCompatibleRenderTarget(
+      D2D1::SizeF(width, height),
+      &rt_);
+  CHECK(SUCCEEDED(hr));
+  rt_->BeginDraw();
+
+  hr = rt_->CreateSolidColorBrush(color_, &solid_color_brush_);
+  CHECK(SUCCEEDED(hr));
 }
 
 Direct2DRenderToTextureRenderer::~Direct2DRenderToTextureRenderer() {
@@ -356,11 +385,17 @@ void Direct2DRenderToTextureRenderer::EndClip() {
 }
 
 void Direct2DRenderToTextureRenderer::SetDrawColor(Color color) {
-  NOTIMPLEMENTED();
+  color_ = D2D1::ColorF(
+      color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
+  solid_color_brush_->SetColor(color_);
 }
 
 void Direct2DRenderToTextureRenderer::DrawFilledRect(Rect rect) {
-  NOTIMPLEMENTED();
+  TranslateByRenderOffset(&rect);
+  if (solid_color_brush_)
+    rt_->FillRectangle(
+        D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h),
+        solid_color_brush_);
 }
 
 void Direct2DRenderToTextureRenderer::LoadTexture(Texture* texture) {
@@ -382,7 +417,8 @@ void Direct2DRenderToTextureRenderer::DrawTexturedRectAlpha(
 void Direct2DRenderToTextureRenderer::DrawRenderToTextureResult(
     RenderToTextureRenderer* renderer,
     Rect target_rect,
-    float alpha) {
+    float alpha,
+    float u1, float v1, float u2, float v2) {
   NOTIMPLEMENTED();
 }
 
@@ -396,14 +432,33 @@ void Direct2DRenderToTextureRenderer::FreeFont(Font* font) {
 
 void Direct2DRenderToTextureRenderer::RenderText(
     Font* font, Point pos, const string16& text) {
-  NOTIMPLEMENTED();
+  FontData* font_data = reinterpret_cast<FontData*>(font->data);
+  TranslateByRenderOffset(&pos.x, &pos.y);
+  if (solid_color_brush_) {
+    rt_->DrawTextW(
+        text.c_str(),
+        text.length(),
+        font_data->text_format,
+        D2D1::RectF(pos.x, pos.y, pos.x + 50000, pos.y + 50000),
+        solid_color_brush_);
+  }
 }
 
-Point Direct2DRenderToTextureRenderer::MeasureText(Font* font, const string16& text) {
+Point Direct2DRenderToTextureRenderer::MeasureText(
+    Font* font, const string16& text) {
   return main_renderer_->MeasureText(font, text);
 }
 
-RenderToTextureRenderer* Direct2DRenderToTextureRenderer::CreateRenderToTextureRenderer(
-    int width, int height) {
+RenderToTextureRenderer*
+    Direct2DRenderToTextureRenderer::CreateRenderToTextureRenderer(
+        int width, int height) {
   return main_renderer_->CreateRenderToTextureRenderer(width, height);
+}
+
+ID2D1Bitmap* Direct2DRenderToTextureRenderer::FinishAndGetBitmap() {
+  rt_->EndDraw();
+  ID2D1Bitmap* bitmap;
+  HRESULT hr = rt_->GetBitmap(&bitmap);
+  CHECK(SUCCEEDED(hr));
+  return bitmap;
 }

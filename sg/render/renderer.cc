@@ -104,6 +104,10 @@ void Renderer::DrawOutlineRect(Rect rect) {
   DrawFilledRect(Rect(rect.x + rect.w - 1, rect.y, 1, rect.h));
 }
 
+void Renderer::RenderChild(base::Closure render_function) {
+  //render_function();
+}
+
 RenderToTextureRenderer::RenderToTextureRenderer() {
 }
 
