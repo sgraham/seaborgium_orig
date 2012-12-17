@@ -10,7 +10,7 @@
 
 namespace {
 
-int gSplitterWidth = 3;
+int gSplitterWidth = 4;
 
 }  // namespace
 
@@ -86,9 +86,9 @@ Rect DockingSplitContainer::GetRectForSplitter() {
     int height_for_top = height * fraction_;
     return Rect(0, height_for_top, GetScreenRect().w, gSplitterWidth);
   }
-  NOTREACHED();
   return Rect();
 }
+
 void DockingSplitContainer::Render(Renderer* renderer, const Skin& skin) {
   Point old_offset = renderer->GetRenderOffset();
 
@@ -107,6 +107,21 @@ void DockingSplitContainer::Render(Renderer* renderer, const Skin& skin) {
   if (direction_ == kSplitVertical || direction_ == kSplitHorizontal) {
     renderer->SetDrawColor(skin.GetColorScheme().border());
     renderer->DrawFilledRect(GetRectForSplitter());
+  }
+}
+
+void DockingSplitContainer::UpdateCursor(const Point& screen_position) {
+  // TODO(dispatch)
+  Point client_position = ToClient(screen_position);
+  if (GetRectForSplitter().Contains(client_position)) {
+    if (direction_ == kSplitVertical)
+      SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+    else if (direction_ == kSplitHorizontal)
+      SetCursor(LoadCursor(NULL, IDC_SIZENS));
+  } else {
+    left_->UpdateCursor(screen_position);
+    if (right_.get())
+      right_->UpdateCursor(screen_position);
   }
 }
 

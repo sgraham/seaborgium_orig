@@ -27,8 +27,7 @@ Color kGreen(133, 153, 0);
 }  // namespace
 
 ColorScheme::ColorScheme()
-  : border_(0, 0, 0),
-    border_active_(kOrange),
+  : border_(0, 12, 16),
     background_(kBase03),
     text_(kBase0),
     title_bar_active_(kBase00),

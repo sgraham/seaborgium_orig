@@ -30,3 +30,8 @@ const Rect& Dockable::GetScreenRect() const {
 void Dockable::Invalidate() {
   Workspace::Invalidate();
 }
+
+void Dockable::UpdateCursor(const Point& screen_position) {
+  if (GetScreenRect().Contains(screen_position))
+    SetCursor(LoadCursor(NULL, IDC_ARROW));
+}

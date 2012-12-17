@@ -34,6 +34,7 @@ class DockingSplitContainer : public Dockable {
 
   void SetScreenRect(const Rect& rect) OVERRIDE;
   void Render(Renderer* renderer, const Skin& skin) OVERRIDE;
+  void UpdateCursor(const Point& client_position) OVERRIDE;
 
   DockingSplitDirection direction() const { return direction_; }
   double fraction() const { return fraction_; }

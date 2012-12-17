@@ -30,3 +30,8 @@ Dockable* DockingWorkspace::GetRoot() {
 void DockingWorkspace::SetScreenRect(const Rect& rect) {
   root_->SetScreenRect(rect);
 }
+
+void DockingWorkspace::UpdateCursor(const Point& screen_position) {
+  root_->UpdateCursor(screen_position);
+}
+

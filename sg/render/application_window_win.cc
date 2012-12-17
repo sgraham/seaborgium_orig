@@ -46,6 +46,7 @@ class ApplicationWindowWin : public ApplicationWindow {
   virtual void Show() OVERRIDE {
     DCHECK(AppThread::CurrentlyOn(AppThread::UI));
     SetWindowText(hwnd_, L"Seaborgium");
+    SetCursor(LoadCursor(NULL, IDC_ARROW));
     ShowWindow(hwnd_, SW_SHOWMAXIMIZED);
     SetForegroundWindow(hwnd_);
     SetFocus(hwnd_);
@@ -182,6 +183,9 @@ class ApplicationWindowWin : public ApplicationWindow {
         }
         break;
       }
+
+      case WM_SETCURSOR:
+        return 0;
     }
     return DefWindowProc(hwnd_, msg, w_param, l_param);
   }

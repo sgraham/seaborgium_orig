@@ -31,6 +31,7 @@ class Dockable : public InputHandler {
 
   virtual void Render(Renderer* renderer, const Skin& skin) {}
   virtual void Invalidate();
+  virtual void UpdateCursor(const Point& point);
 
   virtual int X() const { return GetScreenRect().x; }
   virtual int Y() const { return GetScreenRect().y; }
@@ -38,6 +39,9 @@ class Dockable : public InputHandler {
   virtual int Height() const { return GetScreenRect().h; }
   Rect GetClientRect() {
     return Rect(0, 0, GetScreenRect().w, GetScreenRect().h);
+  }
+  Point ToClient(const Point& point) {
+    return Point(point.x - GetScreenRect().x, point.y - GetScreenRect().y);
   }
 
   // Default implementation of InputHandler.

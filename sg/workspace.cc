@@ -159,11 +159,11 @@ bool Workspace::NotifyMouseMoved(
     int x, int y, int dx, int dy, const InputModifiers& modifiers) {
   mouse_position_.x = x;
   mouse_position_.y = y;
+  main_area_->UpdateCursor(mouse_position_);
   Dockable* focused = GetFocusedContents();
   if (!focused || !focused->WantMouseEvents())
     return false;
   return focused->NotifyMouseMoved(x, y, dx, dy, modifiers);
-  return false;
 }
 
 bool Workspace::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {

@@ -12,7 +12,6 @@ class ColorScheme {
   // TODO(config): Configuration from .json or something.
   ColorScheme();
   const Color& border() const { return border_; }
-  const Color& border_active() const { return border_active_; }
   const Color& background() const { return background_; }
   const Color& text() const { return text_; }
   const Color& title_bar_active() const { return title_bar_active_; }
@@ -39,7 +38,6 @@ class ColorScheme {
 
  private:
   Color border_;
-  Color border_active_;
   Color background_;
   Color text_;
   Color title_bar_active_;
