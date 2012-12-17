@@ -44,13 +44,32 @@ void DockingSplitContainer::SplitChild(
     CHECK(right_.get() == left || right_.get() == right);
     to_replace = &right_;
   }
+  DockingSplitContainer* current_parent = (*to_replace)->parent();
   to_replace->release();  // We're going re-own this pointer on the next line.
   DockingSplitContainer* replacement =
     new DockingSplitContainer(direction, left, right);
+  replacement->set_parent(current_parent);
   to_replace->reset(replacement);
   left->set_parent(replacement);
   right->set_parent(replacement);
   replacement->SetScreenRect(GetScreenRect());
+}
+
+void DockingSplitContainer::RemoveChild(Dockable* child) {
+  if (left_.get() == child)
+    parent()->Replace(this, right_.release());
+  else if (right_.get() == child)
+    parent()->Replace(this, left_.release());
+}
+
+void DockingSplitContainer::Replace(Dockable* target, Dockable* with) {
+  if (left_.get() == target)
+    left_.reset(with);
+  else if (right_.get() == target)
+    right_.reset(with);
+  else
+    NOTREACHED();
+  SetScreenRect(GetScreenRect());
 }
 
 void DockingSplitContainer::SetScreenRect(const Rect& rect) {
