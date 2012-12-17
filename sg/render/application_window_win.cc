@@ -184,8 +184,19 @@ class ApplicationWindowWin : public ApplicationWindow {
         break;
       }
 
-      case WM_SETCURSOR:
-        return 0;
+      case WM_SETCURSOR: {
+        RECT rect;
+        // We want DefWindowProc to handle NC.
+        if (GetClientRect(hwnd_, &rect)) {
+          POINT pos;
+          if (GetCursorPos(&pos)) {
+            if (ScreenToClient(hwnd_, &pos)) {
+              if (PtInRect(&rect, pos))
+                return 0;
+            }
+          }
+        }
+      }
     }
     return DefWindowProc(hwnd_, msg, w_param, l_param);
   }
