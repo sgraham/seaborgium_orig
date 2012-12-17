@@ -266,12 +266,30 @@ TEST_F(DockingTest, AddAndRelease) {
   EXPECT_EQ("502,0 498x1000", RectAsString(root->right()->GetScreenRect()));
 
   scoped_ptr<Dockable> result(pane->parent()->ReleaseChild(pane));
+  EXPECT_EQ(NULL, result->parent());
   EXPECT_FALSE(workspace.GetRoot()->IsContainer());
   EXPECT_EQ(main, workspace.GetRoot());
   EXPECT_EQ("0,0 1000x1000",
             RectAsString(workspace.GetRoot()->GetScreenRect()));
 }
 
-// TODO(scottmg): Test for sibling parent
-// TODO(scottmg): Test rect on sub-sub split.
-// TODO(scottmg): Test ReleaseChild nulls parent
+TEST_F(DockingTest, SubSplitRectSize) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(0);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane1 = new ContentPane;
+  ContentPane* pane2 = new ContentPane;
+  ContentPane* pane3 = new ContentPane;
+  main->parent()->SplitChild(kSplitVertical, main, pane1);
+  pane1->parent()->SplitChild(kSplitVertical, pane1, pane2);
+  pane1->parent()->SplitChild(kSplitHorizontal, pane1, pane3);
+
+  EXPECT_EQ("0,0 500x1000", RectAsString(main->GetScreenRect()));
+  EXPECT_EQ("500,0 250x500", RectAsString(pane1->GetScreenRect()));
+  EXPECT_EQ("750,0 250x1000", RectAsString(pane2->GetScreenRect()));
+  EXPECT_EQ("500,500 250x500", RectAsString(pane3->GetScreenRect()));
+}
+
+// TODO(scottmg): Test for sibling parent (maybe covered already).
