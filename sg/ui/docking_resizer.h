@@ -19,6 +19,8 @@ class DockingResizer {
 
   const Point& GetInitialLocationForTest() const { return initial_location_; }
 
+  DockingSplitContainer* Resizing() { return resizing_; }
+
  private:
   int ParentSize();
   int ComponentForDirection(const Point& point);

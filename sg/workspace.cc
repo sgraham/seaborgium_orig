@@ -161,7 +161,9 @@ bool Workspace::NotifyMouseMoved(
   mouse_position_.x = x;
   mouse_position_.y = y;
   if (docking_resizer_.get()) {
-    docking_resizer_->Drag(mouse_position_);
+    Point client_position =
+        docking_resizer_->Resizing()->ToClient(mouse_position_);
+    docking_resizer_->Drag(client_position);
     InvalidateImpl();
     return true;
   }
