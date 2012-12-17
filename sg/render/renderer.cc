@@ -103,3 +103,9 @@ void Renderer::DrawOutlineRect(Rect rect) {
   DrawFilledRect(Rect(rect.x, rect.y, 1, rect.h));
   DrawFilledRect(Rect(rect.x + rect.w - 1, rect.y, 1, rect.h));
 }
+
+RenderToTextureRenderer::RenderToTextureRenderer() {
+}
+
+RenderToTextureRenderer::~RenderToTextureRenderer() {
+}

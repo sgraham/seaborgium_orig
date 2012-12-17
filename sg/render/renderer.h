@@ -38,6 +38,8 @@
 class Font;
 class Texture;
 
+class RenderToTextureRenderer;
+
 class Renderer {
  public:
   Renderer();
@@ -58,10 +60,16 @@ class Renderer {
       float alpha,
       float u1, float v1, float u2, float v2) = 0;
 
-  virtual void LoadFont(Font* pFont) = 0;
-  virtual void FreeFont(Font* pFont) = 0;
-  virtual void RenderText(Font* pFont, Point pos, const string16& text) = 0;
-  virtual Point MeasureText(Font* pFont, const string16& text) = 0;
+  virtual void DrawRenderToTextureResult(
+      RenderToTextureRenderer* renderer, Rect target_rect, float alpha) = 0;
+
+  virtual void LoadFont(Font* font) = 0;
+  virtual void FreeFont(Font* font) = 0;
+  virtual void RenderText(Font* font, Point pos, const string16& text) = 0;
+  virtual Point MeasureText(Font* font, const string16& text) = 0;
+
+  virtual RenderToTextureRenderer* CreateRenderToTextureRenderer(
+      int width, int height) = 0;
 
   // Below here not implemented by derived classes.
 
@@ -98,6 +106,12 @@ class Renderer {
  private:
   Point render_offset_;
   Rect clip_region_;
+};
+
+class RenderToTextureRenderer : public Renderer {
+ public:
+  RenderToTextureRenderer();
+  virtual ~RenderToTextureRenderer();
 };
 
 #endif  // SG_RENDER_RENDERER_H_

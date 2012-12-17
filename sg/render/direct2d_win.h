@@ -38,12 +38,51 @@
 #include <wincodec.h>
 #include <list>
 
+#include "base/compiler_specific.h"
 #include "base/string16.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/render/renderer.h"
 
+class Direct2DRenderer;
 class Font;
 class Texture;
+
+class Direct2DRenderToTextureRenderer : public RenderToTextureRenderer {
+ public:
+  Direct2DRenderToTextureRenderer(Direct2DRenderer* main_renderer);
+  virtual ~Direct2DRenderToTextureRenderer();
+
+  virtual void StartClip() OVERRIDE;
+  virtual void EndClip() OVERRIDE;
+
+  virtual void SetDrawColor(Color color) OVERRIDE;
+
+  virtual void DrawFilledRect(Rect rect) OVERRIDE;
+
+  virtual void LoadTexture(Texture* texture) OVERRIDE;
+  virtual void FreeTexture(Texture* texture) OVERRIDE;
+  virtual void DrawTexturedRectAlpha(
+      Texture* texture,
+      Rect target_rect,
+      float alpha,
+      float u1, float v1, float u2, float v2) OVERRIDE;
+
+  virtual void DrawRenderToTextureResult(
+      RenderToTextureRenderer* renderer,
+      Rect target_rect,
+      float alpha) OVERRIDE;
+
+  virtual void LoadFont(Font* font) OVERRIDE;
+  virtual void FreeFont(Font* font) OVERRIDE;
+  virtual void RenderText(Font* font, Point pos, const string16& text) OVERRIDE;
+  virtual Point MeasureText(Font* font, const string16& text) OVERRIDE;
+
+  virtual RenderToTextureRenderer* CreateRenderToTextureRenderer(
+      int width, int height) OVERRIDE;
+
+ private:
+  Direct2DRenderer* main_renderer_;
+};
 
 class Direct2DRenderer : public Renderer {
  public:
@@ -54,32 +93,36 @@ class Direct2DRenderer : public Renderer {
 
   virtual void Release();
 
-  virtual void SetDrawColor(Color color);
+  virtual void SetDrawColor(Color color) OVERRIDE;
 
-  virtual void DrawFilledRect(Rect rect);
+  virtual void DrawFilledRect(Rect rect) OVERRIDE;
 
-  virtual void LoadFont(Font* font);
-  virtual void FreeFont(Font* font);
-  virtual void RenderText(Font* font, Point pos, const string16& text);
-  virtual Point MeasureText(Font* font, const string16& text);
+  virtual void LoadFont(Font* font) OVERRIDE;
+  virtual void FreeFont(Font* font) OVERRIDE;
+  virtual void RenderText(Font* font, Point pos, const string16& text) OVERRIDE;
+  virtual Point MeasureText(Font* font, const string16& text) OVERRIDE;
 
   virtual void DeviceLost();
   virtual void DeviceAcquired(ID2D1RenderTarget* rt);
 
-  void StartClip();
-  void EndClip();
+  void StartClip() OVERRIDE;
+  void EndClip() OVERRIDE;
 
   void DrawTexturedRectAlpha(
       Texture* texture,
       Rect target_rect,
       float alpha,
-      float u1, float v1, float u2, float v2);
-  void LoadTexture(Texture* texture);
-  void FreeTexture(Texture* texture);
+      float u1, float v1, float u2, float v2) OVERRIDE;
+  void LoadTexture(Texture* texture) OVERRIDE;
+  void FreeTexture(Texture* texture) OVERRIDE;
 
- private:
-  bool InternalCreateDeviceResources();
-  void InternalReleaseDeviceResources();
+  virtual void DrawRenderToTextureResult(
+      RenderToTextureRenderer* renderer,
+      Rect target_rect,
+      float alpha) OVERRIDE;
+
+  virtual Direct2DRenderToTextureRenderer* CreateRenderToTextureRenderer(
+      int width, int height) OVERRIDE;
 
  private:
   bool InternalLoadTexture(Texture* texture);
@@ -88,7 +131,6 @@ class Direct2DRenderer : public Renderer {
   void InternalFreeFont(Font* texture, bool bRemove = true);
   void InternalFreeTexture(Texture* texture, bool bRemove = true);
 
- private:
   IDWriteFactory* dwrite_factory_;
   IWICImagingFactory* wic_factory_;
   ID2D1RenderTarget* rt_;

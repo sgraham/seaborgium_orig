@@ -35,6 +35,7 @@
 #include <dwrite.h>
 #include <wincodec.h>
 
+#include "base/logging.h"
 #include "sg/render/direct2d_win.h"
 #include "sg/render/font.h"
 #include "sg/render/texture.h"
@@ -326,4 +327,83 @@ void Direct2DRenderer::Release() {
     FreeFont(font_list_.front());
     font_list_.pop_front();
   }
+}
+
+void Direct2DRenderer::DrawRenderToTextureResult(
+    RenderToTextureRenderer* renderer,
+    Rect target_rect,
+    float alpha) {
+}
+
+Direct2DRenderToTextureRenderer*
+    Direct2DRenderer::CreateRenderToTextureRenderer(int width, int height) {
+  return new Direct2DRenderToTextureRenderer(this);
+}
+
+Direct2DRenderToTextureRenderer::Direct2DRenderToTextureRenderer(
+    Direct2DRenderer* main_renderer) : main_renderer_(main_renderer) {
+}
+
+Direct2DRenderToTextureRenderer::~Direct2DRenderToTextureRenderer() {
+}
+
+void Direct2DRenderToTextureRenderer::StartClip() {
+  NOTIMPLEMENTED();
+}
+
+void Direct2DRenderToTextureRenderer::EndClip() {
+  NOTIMPLEMENTED();
+}
+
+void Direct2DRenderToTextureRenderer::SetDrawColor(Color color) {
+  NOTIMPLEMENTED();
+}
+
+void Direct2DRenderToTextureRenderer::DrawFilledRect(Rect rect) {
+  NOTIMPLEMENTED();
+}
+
+void Direct2DRenderToTextureRenderer::LoadTexture(Texture* texture) {
+  main_renderer_->LoadTexture(texture);
+}
+
+void Direct2DRenderToTextureRenderer::FreeTexture(Texture* texture) {
+  main_renderer_->FreeTexture(texture);
+}
+
+void Direct2DRenderToTextureRenderer::DrawTexturedRectAlpha(
+    Texture* texture,
+    Rect target_rect,
+    float alpha,
+    float u1, float v1, float u2, float v2) {
+  NOTIMPLEMENTED();
+}
+
+void Direct2DRenderToTextureRenderer::DrawRenderToTextureResult(
+    RenderToTextureRenderer* renderer,
+    Rect target_rect,
+    float alpha) {
+  NOTIMPLEMENTED();
+}
+
+void Direct2DRenderToTextureRenderer::LoadFont(Font* font) {
+  main_renderer_->LoadFont(font);
+}
+
+void Direct2DRenderToTextureRenderer::FreeFont(Font* font) {
+  main_renderer_->FreeFont(font);
+}
+
+void Direct2DRenderToTextureRenderer::RenderText(
+    Font* font, Point pos, const string16& text) {
+  NOTIMPLEMENTED();
+}
+
+Point Direct2DRenderToTextureRenderer::MeasureText(Font* font, const string16& text) {
+  return main_renderer_->MeasureText(font, text);
+}
+
+RenderToTextureRenderer* Direct2DRenderToTextureRenderer::CreateRenderToTextureRenderer(
+    int width, int height) {
+  return main_renderer_->CreateRenderToTextureRenderer(width, height);
 }
