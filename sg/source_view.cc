@@ -22,8 +22,6 @@
 namespace {
 
 // TODO(config):
-// TODO(rendering): Font line height.
-const int g_line_height = 17;
 Texture g_pc_indicator_texture;
 Texture g_breakpoint_texture;
 
@@ -63,7 +61,7 @@ std::vector<Line> HighlightOnFILE(std::string utf8_text) {
 }  // namespace
 
 SourceView::SourceView()
-    : scroll_helper_(this, g_line_height),
+    : scroll_helper_(this, Skin::current().text_line_height()),
       program_counter_line_(-1) {
   font_.facename = L"Consolas";
   font_.size = 13.f;
@@ -104,14 +102,15 @@ void SourceView::CommitAfterHighlight(std::vector<Line> lines) {
 }
 
 int SourceView::GetFirstLineInView() {
-  return scroll_helper_.GetOffset() / g_line_height;
+  return scroll_helper_.GetOffset() / Skin::current().text_line_height();
 }
 
 bool SourceView::LineInView(int line_number) {
   int start_line = GetFirstLineInView();
+  int line_height = Skin::current().text_line_height();
   if (line_number < start_line)
     return false;
-  if ((line_number - start_line) * g_line_height > Height() + g_line_height)
+  if ((line_number - start_line) * line_height > Height() + line_height)
     return false;
   return true;
 }
@@ -127,6 +126,7 @@ void SourceView::Render(Renderer* renderer) {
   }
 
   const Skin& skin = Skin::current();
+  int line_height = skin.text_line_height();
 
   // TODO(rendering): Need to separate Update/Render.
   bool invalidate = scroll_helper_.Update();
@@ -143,8 +143,8 @@ void SourceView::Render(Renderer* renderer) {
       base::IntToString16(lines_.size()).c_str()).x;
   static const int left_margin = 5;
   static const int right_margin = 10;
-  static const int indicator_width = g_line_height;
-  static const int indicator_height = g_line_height;
+  static const int indicator_width = line_height;
+  static const int indicator_height = line_height;
   static const int indicator_and_margin = indicator_width + 5;
   renderer->SetDrawColor(skin.GetColorScheme().margin());
   renderer->DrawFilledRect(Rect(
@@ -155,7 +155,7 @@ void SourceView::Render(Renderer* renderer) {
   int y_pixel_scroll = scroll_helper_.GetOffset();
 
   for (size_t i = start_line; i < lines_.size(); ++i) {
-    // Extra |g_line_height| added to height so that a full line is drawn at
+    // Extra |line_height| added to height so that a full line is drawn at
     // the bottom when partial-line pixel scrolled.
     if (!LineInView(i))
       break;
@@ -164,7 +164,7 @@ void SourceView::Render(Renderer* renderer) {
     renderer->SetDrawColor(skin.GetColorScheme().margin_text());
     renderer->RenderText(
         &font_,
-        Point(left_margin, i * g_line_height - y_pixel_scroll),
+        Point(left_margin, i * line_height - y_pixel_scroll),
         base::IntToString16(i + 1).c_str());
     size_t x = left_margin + largest_numbers_width + right_margin +
                indicator_and_margin;
@@ -174,7 +174,7 @@ void SourceView::Render(Renderer* renderer) {
       renderer->SetDrawColor(ColorForTokenType(skin, lines_[i][j].type));
       renderer->RenderText(
           &font_,
-          Point(x, i * g_line_height - y_pixel_scroll),
+          Point(x, i * line_height - y_pixel_scroll),
           lines_[i][j].text.c_str());
       x += renderer->MeasureText(
           &font_,
@@ -183,7 +183,7 @@ void SourceView::Render(Renderer* renderer) {
   }
 
   if (LineInView(program_counter_line_)) {
-    int y = program_counter_line_ * g_line_height - y_pixel_scroll;
+    int y = program_counter_line_ * line_height - y_pixel_scroll;
     renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
     renderer->DrawTexturedRect(
         &g_pc_indicator_texture,
@@ -244,7 +244,7 @@ bool SourceView::NotifyKey(
 }
 
 int SourceView::GetContentSize() {
-  return g_line_height * lines_.size();
+  return Skin::current().text_line_height() * lines_.size();
 }
 
 const Rect& SourceView::GetScreenRect() {

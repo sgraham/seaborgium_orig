@@ -50,7 +50,11 @@ ColorScheme::ColorScheme()
     pc_indicator_(kYellow) {
 }
 
-Skin::Skin() : title_bar_size_(19), border_size_(3), status_bar_size_(26) {
+Skin::Skin()
+    : title_bar_size_(19),
+      border_size_(3),
+      status_bar_size_(26),
+      text_line_height_(17) {
 }
 
 // static

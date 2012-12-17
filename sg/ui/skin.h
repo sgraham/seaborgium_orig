@@ -70,6 +70,7 @@ class Skin {
   int title_bar_size() const { return title_bar_size_; }
   int border_size() const { return border_size_; }
   int status_bar_size() const { return status_bar_size_; }
+  int text_line_height() const { return text_line_height_; }
 
   static const Skin& current();
 
@@ -79,6 +80,7 @@ class Skin {
   int title_bar_size_;
   int border_size_;
   int status_bar_size_;
+  int text_line_height_;
 };
 
 #endif  // SG_UI_SKIN_H_

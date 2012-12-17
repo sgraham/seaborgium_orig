@@ -7,14 +7,6 @@
 #include "base/logging.h"
 #include "sg/ui/skin.h"
 
-namespace {
-
-// TODO(config):
-// TODO(rendering): Font line height.
-const int g_line_height = 17;
-
-}  // namespace
-
 LocalsView::LocalsView(const Skin& skin) : Contents(skin) {
   // TODO(rendering): Share with source view.
   font_.facename = L"Consolas";
@@ -29,6 +21,7 @@ void LocalsView::SetData(const std::vector<TypeNameValue>& locals) {
 void LocalsView::Render(Renderer* renderer) {
   /*
   const Skin& skin = Contents::GetSkin();
+  int line_height = skin.text_line_height();
 
   // TODO(rendering): Hacky.
   if (!g_pc_indicator_texture.data) {
@@ -40,8 +33,8 @@ void LocalsView::Render(Renderer* renderer) {
 
   static const int left_margin = 5;
   static const int right_margin = 5;
-  static const int indicator_width = g_line_height;
-  static const int indicator_height = g_line_height;
+  static const int indicator_width = line_height;
+  static const int indicator_height = line_height;
   static const int full_margin_width =
       left_margin + indicator_width + right_margin;
 
@@ -52,13 +45,13 @@ void LocalsView::Render(Renderer* renderer) {
   renderer->SetDrawColor(skin.GetColorScheme().text());
   for (size_t i = 0; i < lines_.size(); ++i) {
     renderer->RenderText(
-        &font_, Point(full_margin_width, i * g_line_height), lines_[i]);
+        &font_, Point(full_margin_width, i * line_height), lines_[i]);
   }
 
   renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
   renderer->DrawTexturedRect(
       &g_pc_indicator_texture,
-      Rect(left_margin, active_ * g_line_height,
+      Rect(left_margin, active_ * line_height,
                  indicator_width, indicator_height),
       0, 0, 1, 1);
       */

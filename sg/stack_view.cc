@@ -18,14 +18,15 @@ namespace {
 
 // TODO(config):
 // TODO(rendering): Font line height.
-const int g_line_height = 17;
 Texture g_pc_indicator_texture;
 
 }  // namespace
 
 StackView::StackView()
     : active_(-1),
-      tree_view_(this, g_line_height, arraysize(column_widths_)) {
+      tree_view_(this,
+                 Skin::current().text_line_height(),
+                 arraysize(column_widths_)) {
   // TODO(config): Share with source view.
   g_pc_indicator_texture.name = L"art/pc-location.png";
   // TODO(config): Save this.
@@ -82,10 +83,11 @@ void StackView::Render(Renderer* renderer) {
   renderer->DrawFilledRect(Rect(0, 0, full_margin_width, Height()));
 
   renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
+  int line_height = skin.text_line_height();
   renderer->DrawTexturedRect(
       &g_pc_indicator_texture,
       Rect(left_margin,
-           active_ * g_line_height + tree_view_.GetYOffsetToFirstRow(),
+           active_ * line_height + tree_view_.GetYOffsetToFirstRow(),
            indicator_width, indicator_height),
       0, 0, 1, 1);
 
