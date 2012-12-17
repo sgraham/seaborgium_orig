@@ -408,10 +408,19 @@ void Direct2DRenderToTextureRenderer::FreeTexture(Texture* texture) {
 
 void Direct2DRenderToTextureRenderer::DrawTexturedRectAlpha(
     Texture* texture,
-    Rect target_rect,
+    Rect rect,
     float alpha,
     float u1, float v1, float u2, float v2) {
-  NOTIMPLEMENTED();
+  TextureData* tex_data = reinterpret_cast<TextureData*>(texture->data);
+  TranslateByRenderOffset(&rect);
+  rt_->DrawBitmap(tex_data->bitmap,
+      D2D1::RectF(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h),
+      alpha,
+      D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+      D2D1::RectF(u1 * texture->width,
+                  v1 * texture->height,
+                  u2 * texture->width,
+                  v2 * texture->height));
 }
 
 void Direct2DRenderToTextureRenderer::DrawRenderToTextureResult(
