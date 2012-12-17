@@ -18,11 +18,17 @@ float kHoveringAlphaHigh = 0.8f;
 float kDropTargetAlpha = 0.6f;
 
 DropTargetIndicator IndicatorAt(
-    Dockable* dockable, const Texture* texture, int x, int y) {
+    Dockable* dockable,
+    const Texture* texture,
+    int x, int y,
+    DockingSplitDirection direction,
+    bool this_dockable_first) {
   DropTargetIndicator target;
   target.dockable = dockable;
   target.texture = texture;
   target.rect = Rect(x, y, texture->width, texture->height);
+  target.direction = direction;
+  target.this_dockable_first = this_dockable_first;
   return target;
 }
 
@@ -35,22 +41,26 @@ void PlaceIndicatorsAroundEdge(
       dockable,
       skin.dock_top_texture(),
       rect.x + rect.w / 2 - skin.dock_top_texture()->width / 2,
-      rect.y));
+      rect.y,
+      kSplitHorizontal, false));
   into->push_back(IndicatorAt(
       dockable,
       skin.dock_left_texture(),
       rect.x,
-      rect.y + rect.h / 2 - skin.dock_left_texture()->height / 2));
+      rect.y + rect.h / 2 - skin.dock_left_texture()->height / 2,
+      kSplitVertical, false));
   into->push_back(IndicatorAt(
       dockable,
       skin.dock_right_texture(),
       rect.x + rect.w - skin.dock_right_texture()->width,
-      rect.y + rect.h / 2 - skin.dock_right_texture()->height / 2));
+      rect.y + rect.h / 2 - skin.dock_right_texture()->height / 2,
+      kSplitVertical, true));
   into->push_back(IndicatorAt(
       dockable,
       skin.dock_bottom_texture(),
       rect.x + rect.w / 2 - skin.dock_bottom_texture()->width / 2,
-      rect.y + rect.h - skin.dock_bottom_texture()->height));
+      rect.y + rect.h - skin.dock_bottom_texture()->height,
+      kSplitHorizontal, true));
 }
 
 void PlaceIndicatorsAtCenter(
@@ -64,22 +74,26 @@ void PlaceIndicatorsAtCenter(
       dockable,
       skin.dock_top_texture(),
       cx - skin.dock_top_texture()->width / 2,
-      cy - skin.dock_top_texture()->height * 2));
+      cy - skin.dock_top_texture()->height * 2,
+      kSplitHorizontal, false));
   into->push_back(IndicatorAt(
       dockable,
       skin.dock_left_texture(),
       cx - skin.dock_left_texture()->height * 2,
-      cy - skin.dock_left_texture()->height / 2));
+      cy - skin.dock_left_texture()->height / 2,
+      kSplitVertical, false));
   into->push_back(IndicatorAt(
       dockable,
       skin.dock_right_texture(),
       cx + skin.dock_right_texture()->width,
-      cy - skin.dock_right_texture()->height / 2));
+      cy - skin.dock_right_texture()->height / 2,
+      kSplitVertical, true));
   into->push_back(IndicatorAt(
       dockable,
       skin.dock_bottom_texture(),
       cx - skin.dock_bottom_texture()->width / 2,
-      cy + skin.dock_bottom_texture()->height));
+      cy + skin.dock_bottom_texture()->height,
+      kSplitHorizontal, true));
 }
 
 }  // namespace
@@ -103,6 +117,11 @@ ToolWindowDragger::ToolWindowDragger(
   dragging->parent()->ReleaseChild(dragging);
   dragging_.reset(dragging);
 
+  RefreshTargets();
+}
+
+void ToolWindowDragger::RefreshTargets() {
+  targets_.clear();
   // Find all possible target split containers and make a list of drag targets
   // and icons of those, plus ones for the root.
   Rect workspace_rect = docking_workspace_->GetScreenRect();
@@ -118,7 +137,13 @@ ToolWindowDragger::ToolWindowDragger(
   }
 }
 
+
 ToolWindowDragger::~ToolWindowDragger() {
+  // We were added into a tree.
+  if (on_drop_target_ && dragging_.get())
+    dragging_.release();
+  else
+    CancelDrag();
 }
 
 void ToolWindowDragger::Drag(const Point& screen_point) {
@@ -131,11 +156,21 @@ void ToolWindowDragger::Drag(const Point& screen_point) {
   // -   Render detached.
   current_position_ = screen_point;
 
-  on_drop_target_ = NULL;
+  if (on_drop_target_) {
+    dragging_->parent()->ReleaseChild(dragging_.get());
+    on_drop_target_ = NULL;
+    dragging_->SetScreenRect(initial_screen_rect_);
+  }
+
   for (size_t i = 0; i < targets_.size(); ++i) {
     DropTargetIndicator& dti = targets_[i];
     if (dti.rect.Contains(current_position_)) {
       on_drop_target_ = &dti;
+      Dockable* primary = dti.dockable;
+      Dockable* secondary = dragging_.get();
+      if (!dti.this_dockable_first)
+        std::swap(primary, secondary);
+      dti.dockable->parent()->SplitChild(dti.direction, primary, secondary);
       break;
     }
   }
@@ -168,21 +203,24 @@ void ToolWindowDragger::Render(Renderer* renderer) {
   else
     current_alpha_ += (kHoveringAlphaLow - current_alpha_) * 0.05f;
 
+  Rect draw_rect;
   if (on_drop_target_) {
+    draw_rect = dragging_->GetScreenRect();
   } else {
     Point draw_at = current_position_.Subtract(
         pick_up_offset_.Scale(kDetachedScale));
-    Rect dest(draw_at.x, draw_at.y,
-              static_cast<int>(dragging_->GetClientRect().w * kDetachedScale),
-              static_cast<int>(dragging_->GetClientRect().h * kDetachedScale));
-    renderer->DrawRenderToTextureResult(
-        render_to_texture_renderer.get(),
-        dest,
-        current_alpha_,
-        0.f, 0.f, 1.f, 1.f);
-    renderer->SetDrawColor(Color(0, 128, 128, current_alpha_ * 128));
-    renderer->DrawFilledRect(dest);
+    draw_rect = Rect(
+        draw_at.x, draw_at.y,
+        static_cast<int>(dragging_->GetClientRect().w * kDetachedScale),
+        static_cast<int>(dragging_->GetClientRect().h * kDetachedScale));
   }
+  renderer->DrawRenderToTextureResult(
+      render_to_texture_renderer.get(),
+      draw_rect,
+      current_alpha_,
+      0.f, 0.f, 1.f, 1.f);
+  renderer->SetDrawColor(Color(0, 128, 128, current_alpha_ * 128));
+  renderer->DrawFilledRect(draw_rect);
 
   Workspace::Invalidate();
 }

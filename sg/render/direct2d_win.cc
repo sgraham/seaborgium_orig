@@ -352,6 +352,8 @@ void Direct2DRenderer::DrawRenderToTextureResult(
                   v1 * as_d2d->height(),
                   u2 * as_d2d->width(),
                   v2 * as_d2d->height()));
+
+  bitmap->Release();
 }
 
 Direct2DRenderToTextureRenderer*
@@ -378,6 +380,7 @@ Direct2DRenderToTextureRenderer::Direct2DRenderToTextureRenderer(
 }
 
 Direct2DRenderToTextureRenderer::~Direct2DRenderToTextureRenderer() {
+  rt_->Release();
 }
 
 void Direct2DRenderToTextureRenderer::StartClip() {

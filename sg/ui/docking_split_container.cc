@@ -44,15 +44,16 @@ void DockingSplitContainer::SplitChild(
     CHECK(right_.get() == left || right_.get() == right);
     to_replace = &right_;
   }
-  DockingSplitContainer* current_parent = (*to_replace)->parent();
+  DockingSplitContainer* previous_parent = (*to_replace)->parent();
+  Rect previous_rect = (*to_replace)->GetScreenRect();
   to_replace->release();  // We're going re-own this pointer on the next line.
   DockingSplitContainer* replacement =
     new DockingSplitContainer(direction, left, right);
-  replacement->set_parent(current_parent);
+  replacement->set_parent(previous_parent);
   to_replace->reset(replacement);
   left->set_parent(replacement);
   right->set_parent(replacement);
-  replacement->SetScreenRect(GetScreenRect());
+  replacement->SetScreenRect(previous_rect);
 }
 
 void DockingSplitContainer::DeleteChild(Dockable* child) {
@@ -73,16 +74,22 @@ Dockable* DockingSplitContainer::ReleaseChild(Dockable* child) {
     parent()->Replace(this, left_.release());
     // |this| has been deleted here.
   }
+  if (result)
+    result->set_parent(NULL);
   return result;
 }
 
 void DockingSplitContainer::Replace(Dockable* target, Dockable* with) {
-  if (left_.get() == target)
+  if (left_.get() == target) {
     left_.reset(with);
-  else if (right_.get() == target)
+    left_->set_parent(this);
+  } else if (right_.get() == target) {
     right_.reset(with);
-  else
+    right_->set_parent(this);
+  }
+  else {
     NOTREACHED();
+  }
   SetScreenRect(GetScreenRect());
 }
 

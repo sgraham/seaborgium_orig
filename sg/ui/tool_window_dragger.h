@@ -10,6 +10,7 @@
 #include "base/compiler_specific.h"
 #include "base/memory/scoped_ptr.h"
 #include "sg/basic_geometric_types.h"
+#include "sg/ui/docking_split_container.h"
 #include "sg/ui/draggable.h"
 
 class Dockable;
@@ -25,6 +26,8 @@ struct DropTargetIndicator {
   Dockable* dockable;
   const Texture* texture;
   Rect rect;
+  DockingSplitDirection direction;
+  bool this_dockable_first;
 };
 
 class ToolWindowDragger : public Draggable {
@@ -39,6 +42,8 @@ class ToolWindowDragger : public Draggable {
   virtual void Render(Renderer* renderer) OVERRIDE;
 
  private:
+  void RefreshTargets();
+
   scoped_ptr<DockingToolWindow> dragging_;
   Point pick_up_offset_;
   Point current_position_;

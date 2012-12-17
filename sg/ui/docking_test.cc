@@ -271,3 +271,7 @@ TEST_F(DockingTest, AddAndRelease) {
   EXPECT_EQ("0,0 1000x1000",
             RectAsString(workspace.GetRoot()->GetScreenRect()));
 }
+
+// TODO(scottmg): Test for sibling parent
+// TODO(scottmg): Test rect on sub-sub split.
+// TODO(scottmg): Test ReleaseChild nulls parent
