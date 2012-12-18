@@ -48,6 +48,7 @@ void DebugPresenter::SetDisplay(DebugPresenterDisplay* display) {
                           // "S-F9: edit breakpoint properties\n"
                           "F5: run (not too useful yet)\n"
                           "S-F5: stop debugging\n"
+                          "C-S-F5: restart debugging\n"
                           "\n"
                           "Resize/redock windows with mouse\n");
 }
@@ -63,6 +64,7 @@ void DebugPresenter::ReadFileOnFILE(FilePath path, std::string* result) {
 
 bool DebugPresenter::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
+  // TODO(config): I guess.
   if (key == kF10 && down && modifiers.None()) {
     AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
         base::Bind(running_ ?
@@ -86,6 +88,14 @@ bool DebugPresenter::NotifyKey(
   } else if (key == kF5 && down && modifiers.None()) {
     AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
         base::Bind(&DebugCoreGdb::Continue, debug_core_));
+    return true;
+  } else if (key == kF5 && down &&
+             modifiers.ShiftPressed() &&
+             modifiers.ControlPressed()) {
+    AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+        base::Bind(&DebugCoreGdb::StopDebugging, debug_core_));
+    AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+        base::Bind(&DebugCoreGdb::RunToMain, debug_core_));
     return true;
   } else if (key == kF5 && down && modifiers.ShiftPressed()) {
     AppThread::PostTask(AppThread::BACKEND, FROM_HERE,

@@ -345,8 +345,7 @@ void DebugCoreGdb::GetLocals() {
 }
 
 void DebugCoreGdb::StopDebugging() {
-  // TODO(scottmg): No MI command -exec it seems.
-  SendCommand(L"kill");
+  SendCommand(L"-exec-abort");
 }
 
 void DebugCoreGdb::SetDebugNotification(DebugNotification* debug_notification) {
