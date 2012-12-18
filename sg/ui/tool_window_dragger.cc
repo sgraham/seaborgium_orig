@@ -107,8 +107,11 @@ ToolWindowDragger::ToolWindowDragger(
   initial_screen_rect_ = dragging->GetScreenRect();
   current_position_ = drag_setup->screen_position;
 
-  // TODO(drag): Save target, split direction, fraction for cancel.
-  // Should be the sibling of dragging.
+  // Save sibling, split direction, and fraction for cancel.
+  cancel_sibling_ = dragging->parent()->GetSiblingOf(dragging);
+  cancel_direction_ = dragging->parent()->direction();
+  cancel_fraction_ = dragging->parent()->fraction();
+  cancel_was_primary_ = dragging->parent()->left() == dragging;
 
   // Remove from tree
   dragging->parent()->ReleaseChild(dragging);
@@ -134,7 +137,6 @@ void ToolWindowDragger::RefreshTargets() {
   }
 }
 
-
 ToolWindowDragger::~ToolWindowDragger() {
   // We were added into a tree.
   if (on_drop_target_ && dragging_.get())
@@ -144,14 +146,11 @@ ToolWindowDragger::~ToolWindowDragger() {
 }
 
 void ToolWindowDragger::Drag(const Point& screen_point) {
-  // TODO(drag):
-  // - If over a drag target, figure out the space we would on an insert
-  // -   SetScreenRect for target to that rect
-  // -   Render at that rect, still alpha, but full size
-  // - Otherwise,
-  // -   Restore initial rect for detached draw
-  // -   Render detached.
   current_position_ = screen_point;
+
+  // We're repeatedly removing/inserting on every move, which is kind of
+  // silly. Probably simpler than trying to cache more state information here
+  // though.
 
   if (on_drop_target_) {
     dragging_->parent()->ReleaseChild(dragging_.get());
@@ -168,14 +167,20 @@ void ToolWindowDragger::Drag(const Point& screen_point) {
       if (!dti.this_dockable_first)
         std::swap(primary, secondary);
       dti.dockable->parent()->SplitChild(dti.direction, primary, secondary);
+      // Splitting/inserting sets the screen rect for us.
       break;
     }
   }
 }
 
 void ToolWindowDragger::CancelDrag() {
-  // TODO(drag):
-  // Reinsert at "old" location. Save sibling, split direction, fraction.
+  // Reinsert at "old" location, based on saved information.
+  Dockable* primary = cancel_sibling_;
+  Dockable* secondary = dragging_.release();
+  if (cancel_was_primary_)
+    std::swap(primary, secondary);
+  cancel_sibling_->parent()->SplitChild(cancel_direction_, primary, secondary);
+  cancel_sibling_->parent()->SetFraction(cancel_fraction_);
 }
 
 void ToolWindowDragger::Render(Renderer* renderer) {

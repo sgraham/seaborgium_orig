@@ -51,6 +51,11 @@ class ToolWindowDragger : public Draggable {
   DropTargetIndicator* on_drop_target_;
   DockingWorkspace* docking_workspace_;
   std::vector<DropTargetIndicator> targets_;
+
+  Dockable* cancel_sibling_;
+  DockingSplitDirection cancel_direction_;
+  double cancel_fraction_;
+  bool cancel_was_primary_;
 };
 
 #endif  // SG_UI_TOOL_WINDOW_DRAGGER_H_
