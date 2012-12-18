@@ -44,8 +44,15 @@ void ScrollingOutputView::AddText(const string16& text) {
   std::vector<string16> result;
   base::SplitString(text, '\n', &result);
   for (size_t i = 0; i < result.size(); ++i) {
-    lines_.push_back(result[i]);
+    // TODO(scottmg): Not sure if this is a great idea, but there seems to be
+    // a bunch of blank lines from gdb, which is annoying.
+    if (result[i].size() > 0)
+      lines_.push_back(result[i]);
   }
+
+  // TODO(scottmg): This should only happen when the scroll location is
+  // already at "end".
+  scroll_helper_.ScrollToEnd();
 }
 
 bool ScrollingOutputView::NotifyMouseMoved(
