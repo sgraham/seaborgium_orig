@@ -58,22 +58,34 @@ void Workspace::Init() {
   Dockable* output = Placeholder(L"Output");
   Dockable* log = Placeholder(L"Log");
 
-  source_view_->parent()->SplitChild(kSplitHorizontal, source_view_, output);
-  source_view_->parent()->SetFraction(.7);
-  output->parent()->SplitChild(kSplitVertical, output, log);
-  output->parent()->SetFraction(.6);
+  if (delegate_->IsLandscape()) {
+    source_view_->parent()->SplitChild(kSplitHorizontal, source_view_, output);
+    source_view_->parent()->SetFraction(.7);
+    output->parent()->SplitChild(kSplitVertical, output, log);
+    output->parent()->SetFraction(.6);
 
-  source_view_->parent()->SplitChild(
-      kSplitVertical, source_view_, stack_view_window_);
-  source_view_->parent()->SetFraction(.375);
-  stack_view_window_->parent()->SplitChild(
-      kSplitVertical, stack_view_window_, watch);
-  stack_view_window_->parent()->SetFraction(.4);
-  watch->parent()->SplitChild(kSplitHorizontal, watch, locals);
-  watch->parent()->SetFraction(.65);
-  stack_view_window_->parent()->SplitChild(
-      kSplitHorizontal, stack_view_window_, breakpoints);
-  stack_view_window_->parent()->SetFraction(.6);
+    source_view_->parent()->SplitChild(
+        kSplitVertical, source_view_, stack_view_window_);
+    source_view_->parent()->SetFraction(.375);
+    stack_view_window_->parent()->SplitChild(
+        kSplitVertical, stack_view_window_, watch);
+    stack_view_window_->parent()->SetFraction(.4);
+    watch->parent()->SplitChild(kSplitHorizontal, watch, locals);
+    watch->parent()->SetFraction(.65);
+    stack_view_window_->parent()->SplitChild(
+        kSplitHorizontal, stack_view_window_, breakpoints);
+    stack_view_window_->parent()->SetFraction(.6);
+  } else {
+    source_view_->parent()->SplitChild(kSplitHorizontal, source_view_, output);
+    source_view_->parent()->SetFraction(.7);
+    output->parent()->SplitChild(kSplitVertical, output, log);
+    output->parent()->SetFraction(.6);
+    log->parent()->SplitChild(kSplitHorizontal, breakpoints, log);
+
+    source_view_->parent()->SplitChild(kSplitVertical, source_view_, watch);
+    watch->parent()->SplitChild(kSplitHorizontal, watch, locals);
+    locals->parent()->SplitChild(kSplitHorizontal, locals, stack_view_window_);
+  }
 
   SetFocusedContents(source_view_);
 
