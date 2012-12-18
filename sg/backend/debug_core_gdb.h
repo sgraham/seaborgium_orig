@@ -41,6 +41,7 @@ class DebugCoreGdb : public base::NonThreadSafe,
 
   virtual void StepOver();
   virtual void StepIn();
+  virtual void StepOut();
 
   virtual void StopDebugging();
 

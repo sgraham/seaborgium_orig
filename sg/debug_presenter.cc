@@ -53,6 +53,11 @@ bool DebugPresenter::NotifyKey(
         base::Bind(&DebugCoreGdb::StepIn,
                    debug_core_));
     return true;
+  } else if (key == kF11 && down && modifiers.ShiftPressed()) {
+    AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+        base::Bind(&DebugCoreGdb::StepOut,
+                   debug_core_));
+    return true;
   }
   return false;
 }

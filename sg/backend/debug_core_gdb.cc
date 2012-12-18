@@ -143,7 +143,8 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
                   base::Bind(&DebugNotification::OnStoppedAtBreakpoint,
                              base::Unretained(debug_notification_), data));
               continue;
-            } else if (reason == "end-stepping-range") {
+            } else if (reason == "end-stepping-range" ||
+                       reason == "function-finished") {
               StoppedAfterSteppingData data =
                   StoppedAfterSteppingDataFromRecordResults(record->results());
               AppThread::PostTask(AppThread::UI, FROM_HERE,
@@ -317,6 +318,10 @@ void DebugCoreGdb::StepOver() {
 
 void DebugCoreGdb::StepIn() {
   SendCommand(L"-exec-step");
+}
+
+void DebugCoreGdb::StepOut() {
+  SendCommand(L"-exec-finish");
 }
 
 void DebugCoreGdb::GetStack() {
