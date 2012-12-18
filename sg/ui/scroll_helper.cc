@@ -138,6 +138,7 @@ void ScrollHelper::CommonNotifyKey(
     bool* invalidate,
     bool* handled) {
   *invalidate = false;
+  *handled = false;
   if (key == kDown) {
     *invalidate = ScrollLines(1);
     *handled = true;

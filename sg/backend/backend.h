@@ -30,6 +30,21 @@ class StoppedAtBreakpointData {
   FrameData frame;
 };
 
+class LibraryLoadedData {
+ public:
+  string16 host_path;
+  string16 target_path;
+  string16 thread_id;
+  bool symbols_loaded;
+};
+
+class LibraryUnloadedData {
+ public:
+  string16 host_path;
+  string16 target_path;
+  string16 thread_id;
+};
+
 class StoppedAfterSteppingData {
  public:
   FrameData frame;
@@ -52,6 +67,8 @@ class DebugNotification {
   virtual void OnProcessLoaded() {}
   virtual void OnStoppedAtBreakpoint(const StoppedAtBreakpointData& data) {}
   virtual void OnStoppedAfterStepping(const StoppedAfterSteppingData& data) {}
+  virtual void OnLibraryLoaded(const LibraryLoadedData& data) {}
+  virtual void OnLibraryUnloaded(const LibraryUnloadedData& data) {}
   virtual void OnRetrievedStack(const RetrievedStackData& data) {}
   virtual void OnRetrievedLocals(const RetrievedLocalsData& data) {}
   virtual void OnConsoleOutput(const string16& data) {}

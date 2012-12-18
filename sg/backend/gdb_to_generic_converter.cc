@@ -130,4 +130,16 @@ RetrievedLocalsData RetrievedLocalsDataFromList(base::Value* value) {
   return data;
 }
 
+LibraryLoadedData LibraryLoadedDataFromRecordResults(
+    const std::vector<GdbRecordResult*>& results) {
+  LibraryLoadedData data;
+  data.target_path = UTF8ToUTF16(FindStringValue("target-name", results));
+  data.host_path = UTF8ToUTF16(FindStringValue("host-name", results));
+  data.thread_id = UTF8ToUTF16(FindStringValue("thread-group", results));
+  std::string symbols_string = FindStringValue("symbols-loaded", results);
+  int symbols_int;
+  CHECK(base::StringToInt(symbols_string, &symbols_int));
+  data.symbols_loaded = symbols_int;
+  return data;
+}
 

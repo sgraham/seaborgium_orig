@@ -153,6 +153,16 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
             }
           }
           goto notimplemented;
+        case GdbRecord::RT_NOTIFY_ASYNC_OUTPUT:
+          if (record->AsyncClass() == "library-loaded") {
+             LibraryLoadedData data =
+                 LibraryLoadedDataFromRecordResults(record->results());
+             AppThread::PostTask(AppThread::UI, FROM_HERE,
+                 base::Bind(&DebugNotification::OnLibraryLoaded,
+                           base::Unretained(debug_notification_), data));
+             continue;
+          }
+          goto notimplemented;
         case GdbRecord::RT_CONSOLE_STREAM_OUTPUT:
           AppThread::PostTask(AppThread::UI, FROM_HERE,
               base::Bind(&DebugNotification::OnConsoleOutput,

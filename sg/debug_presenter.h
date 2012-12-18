@@ -36,6 +36,8 @@ class DebugPresenter : public DebugPresenterNotify,
       const StoppedAtBreakpointData& data) OVERRIDE;
   virtual void OnStoppedAfterStepping(
       const StoppedAfterSteppingData& data) OVERRIDE;
+  virtual void OnLibraryLoaded(const LibraryLoadedData& data) OVERRIDE;
+  virtual void OnLibraryUnloaded(const LibraryUnloadedData& data) OVERRIDE;
   virtual void OnRetrievedStack(const RetrievedStackData& data) OVERRIDE;
   virtual void OnRetrievedLocals(const RetrievedLocalsData& data) OVERRIDE;
   virtual void OnConsoleOutput(const string16& data) OVERRIDE;

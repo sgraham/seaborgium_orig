@@ -114,6 +114,18 @@ void DebugPresenter::OnStoppedAfterStepping(
   UpdatePassiveDisplays();
 }
 
+void DebugPresenter::OnLibraryLoaded(const LibraryLoadedData& data) {
+  string16 output = L"Loaded '" + data.host_path + L"'";
+  if (data.host_path != data.target_path)
+    output += L" (" + data.target_path + L")";
+  if (data.symbols_loaded)
+    output += L", Symbols loaded.";
+  display_->AddOutput(output);
+}
+
+void DebugPresenter::OnLibraryUnloaded(const LibraryUnloadedData& data) {
+}
+
 void DebugPresenter::UpdatePassiveDisplays() {
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::GetStack, debug_core_));
