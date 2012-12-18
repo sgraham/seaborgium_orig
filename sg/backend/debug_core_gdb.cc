@@ -247,6 +247,7 @@ void DebugCoreGdb::DeleteSelf() {
   delete this;
 }
 
+// TODO(scottmg): Not sure what escaping is expected here, C-style?
 void DebugCoreGdb::SendCommand(const string16& arg0) {
   string16 command = arg0 + L"\r\n";
   reader_writer_->SendString(command);

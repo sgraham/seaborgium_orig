@@ -4,6 +4,8 @@
 
 #include "sg/ui/tool_window_dragger.h"
 
+#include <algorithm>
+
 #include "sg/render/renderer.h"
 #include "sg/render/texture.h"
 #include "sg/ui/docking_split_container.h"

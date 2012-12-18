@@ -176,7 +176,6 @@ void SourceView::Render(Renderer* renderer) {
         0, 0, 1, 1);
   }
 
-  // Ease to target.
   scroll_helper_.RenderScrollIndicators(renderer, skin);
 }
 
@@ -186,9 +185,11 @@ bool SourceView::NotifyMouseMoved(
 }
 
 bool SourceView::NotifyMouseWheel(int delta, const InputModifiers& modifiers) {
-  if (scroll_helper_.ScrollPixels(-delta * .5f))  // TODO(config): Random scale.
+  bool invalidate, handled;
+  scroll_helper_.CommonMouseWheel(delta, modifiers, &invalidate, &handled);
+  if (invalidate)
     Invalidate();
-  return true;
+  return handled;
 }
 
 bool SourceView::NotifyMouseButton(
@@ -199,29 +200,8 @@ bool SourceView::NotifyMouseButton(
 
 bool SourceView::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
-  if (!down)
-    return false;
-  bool handled = false;
-  bool invalidate = false;
-  if (key == kDown) {
-    invalidate = scroll_helper_.ScrollLines(1);
-    handled = true;
-  } else if (key == kUp) {
-    invalidate = scroll_helper_.ScrollLines(-1);
-    handled = true;
-  } else if (key == kPageUp || (key == kSpace && modifiers.ShiftPressed())) {
-    invalidate = scroll_helper_.ScrollPages(-1);
-    handled = true;
-  } else if (key == kPageDown || (key == kSpace && !modifiers.ShiftPressed())) {
-    invalidate = scroll_helper_.ScrollPages(1);
-    handled = true;
-  } else if (key == kHome) {
-    invalidate = scroll_helper_.ScrollToBeginning();
-    handled = true;
-  } else if (key == kEnd) {
-    invalidate = scroll_helper_.ScrollToEnd();
-    handled = true;
-  }
+  bool invalidate, handled;
+  scroll_helper_.CommonNotifyKey(key, down, modifiers, &invalidate, &handled);
   if (invalidate)
     Invalidate();
   return handled;
@@ -229,10 +209,6 @@ bool SourceView::NotifyKey(
 
 int SourceView::GetContentSize() {
   return Skin::current().text_line_height() * lines_.size();
-}
-
-const Rect& SourceView::GetScreenRect() {
-  return Dockable::GetScreenRect();
 }
 
 const Color& SourceView::ColorForTokenType(

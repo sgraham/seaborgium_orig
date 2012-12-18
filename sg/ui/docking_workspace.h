@@ -27,11 +27,13 @@ class DockingWorkspace {
   Dockable* GetRoot();
 
   void SetScreenRect(const Rect& rect);
-  Rect GetScreenRect();
+  const Rect& GetScreenRect() const;
 
   // All non-container children that have an immediate parent of a
   // DockingSplitContainer. I think.
   std::vector<Dockable*> GetAllDockTargets();
+
+  Dockable* FindTopMostUnderPoint(const Point& point);
 
  private:
   void GetDockTargets(Dockable* root, std::vector<Dockable*>* into);

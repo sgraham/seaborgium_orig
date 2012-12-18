@@ -45,7 +45,9 @@ class SourceView : public Dockable, public ScrollHelperDataProvider {
 
   // Implementation of ScrollHelperDataProvider:
   virtual int GetContentSize() OVERRIDE;
-  virtual const Rect& GetScreenRect() OVERRIDE;
+  virtual const Rect& GetScreenRect() const OVERRIDE {
+    return Dockable::GetScreenRect();
+  }
 
 
  private:

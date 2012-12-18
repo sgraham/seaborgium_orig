@@ -37,6 +37,7 @@ void ScrollingOutputView::Render(Renderer* renderer) {
         Point(0, i * line_height - y_pixel_scroll),
         lines_[i].c_str());
   }
+  scroll_helper_.RenderScrollIndicators(renderer, skin);
 }
 
 void ScrollingOutputView::AddText(const string16& text) {
@@ -54,7 +55,11 @@ bool ScrollingOutputView::NotifyMouseMoved(
 
 bool ScrollingOutputView::NotifyMouseWheel(
     int delta, const InputModifiers& modifiers) {
-  return false;
+  bool invalidate, handled;
+  scroll_helper_.CommonMouseWheel(delta, modifiers, &invalidate, &handled);
+  if (invalidate)
+    Invalidate();
+  return handled;
 }
 
 bool ScrollingOutputView::NotifyMouseButton(
@@ -64,15 +69,15 @@ bool ScrollingOutputView::NotifyMouseButton(
 
 bool ScrollingOutputView::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
-  return false;
+  bool invalidate, handled;
+  scroll_helper_.CommonNotifyKey(key, down, modifiers, &invalidate, &handled);
+  if (invalidate)
+    Invalidate();
+  return handled;
 }
 
 int ScrollingOutputView::GetContentSize() {
   return Skin::current().text_line_height() * lines_.size();
-}
-
-const Rect& ScrollingOutputView::GetScreenRect() {
-  return Dockable::GetScreenRect();
 }
 
 int ScrollingOutputView::GetFirstLineInView() {

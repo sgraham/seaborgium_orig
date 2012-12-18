@@ -5,6 +5,8 @@
 #ifndef SG_UI_SCROLLING_OUTPUT_VIEW_H_
 #define SG_UI_SCROLLING_OUTPUT_VIEW_H_
 
+#include <vector>
+
 #include "base/string16.h"
 #include "sg/ui/dockable.h"
 #include "sg/ui/scroll_helper.h"
@@ -32,7 +34,9 @@ class ScrollingOutputView : public Dockable, public ScrollHelperDataProvider {
 
   // Implementation of ScrollHelperDataProvider:
   virtual int GetContentSize() OVERRIDE;
-  virtual const Rect& GetScreenRect() OVERRIDE;
+  virtual const Rect& GetScreenRect() const OVERRIDE {
+    return Dockable::GetScreenRect();
+  }
 
  private:
   bool LineInView(int line_number);

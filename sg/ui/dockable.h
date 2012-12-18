@@ -49,6 +49,10 @@ class Dockable : public InputHandler {
     return Point(point.x - GetScreenRect().x, point.y - GetScreenRect().y);
   }
 
+  // Find the Dockable in the tree that's top-most in the stacking order (or
+  // equivalently lowest in the tree).
+  virtual Dockable* FindTopMostUnderPoint(const Point& point);
+
   // Default implementation of InputHandler.
   virtual bool NotifyMouseMoved(
       int x, int y, int dx, int dy, const InputModifiers& modifiers) OVERRIDE {

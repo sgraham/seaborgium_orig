@@ -57,6 +57,8 @@ class DockingSplitContainer : public Dockable {
   // Hokey method only used for DockingWorkspace that uses left as root.
   void ReplaceLeft(Dockable* left);
 
+  virtual Dockable* FindTopMostUnderPoint(const Point& point) OVERRIDE;
+
  private:
   Rect GetRectForSplitter();
 

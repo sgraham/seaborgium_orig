@@ -8,6 +8,7 @@
 #include "sg/render/renderer.h"
 #include "sg/render/scoped_render_offset.h"
 #include "sg/ui/draggable.h"
+#include "sg/ui/focus.h"
 #include "sg/ui/skin.h"
 #include "sg/ui/tool_window_dragger.h"
 
@@ -31,10 +32,20 @@ Rect DockingToolWindow::RectForTitleBar() {
 
 void DockingToolWindow::Render(Renderer* renderer) {
   const Skin& skin = Skin::current();
-  renderer->SetDrawColor(skin.GetColorScheme().title_bar_inactive());
+  bool focused = GetFocusedContents() == contents_;
+
+  if (focused)
+    renderer->SetDrawColor(skin.GetColorScheme().title_bar_active());
+  else
+    renderer->SetDrawColor(skin.GetColorScheme().title_bar_inactive());
   renderer->DrawFilledRect(RectForTitleBar());
-  renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_inactive());
+
+  if (focused)
+    renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_active());
+  else
+    renderer->SetDrawColor(skin.GetColorScheme().title_bar_text_inactive());
   renderer->RenderText(skin.ui_font(), Point(kTitleOffset, 0), title_);
+
   ScopedRenderOffset offset(renderer, this, contents_);
   contents_->Render(renderer);
 }
@@ -56,4 +67,9 @@ bool DockingToolWindow::CouldStartDrag(DragSetup* drag_setup) {
     return true;
   }
   return false;
+}
+
+Dockable* DockingToolWindow::FindTopMostUnderPoint(const Point& point) {
+  // We never want to return ourselves.
+  return contents_->FindTopMostUnderPoint(point);
 }

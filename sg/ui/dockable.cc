@@ -30,3 +30,9 @@ const Rect& Dockable::GetScreenRect() const {
 void Dockable::Invalidate() {
   Workspace::Invalidate();
 }
+
+Dockable* Dockable::FindTopMostUnderPoint(const Point& point) {
+  if (!rect_.Contains(point))
+    return NULL;
+  return this;
+}

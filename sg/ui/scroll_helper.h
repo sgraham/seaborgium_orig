@@ -8,6 +8,7 @@
 #include "base/bind.h"
 #include "base/string16.h"
 #include "sg/basic_geometric_types.h"
+#include "sg/ui/input.h"
 
 class Skin;
 class Renderer;
@@ -17,7 +18,7 @@ class ScrollHelperDataProvider {
   virtual ~ScrollHelperDataProvider() {}
 
   virtual int GetContentSize() = 0;
-  virtual const Rect& GetScreenRect() = 0;
+  virtual const Rect& GetScreenRect() const = 0;
 };
 
 // Handles scroll offsets and rendering of scroll indicators.
@@ -39,6 +40,19 @@ class ScrollHelper {
   bool ScrollPages(int delta);
   bool ScrollToBeginning();
   bool ScrollToEnd();
+
+  // Optional, standard handling of keys/mouse for scrolling.
+  void CommonNotifyKey(
+      InputKey key,
+      bool down,
+      const InputModifiers& modifiers,
+      bool* invalidate,
+      bool* handled);
+  void CommonMouseWheel(
+      int delta,
+      const InputModifiers& modifiers,
+      bool* invalidate,
+      bool* handled);
 
  private:
   // Returns whether invalidation is required.

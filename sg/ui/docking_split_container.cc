@@ -86,8 +86,7 @@ void DockingSplitContainer::Replace(Dockable* target, Dockable* with) {
   } else if (right_.get() == target) {
     right_.reset(with);
     right_->set_parent(this);
-  }
-  else {
+  } else {
     NOTREACHED();
   }
   SetScreenRect(GetScreenRect());
@@ -193,4 +192,17 @@ void DockingSplitContainer::ReplaceLeft(Dockable* left) {
   CHECK(direction_ == kSplitNoneRoot && !right_.get());
   left_.reset(left);
   left->SetScreenRect(Dockable::GetScreenRect());
+}
+
+Dockable* DockingSplitContainer::FindTopMostUnderPoint(const Point& point) {
+  if (!GetScreenRect().Contains(point))
+    return NULL;
+  Dockable* left_contains = left_->FindTopMostUnderPoint(point);
+  if (left_contains)
+    return left_contains;
+  Dockable* right_contains = right_->FindTopMostUnderPoint(point);
+  if (right_contains)
+    return right_contains;
+  NOTREACHED();
+  return NULL;
 }

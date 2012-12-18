@@ -8,6 +8,9 @@
 
 #include "sg/ui/docking_split_container.h"
 
+// TODO(scottmg):
+// This whole file sucks. Maybe it should just be a Dockable/Container too.
+
 DockingWorkspace::DockingWorkspace() {
   root_.reset(new DockingSplitContainer(kSplitNoneRoot, NULL, NULL));
 }
@@ -33,7 +36,7 @@ void DockingWorkspace::SetScreenRect(const Rect& rect) {
   root_->SetScreenRect(rect);
 }
 
-Rect DockingWorkspace::GetScreenRect() {
+const Rect& DockingWorkspace::GetScreenRect() const {
   return root_->GetScreenRect();
 }
 
@@ -63,4 +66,8 @@ void DockingWorkspace::GetDockTargets(
     GetDockTargets(root->AsDockingSplitContainer()->left(), into);
     GetDockTargets(root->AsDockingSplitContainer()->right(), into);
   }
+}
+
+Dockable* DockingWorkspace::FindTopMostUnderPoint(const Point& point) {
+  return root_->FindTopMostUnderPoint(point);
 }

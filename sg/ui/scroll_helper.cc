@@ -130,3 +130,41 @@ bool ScrollHelper::ScrollToEnd() {
       data_provider_->GetContentSize() - num_pixels_in_line_;
   return ClampScrollTarget();
 }
+
+void ScrollHelper::CommonNotifyKey(
+    InputKey key,
+    bool down,
+    const InputModifiers& modifiers,
+    bool* invalidate,
+    bool* handled) {
+  *invalidate = false;
+  if (key == kDown) {
+    *invalidate = ScrollLines(1);
+    *handled = true;
+  } else if (key == kUp) {
+    *invalidate = ScrollLines(-1);
+    *handled = true;
+  } else if (key == kPageUp || (key == kSpace && modifiers.ShiftPressed())) {
+    *invalidate = ScrollPages(-1);
+    *handled = true;
+  } else if (key == kPageDown || (key == kSpace && !modifiers.ShiftPressed())) {
+    *invalidate = ScrollPages(1);
+    *handled = true;
+  } else if (key == kHome) {
+    *invalidate = ScrollToBeginning();
+    *handled = true;
+  } else if (key == kEnd) {
+    *invalidate = ScrollToEnd();
+    *handled = true;
+  }
+}
+
+void ScrollHelper::CommonMouseWheel(
+    int delta,
+    const InputModifiers& modifiers,
+    bool* invalidate,
+    bool* handled) {
+  ScrollPixels(-delta * .5f);
+  *invalidate = true;
+  *handled = true;
+}

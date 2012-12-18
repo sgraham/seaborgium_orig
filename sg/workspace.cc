@@ -228,6 +228,10 @@ bool Workspace::NotifyMouseButton(
   } else if (index == 0 && down && main_area_->CouldStartDrag(&drag_setup)) {
     Invalidate();
     return true;
+  } else if (index == 0 && down) {
+    Dockable* target = main_area_->FindTopMostUnderPoint(mouse_position_);
+    SetFocusedContents(target);
+    Invalidate();
   }
   return false;
 }
