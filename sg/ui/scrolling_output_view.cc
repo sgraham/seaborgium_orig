@@ -52,7 +52,8 @@ void ScrollingOutputView::AddText(const string16& text) {
 
   // TODO(scottmg): This should only happen when the scroll location is
   // already at "end".
-  scroll_helper_.ScrollToEnd();
+  if (GetContentSize() > GetScreenRect().h)
+    scroll_helper_.ScrollToEnd();
 }
 
 bool ScrollingOutputView::NotifyMouseMoved(

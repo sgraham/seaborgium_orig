@@ -34,6 +34,17 @@ Workspace::Workspace()
     : delegate_(NULL),
       status_bar_(NULL) {
   // Initialization deferred until Init when we know our window size.
+  // Objects created now so they're ready to receive data early in startup.
+  source_view_ = new SourceView;
+  stack_view_ = new StackView;
+  stack_view_window_ = new DockingToolWindow(stack_view_, L"Stack");
+  watch_ = Placeholder(L"Watch");
+  locals_ = Placeholder(L"Locals");
+  breakpoints_ = Placeholder(L"Breakpoints");
+  output_ = new ScrollingOutputView;
+  output_window_ = new DockingToolWindow(output_, L"Output");
+  log_ = new ScrollingOutputView;
+  log_window_ = new DockingToolWindow(log_, L"Log");
 
   // For Invalidate, and interaction with dragger. Could use some sort of
   // broadcast for Invalidate (and coalesce there) and could pass to dragger.
@@ -49,17 +60,7 @@ Workspace::~Workspace() {
 void Workspace::Init() {
   DCHECK(!main_area_);
   main_area_.reset(new DockingWorkspace);
-  source_view_ = new SourceView;
-  stack_view_ = new StackView;
-  stack_view_window_ = new DockingToolWindow(stack_view_, L"Stack");
   main_area_->SetRoot(source_view_);
-  Dockable* watch = Placeholder(L"Watch");
-  Dockable* locals = Placeholder(L"Locals");
-  Dockable* breakpoints = Placeholder(L"Breakpoints");
-  output_ = new ScrollingOutputView;
-  output_window_ = new DockingToolWindow(output_, L"Output");
-  log_ = new ScrollingOutputView;
-  log_window_ = new DockingToolWindow(log_, L"Log");
 
   if (delegate_->IsLandscape()) {
     source_view_->parent()->SplitChild(
@@ -73,12 +74,12 @@ void Workspace::Init() {
         kSplitVertical, source_view_, stack_view_window_);
     source_view_->parent()->SetFraction(.375);
     stack_view_window_->parent()->SplitChild(
-        kSplitVertical, stack_view_window_, watch);
+        kSplitVertical, stack_view_window_, watch_);
     stack_view_window_->parent()->SetFraction(.4);
-    watch->parent()->SplitChild(kSplitHorizontal, watch, locals);
-    watch->parent()->SetFraction(.65);
+    watch_->parent()->SplitChild(kSplitHorizontal, watch_, locals_);
+    watch_->parent()->SetFraction(.65);
     stack_view_window_->parent()->SplitChild(
-        kSplitHorizontal, stack_view_window_, breakpoints);
+        kSplitHorizontal, stack_view_window_, breakpoints_);
     stack_view_window_->parent()->SetFraction(.6);
   } else {
     source_view_->parent()->SplitChild(
@@ -88,11 +89,12 @@ void Workspace::Init() {
         kSplitVertical, output_window_, log_window_);
     output_window_->parent()->SetFraction(.6);
     log_window_->parent()->SplitChild(
-        kSplitHorizontal, breakpoints, log_window_);
+        kSplitHorizontal, breakpoints_, log_window_);
 
-    source_view_->parent()->SplitChild(kSplitVertical, source_view_, watch);
-    watch->parent()->SplitChild(kSplitHorizontal, watch, locals);
-    locals->parent()->SplitChild(kSplitHorizontal, locals, stack_view_window_);
+    source_view_->parent()->SplitChild(kSplitVertical, source_view_, watch_);
+    watch_->parent()->SplitChild(kSplitHorizontal, watch_, locals_);
+    locals_->parent()->SplitChild(
+        kSplitHorizontal, locals_, stack_view_window_);
   }
 
   SetFocusedContents(source_view_);

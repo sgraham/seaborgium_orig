@@ -55,6 +55,8 @@ class DebugPresenter : public DebugPresenterNotify,
   SourceFiles* source_files_;
   base::WeakPtr<DebugCoreGdb> debug_core_;
 
+  bool running_;
+
   DISALLOW_COPY_AND_ASSIGN(DebugPresenter);
 };
 

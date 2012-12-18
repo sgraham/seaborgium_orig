@@ -74,6 +74,10 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   ScrollingOutputView* log_;
   Dockable* log_window_;
 
+  Dockable* watch_;
+  Dockable* locals_;
+  Dockable* breakpoints_;
+
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;
 

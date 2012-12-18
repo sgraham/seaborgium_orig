@@ -151,6 +151,10 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
                   base::Bind(&DebugNotification::OnStoppedAfterStepping,
                             base::Unretained(debug_notification_), data));
               continue;
+            } else if (reason == "exited-normally" ||
+                       reason == "exited" ||
+                       reason == "exited-signalled") {
+               MessageBox(0, L"todo", L"scottmg", 0);
             }
           }
           goto notimplemented;
@@ -305,10 +309,15 @@ void DebugCoreGdb::LoadProcess(
     const string16& working_directory) {
   DCHECK_EQ(0, environment.size()) << "todo;";
   DCHECK_EQ(0, working_directory.size()) << "todo;";
-  // TODO(scottmg) Any need to post this? The WriteFile is async, and we're
-  // already on the DBG thread, so should be OK I think.
   SendCommand(L"-file-exec-and-symbols", application);
+}
+
+void DebugCoreGdb::RunToMain() {
   SendCommand(L"-break-insert", L"-t", L"main");
+  SendCommand(L"-exec-run");
+}
+
+void DebugCoreGdb::Continue() {
   SendCommand(L"-exec-run");
 }
 

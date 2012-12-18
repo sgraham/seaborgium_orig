@@ -69,12 +69,14 @@ void StackView::Render(Renderer* renderer) {
 
   renderer->SetDrawColor(skin.GetColorScheme().pc_indicator());
   int line_height = skin.text_line_height();
-  renderer->DrawTexturedRect(
-      skin.pc_indicator_texture(),
-      Rect(left_margin,
-           active_ * line_height + tree_view_.GetYOffsetToFirstRow(),
-           indicator_width, indicator_height),
-      0, 0, 1, 1);
+  if (active_ >= 0) {
+    renderer->DrawTexturedRect(
+        skin.pc_indicator_texture(),
+        Rect(left_margin,
+            active_ * line_height + tree_view_.GetYOffsetToFirstRow(),
+            indicator_width, indicator_height),
+        0, 0, 1, 1);
+  }
 
   Point old_render_offset = renderer->GetRenderOffset();
   renderer->AddRenderOffset(Point(full_margin_width, 0));

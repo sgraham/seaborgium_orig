@@ -15,8 +15,12 @@
 #include "sg/debug_presenter_display.h"
 #include "sg/source_files.h"
 
+// TODO(scottmg): Maintaining running_ here is probably wrong and going to
+// cause pain. It should be semi-async updated from the backend somehow.
+
 DebugPresenter::DebugPresenter(SourceFiles* source_files)
-    : source_files_(source_files) {
+    : source_files_(source_files),
+      running_(false) {
   const CommandLine& command_line = *CommandLine::ForCurrentProcess();
   // TODO(scottmg): Temporary obviously.
   if (command_line.GetArgs().size() != 1)
@@ -30,6 +34,23 @@ DebugPresenter::~DebugPresenter() {
 
 void DebugPresenter::SetDisplay(DebugPresenterDisplay* display) {
   display_ = display;
+  if (!running_)
+    display_->SetFileData("\n"
+                          "Binary from command line loaded.\n"
+                          "\n"
+                          "Seaborgium ghetto quickstart:\n"
+                          "\n"
+                          "F10: step over (and run to main() on startup)\n"
+                          "F11: step in\n"
+                          "S-F11: step out\n"
+                          //"F9: add/remove breakpoint\n"
+                          //"C-F9: enable/disable breakpoint\n"
+                          //"S-F9: edit breakpoint properties\n"
+                          "F5: run (not too useful yet)\n"
+                          "S-F5: stop debugging\n"
+                          "\n"
+                          "Resize/redock windows with mouse\n");
+
 }
 
 void DebugPresenter::NotifyFramePainted(double frame_time_in_ms) {
@@ -45,18 +66,31 @@ bool DebugPresenter::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
   if (key == kF10 && down && modifiers.None()) {
     AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
-        base::Bind(&DebugCoreGdb::StepOver,
+        base::Bind(running_ ?
+                       &DebugCoreGdb::StepOver :
+                       &DebugCoreGdb::RunToMain,
                    debug_core_));
+    running_ = true;
     return true;
   } else if (key == kF11 && down && modifiers.None()) {
     AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
-        base::Bind(&DebugCoreGdb::StepIn,
+        base::Bind(running_ ?
+                       &DebugCoreGdb::StepIn :
+                       &DebugCoreGdb::RunToMain,
                    debug_core_));
+    running_ = true;
     return true;
   } else if (key == kF11 && down && modifiers.ShiftPressed()) {
     AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
-        base::Bind(&DebugCoreGdb::StepOut,
-                   debug_core_));
+        base::Bind(&DebugCoreGdb::StepOut, debug_core_));
+    return true;
+  } else if (key == kF5 && down && modifiers.None()) {
+    AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+        base::Bind(&DebugCoreGdb::Continue, debug_core_));
+    return true;
+  } else if (key == kF5 && down && modifiers.ShiftPressed()) {
+    AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+        base::Bind(&DebugCoreGdb::StopDebugging, debug_core_));
     return true;
   }
   return false;
