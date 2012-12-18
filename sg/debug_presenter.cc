@@ -43,14 +43,13 @@ void DebugPresenter::SetDisplay(DebugPresenterDisplay* display) {
                           "F10: step over (and run to main() on startup)\n"
                           "F11: step in\n"
                           "S-F11: step out\n"
-                          //"F9: add/remove breakpoint\n"
-                          //"C-F9: enable/disable breakpoint\n"
-                          //"S-F9: edit breakpoint properties\n"
+                          // "F9: add/remove breakpoint\n"
+                          // "C-F9: enable/disable breakpoint\n"
+                          // "S-F9: edit breakpoint properties\n"
                           "F5: run (not too useful yet)\n"
                           "S-F5: stop debugging\n"
                           "\n"
                           "Resize/redock windows with mouse\n");
-
 }
 
 void DebugPresenter::NotifyFramePainted(double frame_time_in_ms) {
