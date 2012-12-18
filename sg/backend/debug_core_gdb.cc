@@ -141,7 +141,7 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
                   StoppedAtBreakpointDataFromRecordResults(record->results());
               AppThread::PostTask(AppThread::UI, FROM_HERE,
                   base::Bind(&DebugNotification::OnStoppedAtBreakpoint,
-                            base::Unretained(debug_notification_), data));
+                             base::Unretained(debug_notification_), data));
               continue;
             } else if (reason == "end-stepping-range") {
               StoppedAfterSteppingData data =
@@ -153,6 +153,18 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
             }
           }
           goto notimplemented;
+        case GdbRecord::RT_CONSOLE_STREAM_OUTPUT:
+          AppThread::PostTask(AppThread::UI, FROM_HERE,
+              base::Bind(&DebugNotification::OnConsoleOutput,
+                         base::Unretained(debug_notification_),
+                         UTF8ToUTF16(record->OutputString())));
+          break;
+        case GdbRecord::RT_LOG_STREAM_OUTPUT:
+          AppThread::PostTask(AppThread::UI, FROM_HERE,
+              base::Bind(&DebugNotification::OnInternalDebugOutput,
+                         base::Unretained(debug_notification_),
+                         UTF8ToUTF16(record->OutputString())));
+          break;
         default:
         notimplemented:
           NOTIMPLEMENTED() << ", " << record->record_type() << ": " <<

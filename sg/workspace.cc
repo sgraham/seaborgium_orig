@@ -15,6 +15,7 @@
 #include "sg/ui/docking_resizer.h"
 #include "sg/ui/docking_tool_window.h"
 #include "sg/ui/focus.h"
+#include "sg/ui/scrolling_output_view.h"
 #include "sg/ui/skin.h"
 #include "sg/ui/solid_color.h"
 
@@ -55,14 +56,18 @@ void Workspace::Init() {
   Dockable* watch = Placeholder(L"Watch");
   Dockable* locals = Placeholder(L"Locals");
   Dockable* breakpoints = Placeholder(L"Breakpoints");
-  Dockable* output = Placeholder(L"Output");
-  Dockable* log = Placeholder(L"Log");
+  output_ = new ScrollingOutputView;
+  output_window_ = new DockingToolWindow(output_, L"Output");
+  log_ = new ScrollingOutputView;
+  log_window_ = new DockingToolWindow(log_, L"Log");
 
   if (delegate_->IsLandscape()) {
-    source_view_->parent()->SplitChild(kSplitHorizontal, source_view_, output);
+    source_view_->parent()->SplitChild(
+        kSplitHorizontal, source_view_, output_window_);
     source_view_->parent()->SetFraction(.7);
-    output->parent()->SplitChild(kSplitVertical, output, log);
-    output->parent()->SetFraction(.6);
+    output_window_->parent()->SplitChild(
+        kSplitVertical, output_window_, log_window_);
+    output_window_->parent()->SetFraction(.6);
 
     source_view_->parent()->SplitChild(
         kSplitVertical, source_view_, stack_view_window_);
@@ -76,11 +81,14 @@ void Workspace::Init() {
         kSplitHorizontal, stack_view_window_, breakpoints);
     stack_view_window_->parent()->SetFraction(.6);
   } else {
-    source_view_->parent()->SplitChild(kSplitHorizontal, source_view_, output);
-    source_view_->parent()->SetFraction(.7);
-    output->parent()->SplitChild(kSplitVertical, output, log);
-    output->parent()->SetFraction(.6);
-    log->parent()->SplitChild(kSplitHorizontal, breakpoints, log);
+    source_view_->parent()->SplitChild(
+        kSplitHorizontal, source_view_, output_window_);
+    source_view_->parent()->SetFraction(.75);
+    output_window_->parent()->SplitChild(
+        kSplitVertical, output_window_, log_window_);
+    output_window_->parent()->SetFraction(.6);
+    log_window_->parent()->SplitChild(
+        kSplitHorizontal, breakpoints, log_window_);
 
     source_view_->parent()->SplitChild(kSplitVertical, source_view_, watch);
     watch->parent()->SplitChild(kSplitHorizontal, watch, locals);
@@ -88,8 +96,6 @@ void Workspace::Init() {
   }
 
   SetFocusedContents(source_view_);
-
-  // TODO(scottmg): Portrait.
 }
 
 void Workspace::SetDelegate(ApplicationWindow* delegate) {
@@ -167,6 +173,14 @@ void Workspace::SetStackData(
 
 void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
   // locals_view_->SetData(locals_data);
+}
+
+void Workspace::AddOutput(const string16& text) {
+  output_->AddText(text);
+}
+
+void Workspace::AddLog(const string16& text) {
+  log_->AddText(text);
 }
 
 bool Workspace::NotifyMouseMoved(

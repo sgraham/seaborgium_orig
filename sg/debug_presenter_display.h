@@ -26,6 +26,8 @@ class DebugPresenterDisplay {
   virtual void SetLocalsData(const std::vector<TypeNameValue>& locals_data) = 0;
   virtual void SetDebugState(const string16& debug_state) = 0;
   virtual void SetRenderTime(double ms_per_frame) = 0;
+  virtual void AddOutput(const string16& text) = 0;
+  virtual void AddLog(const string16& text) = 0;
 };
 
 #endif  // SG_DEBUG_PRESENTER_DISPLAY_H_

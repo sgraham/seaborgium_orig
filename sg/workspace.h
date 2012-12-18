@@ -16,6 +16,7 @@
 class ApplicationWindow;
 class DebugPresenterNotify;
 class DockingResizer;
+class ScrollingOutputView;
 class SourceView;
 class StackView;
 class StatusBar;
@@ -57,6 +58,8 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
       const std::vector<TypeNameValue>& locals_data) OVERRIDE;
   virtual void SetDebugState(const string16& debug_state) OVERRIDE;
   virtual void SetRenderTime(double ms_per_frame) OVERRIDE;
+  virtual void AddOutput(const string16& text) OVERRIDE;
+  virtual void AddLog(const string16& text) OVERRIDE;
 
  private:
   void InvalidateImpl();
@@ -67,6 +70,10 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   SourceView* source_view_;
   StackView* stack_view_;
   Dockable* stack_view_window_;
+  ScrollingOutputView* output_;
+  Dockable* output_window_;
+  ScrollingOutputView* log_;
+  Dockable* log_window_;
 
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;

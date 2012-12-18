@@ -38,6 +38,8 @@ class DebugPresenter : public DebugPresenterNotify,
       const StoppedAfterSteppingData& data) OVERRIDE;
   virtual void OnRetrievedStack(const RetrievedStackData& data) OVERRIDE;
   virtual void OnRetrievedLocals(const RetrievedLocalsData& data) OVERRIDE;
+  virtual void OnConsoleOutput(const string16& data) OVERRIDE;
+  virtual void OnInternalDebugOutput(const string16& data) OVERRIDE;
 
  private:
   void ReadFileOnFILE(FilePath path, std::string* result);

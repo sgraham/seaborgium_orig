@@ -341,6 +341,7 @@ def main():
                'ui/docking_workspace',
                'ui/focus',
                'ui/scroll_helper',
+               'ui/scrolling_output_view',
                'ui/skin',
                'ui/tool_window_dragger',
                'ui/tree_view_helper',
