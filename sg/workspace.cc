@@ -239,9 +239,9 @@ bool Workspace::NotifyMouseButton(
 bool Workspace::NotifyKey(
     InputKey key, bool down, const InputModifiers& modifiers) {
   Dockable* focused = GetFocusedContents();
-  if (!focused || !focused->WantKeyEvents())
+  if (!focused)
     return false;
-  if (focused->NotifyKey(key, down, modifiers))
+  if (focused->WantKeyEvents() && focused->NotifyKey(key, down, modifiers))
     return true;
   return debug_presenter_notify_->NotifyKey(key, down, modifiers);
 }
