@@ -41,6 +41,8 @@ class DockingSplitContainer : public Dockable {
   // Replaces either left or right child matching |target|, with |with|.
   void Replace(Dockable* target, Dockable* with);
 
+  Dockable* GetSiblingOf(Dockable* child);
+
   void SetScreenRect(const Rect& rect) OVERRIDE;
   void Render(Renderer* renderer) OVERRIDE;
   bool CouldStartDrag(DragSetup* drag_setup) OVERRIDE;

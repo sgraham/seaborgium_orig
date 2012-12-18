@@ -292,4 +292,16 @@ TEST_F(DockingTest, SubSplitRectSize) {
   EXPECT_EQ("500,500 250x500", RectAsString(pane3->GetScreenRect()));
 }
 
-// TODO(scottmg): Test for sibling parent (maybe covered already).
+TEST_F(DockingTest, SiblingRetrieval) {
+  DockingWorkspace workspace;
+  DockingSplitContainer::SetSplitterWidth(0);
+  workspace.SetScreenRect(Rect(0, 0, 1000, 1000));
+  MainDocument* main = new MainDocument;
+  workspace.SetRoot(main);
+  ContentPane* pane1 = new ContentPane;
+  ContentPane* pane2 = new ContentPane;
+  main->parent()->SplitChild(kSplitVertical, main, pane1);
+  pane1->parent()->SplitChild(kSplitVertical, pane1, pane2);
+  EXPECT_EQ(pane1->parent(), pane2->parent());
+  EXPECT_EQ(pane2, pane1->parent()->GetSiblingOf(pane1));
+}

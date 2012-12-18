@@ -93,6 +93,16 @@ void DockingSplitContainer::Replace(Dockable* target, Dockable* with) {
   SetScreenRect(GetScreenRect());
 }
 
+Dockable* DockingSplitContainer::GetSiblingOf(Dockable* child) {
+  if (left_.get() == child)
+    return right_.get();
+  else if (right_.get() == child)
+    return left_.get();
+  else
+    NOTREACHED();
+  return NULL;
+}
+
 void DockingSplitContainer::SetScreenRect(const Rect& rect) {
   Dockable::SetScreenRect(rect);
   if (direction_ == kSplitVertical) {
