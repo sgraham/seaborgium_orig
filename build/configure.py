@@ -14,7 +14,7 @@ if os.system('git submodule update --init') != 0:
 sys.path.append(ninja_misc_dir)
 import ninja_syntax
 
-def GetChromiumBaseFileList(base_dir):
+def GetChromiumBaseFileList(base_dir, platform):
   def get_file_list():
     all_files = []
     orig = os.getcwd()
@@ -30,38 +30,46 @@ def GetChromiumBaseFileList(base_dir):
 
   def filter_file_list(all_files, for_types):
     result = all_files[:]
-    if 'win' in for_types:
+    for x in ('file_path_watcher_stub.cc',
+              'dtoa.cc',
+              'event_recorder_stubs.cc',
+              '_mock.cc',
+              'check_example.cc',
+              'dynamic_annotations.c', # avoid futzing with .c
+              'debug_message.cc',
+              'allocator\\', # Kind of overly involved for user-configuration.
+              'field_trial.cc', # Has screwy winsock inclusion, don't need it.
+              'i18n\\', # Requires icu (I think)
+              ):
+      result = [y for y in result if x not in y]
+    if 'windows' in for_types:
       for x in ('_posix', '_mac', '_android', '_linux', '_ios', '_solaris',
                 '.java', '_gcc', '.mm', 'android\\', '_libevent',
                 'chromeos\\', 'data\\', '_freebsd', '_nacl', 'linux_',
                 '_glib', '_gtk', 'mac\\', 'unix_', 'file_descriptor',
                 '_aurax11', 'sha1_win.cc', '_openbsd', 'xdg_mime', '_kqueue',
                 'symbolize', 'string16.cc', '_chromeos', 'nix\\', 'xdg_',
-                'file_path_watcher_stub.cc', 'dtoa.cc',
-                'event_recorder_stubs.cc', '_mock.cc', 'check_example.cc',
-                'dynamic_annotations.c', # avoid futzing with .c
-                'debug_message.cc',
-                'allocator\\', # Kind of overly involved for user-configuration.
-                'field_trial.cc', # Has screwy winsock inclusion, don't need it.
-                'i18n\\', # Requires icu (I think)
+                ):
+        result = [y for y in result if x not in y]
+    if 'linux' in for_types:
+      for x in ('_win', '_mac', '_android', '_ios', '_solaris',
+                '.java', '.mm', 'android/', '_libevent',
+                'chromeos/', 'data/', '_freebsd', '_nacl', 'linux_',
+                '_glib', '_gtk', 'mac/', 'file_descriptor',
+                '_aurax11', 'sha1_win.cc', '_openbsd', 'xdg_mime', '_kqueue',
+                'symbolize', 'string16.cc', '_chromeos', 'xdg_',
                 ):
         result = [y for y in result if x not in y]
     if 'lib' in for_types:
       for x in ('README', 'LICENSE', 'OWNERS', '.h', '.patch', 'unittest',
                 'PRESUBMIT', 'DEPS', '.gyp', '.py', '.isolate', '.nc', 'test\\',
-                '.git', '_browsertest.cc', 'base64.cc' # TEMP
-                ):
-        result = [y for y in result if x not in y]
-    if 'test' in for_types:
-      for x in ('README', 'LICENSE', 'OWNERS', '.h', '.patch',
-                'PRESUBMIT', 'DEPS', '.gyp', '.py', '.isolate', 'test\\',
-                'base64.cc' # TEMP
+                'test/', '.git', '_browsertest.cc', 'base64.cc' # TEMP
                 ):
         result = [y for y in result if x not in y]
     return result
 
   files = get_file_list()
-  return filter_file_list(files, ('win', 'lib'))
+  return filter_file_list(files, (platform, 'lib'))
 
 
 def GetRe2FileList():
@@ -140,6 +148,13 @@ def GetFreetypeFileList():
   return [os.path.normpath(p) for p in files]
 
 
+def FilterForPlatform(sources_list, platform):
+  # TODO(scottmg): Less lame for the next platform.
+  if platform == 'linux':
+    return filter(lambda x: not x.endswith('_win'), sources_list)
+  elif platform == 'windows':
+    return filter(lambda x: not x.endswith('_linux'), sources_list)
+
 
 def main():
   platform = 'windows'
@@ -173,6 +188,9 @@ def main():
     print 'ERROR: extra unparsed command-line arguments:', args
     sys.exit(1)
 
+  pch_enabled = options.debug and platform == 'windows'
+
+
   BUILD_FILENAME = 'build.ninja'
   buildfile = open(BUILD_FILENAME, 'w')
   n = ninja_syntax.Writer(buildfile)
@@ -196,7 +214,7 @@ def main():
   pch_name = built('sg.pch')
   pch_implicit = None
   pch_compile = ''
-  if options.debug:
+  if pch_enabled:
     pch_implicit = pch_name
     pch_compile = '/Fp' + pch_name + ' /Yusg/global.h'
   def cc(name, src=src, **kwargs):
@@ -222,42 +240,65 @@ def main():
   n.variable('cxx', CXX)
   n.variable('cc', CC)
 
-  cflags = ['/nologo',  # Don't print startup banner.
-            '/Zi',  # Create pdb with debug info.
-            '/W4',  # Highest warning level.
-            '/WX',  # Warnings as errors.
-            '/wd4530', '/wd4100', '/wd4706', '/wd4245', '/wd4018',
-            '/wd4512', '/wd4800', '/wd4702', '/wd4819', '/wd4355',
-            '/wd4996', '/wd4481', '/wd4127', '/wd4310', '/wd4244',
-            '/wd4701', '/wd4201', '/wd4389', '/wd4722',
-            '/GR-',  # Disable RTTI.
-            '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
-            '/DUNICODE', '/D_UNICODE',
-            '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
-            '/D_WIN32_WINNT=0x0601', '/D_VARIADIC_MAX=10',
-            '/DDYNAMIC_ANNOTATIONS_ENABLED=0',
-            '-I.', '-Ithird_party', '-Ithird_party/gwen/gwen/include',
-            '-Ithird_party/re2',
-            '-Ibuild', '-Ithird_party/freetype/include',
-            '-FIsg/global.h']
-  if options.debug:
-    cflags += ['/D_DEBUG', '/MTd']
+  if platform == 'windows':
+    cflags = ['/nologo',  # Don't print startup banner.
+              '/Zi',  # Create pdb with debug info.
+              '/W4',  # Highest warning level.
+              '/WX',  # Warnings as errors.
+              '/wd4530', '/wd4100', '/wd4706', '/wd4245', '/wd4018',
+              '/wd4512', '/wd4800', '/wd4702', '/wd4819', '/wd4355',
+              '/wd4996', '/wd4481', '/wd4127', '/wd4310', '/wd4244',
+              '/wd4701', '/wd4201', '/wd4389', '/wd4722',
+              '/GR-',  # Disable RTTI.
+              '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
+              '/DUNICODE', '/D_UNICODE',
+              '/D_CRT_RAND_S', '/DWIN32', '/D_WIN32',
+              '/D_WIN32_WINNT=0x0601', '/D_VARIADIC_MAX=10',
+              '/DDYNAMIC_ANNOTATIONS_ENABLED=0',
+              '-I.', '-Ithird_party',
+              '-Ithird_party/re2',
+              '-Ibuild', '-Ithird_party/freetype/include',
+              '-FIsg/global.h']
+    if options.debug:
+      cflags += ['/D_DEBUG', '/MTd']
+    else:
+      cflags += ['/DNDEBUG', '/MT']
+    ldflags = ['/DEBUG', '/SUBSYSTEM:WINDOWS']
+    if not options.debug:
+      cflags += ['/Ox', '/DNDEBUG', '/GL']
+      ldflags += ['/LTCG', '/OPT:REF', '/OPT:ICF']
+    else:
+      ldflags += ['/INCREMENTAL']
+    libs = []
+    cxxflags = [
+        '/Fd$builddir\\sg_cxx_intermediate.pdb',
+        ]
+    ccflags = [
+        '/DFT2_BUILD_LIBRARY', '/wd4146',
+        '/Fd$builddir\\sg_cc_intermediate.pdb',
+        ]
   else:
-    cflags += ['/DNDEBUG', '/MT']
-  ldflags = ['/DEBUG', '/SUBSYSTEM:WINDOWS']
-  if not options.debug:
-    cflags += ['/Ox', '/DNDEBUG', '/GL']
-    ldflags += ['/LTCG', '/OPT:REF', '/OPT:ICF']
-  else:
-    ldflags += ['/INCREMENTAL']
-  libs = []
-  cxxflags = [
-      '/Fd$builddir\\sg_cxx_intermediate.pdb',
-      ]
-  ccflags = [
-      '/DFT2_BUILD_LIBRARY', '/wd4146',
-      '/Fd$builddir\\sg_cc_intermediate.pdb',
-      ]
+    cflags = ['-g', '-Wall', '-Wextra',
+              '-Wno-deprecated',
+              '-Wno-unused-parameter',
+              '-Wno-sign-compare',
+              '-fno-rtti',
+              '-fno-exceptions',
+              '-fvisibility=hidden', '-pipe',
+              '-Wno-missing-field-initializers',
+              '-I.', '-Ithird_party',
+              '-Ithird_party/re2',
+              '-Ibuild', '-Ithird_party/freetype/include',
+              '-include', 'sg/global.h',
+              ]
+    if options.debug:
+      cflags += ['-D_GLIBCXX_DEBUG', '-D_GLIBCXX_DEBUG_PEDANTIC']
+      cflags.remove('-fno-rtti')  # Needed for above pedanticness.
+    else:
+      cflags += ['-O2', '-DNDEBUG']
+    ccflags = []
+    cxxflags = []
+    ldflags = ['-L$builddir']
 
   n.newline()
 
@@ -267,20 +308,33 @@ def main():
   n.variable('ldflags', ' '.join(ldflags))
   n.newline()
 
-  compiler = 'ninja -t msvc -o $out -- $cxx /showIncludes'
-  n.rule('cxx',
-    command=('%s $cflags $cxxflags %s '
-             '-c $in /Fo$out' % (compiler, pch_compile)),
-    depfile='$out.d',
-    description='CXX $out')
-  n.newline()
+  if platform == 'windows':
+    cxx_compiler = 'ninja -t msvc -o $out -- $cxx /showIncludes'
+    n.rule('cxx',
+      command=('%s $cflags $cxxflags %s '
+              '-c $in /Fo$out' % (cxx_compiler, pch_compile)),
+      depfile='$out.d',
+      description='CXX $out')
+    n.newline()
+  else:
+    n.rule('cxx',
+      command='$cxx -MMD -MT $out -MF $out.d $cflags $cxxflags -c $in -o $out',
+      depfile='$out.d',
+      description='CXX $out')
+    n.newline()
 
-  compiler = 'ninja -t msvc -o $out -- $cc /showIncludes'
-  n.rule('cc',
-    command=('%s $cflags $ccflags '
-             '-c $in /Fo$out' % compiler),
-    depfile='$out.d',
-    description='CC $out')
+  if platform == 'windows':
+    cc_compiler = 'ninja -t msvc -o $out -- $cc /showIncludes'
+    n.rule('cc',
+      command=('%s $cflags $ccflags '
+              '-c $in /Fo$out' % cc_compiler),
+      depfile='$out.d',
+      description='CC $out')
+  else:
+    n.rule('cc',
+      command='$cc -MMD -MT $out -MF $out.d $cflags $ccflags -c $in -o $out',
+      depfile='$out.d',
+      description='CXX $out')
   n.newline()
 
   n.rule('link',
@@ -294,7 +348,7 @@ def main():
   n.newline()
 
   pch_objs = []
-  if options.debug:
+  if pch_enabled:
     compiler = 'ninja -t msvc -o $objname -- $cxx /showIncludes'
     n.rule('cxx_pch',
       command=('%s $cflags $cxxflags /Ycsg/global.h %s '
@@ -312,7 +366,7 @@ def main():
 
   sg_objs = []
   n.comment('Core source files.')
-  for name in [
+  core_sources = [
                'app_thread',
                'backend/backend_native_win',
                'backend/debug_core_gdb',
@@ -346,7 +400,8 @@ def main():
                'ui/tool_window_dragger',
                'ui/tree_view_helper',
                'workspace',
-              ]:
+              ]
+  for name in FilterForPlatform(core_sources, platform):
     sg_objs += cxx(name)
   n.newline() 
 
@@ -363,7 +418,7 @@ def main():
   n.newline()
 
   n.comment('Chromium base.')
-  crfiles = GetChromiumBaseFileList('third_party/base')
+  crfiles = GetChromiumBaseFileList('third_party/base', platform)
   base_objs = []
   for name in crfiles:
     base, ext = os.path.splitext(name)
@@ -391,14 +446,15 @@ def main():
 
   n.comment('Main executable is library plus main() and some startup goop.')
   main_objs = []
-  for base in ['application',
+  base_sources = ['application',
                'render/application_window_win',
                'render/gpu_win',
                'render/texture',
                'render/renderer',
                'render/direct2d_win',
                'main_win'
-               ]:
+               ]
+  for base in FilterForPlatform(base_sources, platform):
     main_objs += cxx(base)
   if platform == 'windows':
     main_objs += rc('sg', implicit=['art\\sg.ico'])

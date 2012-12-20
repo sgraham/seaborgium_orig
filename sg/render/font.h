@@ -15,9 +15,9 @@ class Font {
       : data(NULL), facename(name), size(size), bold(false) {
   }
 
+  mutable void* data;
   string16 facename;
   float size;
-  mutable void* data;
   bool bold;
 };
 

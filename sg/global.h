@@ -24,7 +24,10 @@
 #include <vector>
 #endif
 
+#ifdef _MSC_VER
 #include <crtdbg.h>  // NOLINT(build/include_order)
+#endif
+
 #include <stdio.h>  // NOLINT(build/include_order)
 #include <string.h>  // NOLINT(build/include_order)
 #include <stdint.h>  // NOLINT(build/include_order)
