@@ -12,7 +12,7 @@
 LocalsView::LocalsView()
     : tree_view_(this, Skin::current().text_line_height(), 3) {
   // TODO(config): Save this.
-  column_widths_[0] = .5;
+  column_widths_[0] = .25;
   column_widths_[1] = .80;
   column_widths_[2] = 1.;
 }
@@ -28,28 +28,12 @@ void LocalsView::SetData(const std::vector<TypeNameValue>& locals) {
 
 void LocalsView::Render(Renderer* renderer) {
   const Skin& skin = Skin::current();
-  int line_height = skin.text_line_height();
 
   renderer->SetDrawColor(skin.GetColorScheme().background());
   renderer->DrawFilledRect(Rect(0, 0, Width(), Height()));
 
-  static const int left_margin = 5;
-  static const int right_margin = 5;
-  static const int indicator_width = line_height;
-  static const int indicator_height = line_height;
-  static const int full_margin_width =
-      left_margin + indicator_width + right_margin;
-
-  renderer->SetDrawColor(skin.GetColorScheme().margin());
-  renderer->DrawFilledRect(Rect(0, 0, full_margin_width, Height()));
-
   // TODO(rendering): Scroll helper.
-  Point old_render_offset = renderer->GetRenderOffset();
-  renderer->AddRenderOffset(Point(full_margin_width, 0));
-  tree_view_screen_size_.w = GetScreenRect().w - full_margin_width;
-  tree_view_screen_size_.h = GetScreenRect().h;
   tree_view_.RenderTree(renderer, skin);
-  renderer->SetRenderOffset(old_render_offset);
 }
 
 double LocalsView::GetColumnWidth(int column) {
@@ -107,5 +91,5 @@ void LocalsView::SetNodeExpansionState(
 }
 
 Size LocalsView::GetTreeViewScreenSize() {
-  return tree_view_screen_size_;
+  return Size(GetScreenRect().w, GetScreenRect().h);
 }

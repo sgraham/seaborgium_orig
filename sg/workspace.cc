@@ -77,7 +77,7 @@ void Workspace::Init() {
     source_view_->parent()->SetFraction(.375);
     stack_view_window_->parent()->SplitChild(
         kSplitVertical, stack_view_window_, watch_);
-    stack_view_window_->parent()->SetFraction(.4);
+    stack_view_window_->parent()->SetFraction(.5);
     watch_->parent()->SplitChild(kSplitHorizontal, watch_, locals_view_window_);
     watch_->parent()->SetFraction(.65);
     stack_view_window_->parent()->SplitChild(

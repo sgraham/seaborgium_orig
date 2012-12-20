@@ -41,7 +41,6 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
 
   TreeViewHelper tree_view_;
   double column_widths_[3];
-  Size tree_view_screen_size_;
 };
 
 #endif  // SG_LOCALS_VIEW_H_
