@@ -10,9 +10,10 @@
 #include "base/string16.h"
 #include "sg/backend/backend.h"
 #include "sg/render/font.h"
-#include "sg/ui/contents.h"
+#include "sg/ui/dockable.h"
+#include "sg/ui/tree_view_helper.h"
 
-class LocalsView : public Contents {
+class LocalsView : public Dockable, public TreeViewHelperDataProvider {
  public:
   LocalsView();
 
@@ -20,8 +21,27 @@ class LocalsView : public Contents {
 
   virtual void SetData(const std::vector<TypeNameValue>& locals);
 
+  // Implementation of TreViewHelperDataProvider:
+  virtual double GetColumnWidth(int column) OVERRIDE;
+  virtual void SetColumnWidth(int column, double width) OVERRIDE;
+  virtual string16 GetColumnTitle(int column) OVERRIDE;
+  virtual int GetNodeChildCount(const std::string& node) OVERRIDE;
+  virtual std::string GetIdForChild(
+      const std::string& node, int child) OVERRIDE;
+  virtual string16 GetNodeDataForColumn(
+      const std::string& node, int column) OVERRIDE;
+  virtual NodeExpansionState GetNodeExpandability(
+      const std::string& node) OVERRIDE;
+  virtual void SetNodeExpansionState(
+      const std::string& node, NodeExpansionState state) OVERRIDE;
+  virtual Size GetTreeViewScreenSize() OVERRIDE;
+
  private:
-  std::vector<string16> lines_;
+  std::vector<TypeNameValue> lines_;
+
+  TreeViewHelper tree_view_;
+  double column_widths_[3];
+  Size tree_view_screen_size_;
 };
 
 #endif  // SG_LOCALS_VIEW_H_

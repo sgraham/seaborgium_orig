@@ -123,6 +123,13 @@ void Subprocess::Init() {
 bool Subprocess::Start(
     const string16& application,
     const string16& command_line) {
+  return Start(application, command_line, L".");
+}
+
+bool Subprocess::Start(
+    const string16& application,
+    const string16& command_line,
+    const string16& working_directory) {
   CHECK(input_pipe_ && output_pipe_ &&
         child_input_pipe_ && child_output_pipe_ && child_error_pipe_);
   STARTUPINFO startup_info = {0};
@@ -143,7 +150,8 @@ bool Subprocess::Start(
   if (!CreateProcess(application.c_str(), command_copy.get(), NULL, NULL,
                      /* inherit handles */ TRUE,
                      CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS,
-                     NULL, NULL,
+                     NULL,
+                     working_directory.c_str(),
                      &startup_info, &process_info)) {
     CloseHandle(child_output_pipe_);
     CloseHandle(child_input_pipe_);

@@ -7,6 +7,7 @@
 #include "base/bind.h"
 #include "sg/app_thread.h"
 #include "sg/debug_presenter_notify.h"
+#include "sg/locals_view.h"
 #include "sg/render/application_window.h"
 #include "sg/source_view.h"
 #include "sg/stack_view.h"
@@ -39,7 +40,8 @@ Workspace::Workspace()
   stack_view_ = new StackView;
   stack_view_window_ = new DockingToolWindow(stack_view_, L"Stack");
   watch_ = Placeholder(L"Watch");
-  locals_ = Placeholder(L"Locals");
+  locals_view_ = new LocalsView;
+  locals_view_window_ = new DockingToolWindow(locals_view_, L"Locals");
   breakpoints_ = Placeholder(L"Breakpoints");
   output_ = new ScrollingOutputView;
   output_window_ = new DockingToolWindow(output_, L"Output");
@@ -76,7 +78,7 @@ void Workspace::Init() {
     stack_view_window_->parent()->SplitChild(
         kSplitVertical, stack_view_window_, watch_);
     stack_view_window_->parent()->SetFraction(.4);
-    watch_->parent()->SplitChild(kSplitHorizontal, watch_, locals_);
+    watch_->parent()->SplitChild(kSplitHorizontal, watch_, locals_view_window_);
     watch_->parent()->SetFraction(.65);
     stack_view_window_->parent()->SplitChild(
         kSplitHorizontal, stack_view_window_, breakpoints_);
@@ -92,9 +94,9 @@ void Workspace::Init() {
         kSplitHorizontal, breakpoints_, log_window_);
 
     source_view_->parent()->SplitChild(kSplitVertical, source_view_, watch_);
-    watch_->parent()->SplitChild(kSplitHorizontal, watch_, locals_);
-    locals_->parent()->SplitChild(
-        kSplitHorizontal, locals_, stack_view_window_);
+    watch_->parent()->SplitChild(kSplitHorizontal, watch_, locals_view_window_);
+    locals_view_window_->parent()->SplitChild(
+        kSplitHorizontal, locals_view_window_, stack_view_window_);
   }
 
   SetFocusedContents(source_view_);
@@ -174,7 +176,7 @@ void Workspace::SetStackData(
 }
 
 void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
-  // locals_view_->SetData(locals_data);
+  locals_view_->SetData(locals_data);
 }
 
 void Workspace::AddOutput(const string16& text) {

@@ -52,7 +52,11 @@ class Subprocess {
   base::PlatformFile GetOutputPipe() const { return output_pipe_; }
   base::PlatformFile GetInputPipe() const { return input_pipe_; }
 
-  bool Start(const string16& application, const string16& command_line);
+  bool Start(const string16& application,
+             const string16& command_line);
+  bool Start(const string16& application,
+             const string16& command_line,
+             const string16& working_directory);
   void OnPipeReady();
 
  private:

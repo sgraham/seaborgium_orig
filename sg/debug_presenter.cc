@@ -23,8 +23,9 @@ DebugPresenter::DebugPresenter(SourceFiles* source_files)
       running_(false) {
   const CommandLine& command_line = *CommandLine::ForCurrentProcess();
   // TODO(scottmg): Temporary obviously.
+  // TODO(scottmg): Relative to gdb location.
   if (command_line.GetArgs().size() != 1)
-    binary_ = L"test_data/test_binary_mingw.exe";
+    binary_ = L"../test_data/test_binary_mingw.exe";
   else
     ReplaceChars(command_line.GetArgs()[0], L"\\", L"/", &binary_);
 }

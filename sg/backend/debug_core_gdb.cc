@@ -247,7 +247,8 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
 
 DebugCoreGdb::DebugCoreGdb() : token_(0) {
   CHECK(gdb_.Start(L"gdb_win_binaries/gdb-python27.exe",
-                   L"--fullname -nx --interpreter=mi2 --quiet"));
+                   L"--fullname -nx --interpreter=mi2 --quiet",
+                   L"gdb_win_binaries"));
   reader_writer_.reset(new ReaderWriter(
         gdb_.GetInputPipe(), gdb_.GetOutputPipe()));
 }

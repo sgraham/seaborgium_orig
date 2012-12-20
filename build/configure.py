@@ -368,12 +368,12 @@ def main():
   n.comment('Core source files.')
   core_sources = [
                'app_thread',
-               'backend/backend_native_win',
+               #'backend/backend_native_win',
                'backend/debug_core_gdb',
                'backend/debug_core_native_win',
                'backend/gdb_mi_parse',
                'backend/gdb_to_generic_converter',
-               'backend/process_native_win',
+               #'backend/process_native_win',
                'backend/subprocess_win',
                'cpp_lexer',
                'debug_presenter',
@@ -381,7 +381,7 @@ def main():
                'display_util',
                'lexer',
                'lexer_state',
-               #'locals_view',
+               'locals_view',
                'main_loop',
                'render/scoped_render_offset',
                'source_files',

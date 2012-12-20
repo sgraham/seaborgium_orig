@@ -16,6 +16,7 @@
 class ApplicationWindow;
 class DebugPresenterNotify;
 class DockingResizer;
+class LocalsView;
 class ScrollingOutputView;
 class SourceView;
 class StackView;
@@ -73,9 +74,10 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   Dockable* output_window_;
   ScrollingOutputView* log_;
   Dockable* log_window_;
+  LocalsView* locals_view_;
+  Dockable* locals_view_window_;
 
   Dockable* watch_;
-  Dockable* locals_;
   Dockable* breakpoints_;
 
   ApplicationWindow* delegate_;
