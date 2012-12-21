@@ -61,6 +61,13 @@ class TreeViewHelper {
   bool NotifyMouseButton(int index, bool down, const InputModifiers& modifiers);
 
  private:
+  struct RectAndId {
+    RectAndId(const Rect& rect, const std::string& id) : rect(rect), id(id) {
+    }
+    Rect rect;
+    std::string id;
+  };
+
   int GetStartXForColumn(int column);
   void RenderNodes(Renderer* renderer,
                    const Skin& skin,
@@ -75,7 +82,8 @@ class TreeViewHelper {
   int indent_size_;
   int buttons_width_;
   bool requires_buttons_;
-  std::vector<Rect> last_rendered_buttons_;
+  std::vector<RectAndId> last_rendered_buttons_;
+  Point mouse_position_;
 };
 
 #endif  // SG_UI_TREE_VIEW_HELPER_H_

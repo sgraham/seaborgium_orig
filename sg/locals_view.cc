@@ -94,6 +94,9 @@ NodeExpansionState LocalsView::GetNodeExpandability(const std::string& node) {
 
 void LocalsView::SetNodeExpansionState(
     const std::string& node, NodeExpansionState state) {
+  int node_index;
+  CHECK(base::StringToInt(node, &node_index));
+  lines_[node_index].expansion_state = state;
 }
 
 Size LocalsView::GetTreeViewScreenSize() {
@@ -142,7 +145,11 @@ bool LocalsView::NotifyMouseWheel(
 
 bool LocalsView::NotifyMouseButton(
     int index, bool down, const InputModifiers& modifiers) {
-  return tree_view_.NotifyMouseButton(index, down, modifiers);
+  // TODO(scottmg): This is a sketcho bool. Might need to rethink the "helper".
+  bool modified = tree_view_.NotifyMouseButton(index, down, modifiers);
+  if (modified)
+    Invalidate();
+  return modified;
 }
 
 LocalsView::VariableData::VariableData(const TypeNameValue& type_name_value)

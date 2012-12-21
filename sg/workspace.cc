@@ -235,6 +235,9 @@ bool Workspace::NotifyMouseButton(
   } else if (index == 0 && down) {
     Dockable* target = main_area_->FindTopMostUnderPoint(mouse_position_);
     SetFocusedContents(target);
+    target->NotifyMouseMoved(mouse_position_.x, mouse_position_.y,
+                             0, 0, modifiers);
+    target->NotifyMouseButton(index, down, modifiers);
     Invalidate();
   }
   return false;

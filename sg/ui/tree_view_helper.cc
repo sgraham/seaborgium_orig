@@ -4,6 +4,7 @@
 
 #include "sg/ui/tree_view_helper.h"
 
+#include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "sg/render/renderer.h"
 #include "sg/render/scoped_render_offset.h"
@@ -95,8 +96,9 @@ void TreeViewHelper::RenderNodes(
       int button_size = buttons_width_ - 6;
       renderer->DrawHorizontalLine(3, *y + num_pixels_in_row_ / 2,
                                    button_size);
-      last_rendered_buttons_.push_back(
-          Rect(3, *y + 3, button_size, button_size));
+      Rect button_rect = Rect(3, *y + 3, button_size, button_size);
+      renderer->TranslateByRenderOffset(&button_rect);
+      last_rendered_buttons_.push_back(RectAndId(button_rect, child_id));
       if (expansion_state == kCollapsed) {
         renderer->DrawVerticalLine(buttons_width_ / 2, *y + 3,
                                    button_size);
@@ -135,11 +137,7 @@ bool TreeViewHelper::NotifyKey(
 
 bool TreeViewHelper::NotifyMouseMoved(
     int x, int y, int dx, int dy, const InputModifiers& modifiers) {
-  for (size_t i = 0; i < last_rendered_buttons_.size(); ++i) {
-    if (last_rendered_buttons_[i].Contains(Point(x, y))) {
-      MessageBox(0, L"here!", L"", 0);
-    }
-  }
+  mouse_position_ = Point(x, y);
   return false;
 }
 
@@ -150,5 +148,17 @@ bool TreeViewHelper::NotifyMouseWheel(
 
 bool TreeViewHelper::NotifyMouseButton(
     int index, bool down, const InputModifiers& modifiers) {
-  return false;
+  bool modified = false;
+  for (size_t i = 0; i < last_rendered_buttons_.size(); ++i) {
+    if (last_rendered_buttons_[i].rect.Contains(mouse_position_)) {
+      NodeExpansionState expansion_state =
+          data_provider_->GetNodeExpandability(last_rendered_buttons_[i].id);
+      CHECK(expansion_state == kCollapsed || expansion_state == kExpanded);
+      expansion_state = expansion_state == kCollapsed ? kExpanded : kCollapsed;
+      data_provider_->SetNodeExpansionState(
+          last_rendered_buttons_[i].id, expansion_state);
+      modified = true;
+    }
+  }
+  return modified;
 }
