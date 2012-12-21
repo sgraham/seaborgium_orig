@@ -21,7 +21,7 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
 
   virtual void SetData(const std::vector<TypeNameValue>& locals);
 
-  // Implementation of TreViewHelperDataProvider:
+  // Implementation of TreeViewHelperDataProvider:
   virtual double GetColumnWidth(int column) OVERRIDE;
   virtual void SetColumnWidth(int column, double width) OVERRIDE;
   virtual string16 GetColumnTitle(int column) OVERRIDE;
@@ -35,6 +35,18 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
   virtual void SetNodeExpansionState(
       const std::string& node, NodeExpansionState state) OVERRIDE;
   virtual Size GetTreeViewScreenSize() OVERRIDE;
+
+  // Implementation of InputHandler:
+  virtual bool NotifyKey(
+      InputKey key, bool down, const InputModifiers& modifiers) OVERRIDE;
+  virtual bool NotifyMouseMoved(
+      int x, int y, int dx, int dy, const InputModifiers& modifiers) OVERRIDE;
+  virtual bool NotifyMouseWheel(
+      int delta, const InputModifiers& modifiers) OVERRIDE;
+  virtual bool NotifyMouseButton(
+      int index, bool down, const InputModifiers& modifiers) OVERRIDE;
+  virtual bool WantKeyEvents() OVERRIDE { return true; }
+  virtual bool WantMouseEvents() OVERRIDE { return true; }
 
  private:
   struct VariableData {

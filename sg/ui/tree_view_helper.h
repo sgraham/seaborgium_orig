@@ -9,6 +9,7 @@
 
 #include "base/string16.h"
 #include "sg/basic_geometric_types.h"
+#include "sg/ui/input.h"
 class Font;
 class Renderer;
 class Skin;
@@ -53,6 +54,12 @@ class TreeViewHelper {
   int GetRowHeight() const { return num_pixels_in_row_; }
   int GetYOffsetToFirstRow() const;
 
+  bool NotifyKey(InputKey key, bool down, const InputModifiers& modifiers);
+  bool NotifyMouseMoved(
+      int x, int y, int dx, int dy, const InputModifiers& modifiers);
+  bool NotifyMouseWheel(int delta, const InputModifiers& modifiers);
+  bool NotifyMouseButton(int index, bool down, const InputModifiers& modifiers);
+
  private:
   int GetStartXForColumn(int column);
   void RenderNodes(Renderer* renderer,
@@ -68,6 +75,7 @@ class TreeViewHelper {
   int indent_size_;
   int buttons_width_;
   bool requires_buttons_;
+  std::vector<Rect> last_rendered_buttons_;
 };
 
 #endif  // SG_UI_TREE_VIEW_HELPER_H_

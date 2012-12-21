@@ -123,6 +123,28 @@ bool LocalsView::IsTypeExpandable(const string16& type) {
   return true;
 }
 
+// TODO(scottmg): For all of these, if the tree view doesn't handle, forward
+// on to a scroll helper.
+bool LocalsView::NotifyKey(
+    InputKey key, bool down, const InputModifiers& modifiers) {
+  return tree_view_.NotifyKey(key, down, modifiers);
+}
+
+bool LocalsView::NotifyMouseMoved(
+    int x, int y, int dx, int dy, const InputModifiers& modifiers) {
+  return tree_view_.NotifyMouseMoved(x, y, dx, dy, modifiers);
+}
+
+bool LocalsView::NotifyMouseWheel(
+    int delta, const InputModifiers& modifiers) {
+  return tree_view_.NotifyMouseWheel(delta, modifiers);
+}
+
+bool LocalsView::NotifyMouseButton(
+    int index, bool down, const InputModifiers& modifiers) {
+  return tree_view_.NotifyMouseButton(index, down, modifiers);
+}
+
 LocalsView::VariableData::VariableData(const TypeNameValue& type_name_value)
     : type(type_name_value.type),
       name(type_name_value.name),

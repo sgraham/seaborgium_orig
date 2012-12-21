@@ -69,6 +69,7 @@ void TreeViewHelper::RenderTree(Renderer* renderer, const Skin& skin) {
   }
 
   requires_buttons_ = RequiresExpansionButtons();
+  last_rendered_buttons_.clear();
 
   // And contents.
   ScopedRenderOffset offset_title(renderer, 0, height_of_header);
@@ -89,14 +90,17 @@ void TreeViewHelper::RenderNodes(
     NodeExpansionState expansion_state =
         data_provider_->GetNodeExpandability(child_id);
     // TODO(rendering): Textures.
-    if (expansion_state == kExpanded) {
+    if (expansion_state == kExpanded ||
+        expansion_state == kCollapsed) {
+      int button_size = buttons_width_ - 6;
       renderer->DrawHorizontalLine(3, *y + num_pixels_in_row_ / 2,
-                                   buttons_width_ - 3);
-    } else if (expansion_state == kCollapsed) {
-      renderer->DrawVerticalLine(buttons_width_ / 2, *y + 3,
-                                 num_pixels_in_row_ - 6);
-      renderer->DrawHorizontalLine(3, *y + num_pixels_in_row_ / 2,
-                                   buttons_width_ - 6);
+                                   button_size);
+      last_rendered_buttons_.push_back(
+          Rect(3, *y + 3, button_size, button_size));
+      if (expansion_state == kCollapsed) {
+        renderer->DrawVerticalLine(buttons_width_ / 2, *y + 3,
+                                   button_size);
+      }
     }
     for (int j = 0; j < num_columns_; ++j) {
       // TODO(rendering): Perhaps dispatch out to customizers here.
@@ -121,5 +125,30 @@ bool TreeViewHelper::RequiresExpansionButtons() {
         kNotExpandable)
       return true;
   }
+  return false;
+}
+
+bool TreeViewHelper::NotifyKey(
+    InputKey key, bool down, const InputModifiers& modifiers) {
+  return false;
+}
+
+bool TreeViewHelper::NotifyMouseMoved(
+    int x, int y, int dx, int dy, const InputModifiers& modifiers) {
+  for (size_t i = 0; i < last_rendered_buttons_.size(); ++i) {
+    if (last_rendered_buttons_[i].Contains(Point(x, y))) {
+      MessageBox(0, L"here!", L"", 0);
+    }
+  }
+  return false;
+}
+
+bool TreeViewHelper::NotifyMouseWheel(
+    int delta, const InputModifiers& modifiers) {
+  return false;
+}
+
+bool TreeViewHelper::NotifyMouseButton(
+    int index, bool down, const InputModifiers& modifiers) {
   return false;
 }
