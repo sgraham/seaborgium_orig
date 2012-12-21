@@ -37,7 +37,18 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
   virtual Size GetTreeViewScreenSize() OVERRIDE;
 
  private:
-  std::vector<TypeNameValue> lines_;
+  struct VariableData {
+    explicit VariableData(const TypeNameValue& type_name_value);
+    string16 type;
+    string16 name;
+    string16 value;
+    NodeExpansionState expansion_state;
+    // TODO(scottmg): Name for a var object or something.
+  };
+  VariableData FindExistingOrCreateVariableData(const TypeNameValue& local);
+  bool IsTypeExpandable(const string16& type);
+
+  std::vector<VariableData> lines_;
 
   TreeViewHelper tree_view_;
   double column_widths_[3];

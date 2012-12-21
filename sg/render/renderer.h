@@ -90,6 +90,10 @@ class Renderer {
   // Can be done manually, or draws in terms of DrawFilledRect.
   virtual void DrawOutlineRect(Rect rect);
 
+  // Can be done manually, or draws in terms of DrawFilledRect.
+  virtual void DrawHorizontalLine(int x, int y, int length);
+  virtual void DrawVerticalLine(int x, int y, int length);
+
   // Global offset applied to rendering (so that sub-controls can work only in
   // local space.
   void SetRenderOffset(const Point& offset) { render_offset_ = offset; }

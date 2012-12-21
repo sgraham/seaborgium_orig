@@ -60,11 +60,14 @@ class TreeViewHelper {
                    const std::string& root,
                    int* y,
                    int indent);
+  bool RequiresExpansionButtons();
 
   TreeViewHelperDataProvider* data_provider_;
   int num_pixels_in_row_;
   int num_columns_;
   int indent_size_;
+  int buttons_width_;
+  bool requires_buttons_;
 };
 
 #endif  // SG_UI_TREE_VIEW_HELPER_H_

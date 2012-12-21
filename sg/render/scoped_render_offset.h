@@ -13,6 +13,7 @@ class Dockable;
 class ScopedRenderOffset {
  public:
   ScopedRenderOffset(Renderer* renderer, Dockable* parent, Dockable* child);
+  ScopedRenderOffset(Renderer* renderer, int dx, int dy);
   ~ScopedRenderOffset();
 
  private:

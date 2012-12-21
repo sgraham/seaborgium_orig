@@ -4,7 +4,9 @@
 
 #include "sg/ui/tree_view_helper.h"
 
+#include "base/memory/scoped_ptr.h"
 #include "sg/render/renderer.h"
+#include "sg/render/scoped_render_offset.h"
 #include "sg/ui/skin.h"
 
 namespace {
@@ -22,6 +24,7 @@ TreeViewHelper::TreeViewHelper(
       num_pixels_in_row_(num_pixels_in_row),
       num_columns_(num_columns) {
   indent_size_ = num_pixels_in_row_;
+  buttons_width_ = num_pixels_in_row_;
 }
 
 TreeViewHelper::~TreeViewHelper() {
@@ -32,25 +35,32 @@ int TreeViewHelper::GetYOffsetToFirstRow() const {
 }
 
 int TreeViewHelper::GetStartXForColumn(int column) {
-  int offset = 0;
-  if (column > 0)
-    offset = data_provider_->GetColumnWidth(column - 1) *
-             data_provider_->GetTreeViewScreenSize().w;
-  return offset;
+  if (column == 0) {
+    if (requires_buttons_)
+      return buttons_width_;
+    return 0;
+  } else {
+    int width = data_provider_->GetTreeViewScreenSize().w;
+    if (requires_buttons_)
+      width -= buttons_width_;
+    return data_provider_->GetColumnWidth(column - 1) * width;
+  }
 }
 
 void TreeViewHelper::RenderTree(Renderer* renderer, const Skin& skin) {
   Size screen_size = data_provider_->GetTreeViewScreenSize();
-
   int height_of_header = GetYOffsetToFirstRow();
+
+  // Header.
   renderer->SetDrawColor(skin.GetColorScheme().margin());
   renderer->DrawFilledRect(Rect(0, 0, screen_size.w, height_of_header));
   renderer->SetDrawColor(skin.GetColorScheme().border());
-  renderer->DrawFilledRect(Rect(0, 0, screen_size.w, 1));
+  renderer->DrawHorizontalLine(0, 0, screen_size.w);
   renderer->DrawFilledRect(Rect(0, height_of_header - 1, screen_size.w, 1));
-  for (int i = 0; i < num_columns_; ++i)
-    renderer->DrawFilledRect(Rect(GetStartXForColumn(i), 0, 1, screen_size.h));
+  for (int i = 1; i < num_columns_; ++i)
+    renderer->DrawVerticalLine(GetStartXForColumn(i), 0, screen_size.h);
 
+  // Titles.
   renderer->SetDrawColor(skin.GetColorScheme().margin_text());
   for (int i = 0; i < num_columns_; ++i) {
     int x = GetStartXForColumn(i) + kFromSidePadding;
@@ -58,9 +68,13 @@ void TreeViewHelper::RenderTree(Renderer* renderer, const Skin& skin) {
     renderer->RenderText(skin.ui_font(), Point(x, kHeaderPadding), title);
   }
 
+  requires_buttons_ = RequiresExpansionButtons();
+
+  // And contents.
+  ScopedRenderOffset offset_title(renderer, 0, height_of_header);
   renderer->SetDrawColor(skin.GetColorScheme().text());
-  int y = height_of_header;
-  RenderNodes(renderer, skin, "", &y, 0);
+  int y = 0;
+  RenderNodes(renderer, skin, std::string(), &y, 0);
 }
 
 void TreeViewHelper::RenderNodes(
@@ -72,6 +86,18 @@ void TreeViewHelper::RenderNodes(
   int count = data_provider_->GetNodeChildCount(root);
   for (int i = 0; i < count; ++i) {
     std::string child_id = data_provider_->GetIdForChild(root, i);
+    NodeExpansionState expansion_state =
+        data_provider_->GetNodeExpandability(child_id);
+    // TODO(rendering): Textures.
+    if (expansion_state == kExpanded) {
+      renderer->DrawHorizontalLine(3, *y + num_pixels_in_row_ / 2,
+                                   buttons_width_ - 3);
+    } else if (expansion_state == kCollapsed) {
+      renderer->DrawVerticalLine(buttons_width_ / 2, *y + 3,
+                                 num_pixels_in_row_ - 6);
+      renderer->DrawHorizontalLine(3, *y + num_pixels_in_row_ / 2,
+                                   buttons_width_ - 6);
+    }
     for (int j = 0; j < num_columns_; ++j) {
       // TODO(rendering): Perhaps dispatch out to customizers here.
       // TODO(rendering): Clip.
@@ -84,4 +110,16 @@ void TreeViewHelper::RenderNodes(
     if (data_provider_->GetNodeExpandability(child_id) == kExpanded)
       RenderNodes(renderer, skin, child_id, y, indent + indent_size_);
   }
+}
+
+bool TreeViewHelper::RequiresExpansionButtons() {
+  std::string root;
+  int count = data_provider_->GetNodeChildCount(root);
+  for (int i = 0; i < count; ++i) {
+    std::string child_id = data_provider_->GetIdForChild(root, i);
+    if (data_provider_->GetNodeExpandability(child_id) !=
+        kNotExpandable)
+      return true;
+  }
+  return false;
 }

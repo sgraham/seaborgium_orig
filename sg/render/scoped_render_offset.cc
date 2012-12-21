@@ -15,6 +15,12 @@ ScopedRenderOffset::ScopedRenderOffset(
   renderer_->AddRenderOffset(Point(relative.x, relative.y));
 }
 
+ScopedRenderOffset::ScopedRenderOffset(Renderer* renderer, int dx, int dy)
+    : renderer_(renderer) {
+  old_offset_ = renderer_->GetRenderOffset();
+  renderer_->AddRenderOffset(Point(dx, dy));
+}
+
 ScopedRenderOffset::~ScopedRenderOffset() {
   renderer_->SetRenderOffset(old_offset_);
 }

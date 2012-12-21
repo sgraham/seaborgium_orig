@@ -6,6 +6,8 @@
 
 #include "base/logging.h"
 #include "base/string_number_conversions.h"
+#include "base/string_util.h"
+#include "sg/display_util.h"
 #include "sg/render/renderer.h"
 #include "sg/ui/skin.h"
 
@@ -18,11 +20,13 @@ LocalsView::LocalsView()
 }
 
 void LocalsView::SetData(const std::vector<TypeNameValue>& locals) {
-  lines_.clear();
-  // TODO
+  std::vector<VariableData> new_lines;
   for (size_t i = 0; i < locals.size(); ++i) {
-    lines_.push_back(locals[i]);
+    VariableData variable_data = FindExistingOrCreateVariableData(locals[i]);
+    variable_data.value = locals[i].value;
+    new_lines.push_back(variable_data);
   }
+  lines_ = new_lines;
   Invalidate();
 }
 
@@ -77,13 +81,15 @@ string16 LocalsView::GetNodeDataForColumn(const std::string& node, int column) {
   else if (column == 1)
     return lines_[node_index].value;
   else if (column == 2)
-    return lines_[node_index].type;
+    return TidyTypeName(lines_[node_index].type);
   NOTREACHED();
   return L"";
 }
 
 NodeExpansionState LocalsView::GetNodeExpandability(const std::string& node) {
-  return kNotExpandable;
+  int node_index;
+  CHECK(base::StringToInt(node, &node_index));
+  return lines_[node_index].expansion_state;
 }
 
 void LocalsView::SetNodeExpansionState(
@@ -92,4 +98,34 @@ void LocalsView::SetNodeExpansionState(
 
 Size LocalsView::GetTreeViewScreenSize() {
   return Size(GetScreenRect().w, GetScreenRect().h);
+}
+
+LocalsView::VariableData LocalsView::FindExistingOrCreateVariableData(
+    const TypeNameValue& local) {
+  for (size_t i = 0; i < lines_.size(); ++i) {
+    if (lines_[i].name == local.name && lines_[i].type == local.type)
+      return lines_[i];
+  }
+  VariableData variable_data(local);
+  if (IsTypeExpandable(variable_data.type))
+    variable_data.expansion_state = kCollapsed;
+  return variable_data;
+}
+
+bool LocalsView::IsTypeExpandable(const string16& type) {
+  // TODO(scottmg): Hmm. Need to lift this into a Type for all these
+  // manipulations. Probably requires backend queries.
+  if (EndsWith(type, L"*", true))
+    return true;
+  if (type == L"int" || type == L"float" || type == L"double" || type == L"char") {
+    return false;
+  }
+  return true;
+}
+
+LocalsView::VariableData::VariableData(const TypeNameValue& type_name_value)
+    : type(type_name_value.type),
+      name(type_name_value.name),
+      value(type_name_value.value),
+      expansion_state(kNotExpandable) {
 }

@@ -104,6 +104,14 @@ void Renderer::DrawOutlineRect(Rect rect) {
   DrawFilledRect(Rect(rect.x + rect.w - 1, rect.y, 1, rect.h));
 }
 
+void Renderer::DrawHorizontalLine(int x, int y, int length) {
+  DrawFilledRect(Rect(x, y, length, 1));
+}
+
+void Renderer::DrawVerticalLine(int x, int y, int length) {
+  DrawFilledRect(Rect(x, y, 1, length));
+}
+
 RenderToTextureRenderer::RenderToTextureRenderer() {
 }
 
