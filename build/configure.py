@@ -383,7 +383,9 @@ def main():
                'lexer_state',
                'locals_view',
                'main_loop',
+               'render/renderer',
                'render/scoped_render_offset',
+               'render/texture',
                'source_files',
                'source_view',
                'status_bar',
@@ -449,8 +451,6 @@ def main():
   base_sources = ['application',
                'render/application_window_win',
                'render/gpu_win',
-               'render/texture',
-               'render/renderer',
                'render/direct2d_win',
                'main_win'
                ]
