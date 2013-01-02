@@ -251,6 +251,7 @@ DebugCoreGdb::DebugCoreGdb() : token_(0) {
                    L"gdb_win_binaries"));
   reader_writer_.reset(new ReaderWriter(
         gdb_.GetInputPipe(), gdb_.GetOutputPipe()));
+  SendCommand(L"-enable-pretty-printing");
 }
 
 DebugCoreGdb::~DebugCoreGdb() {
