@@ -5,6 +5,7 @@
 #ifndef SG_LOCALS_VIEW_H_
 #define SG_LOCALS_VIEW_H_
 
+#include <string>
 #include <vector>
 
 #include "base/string16.h"
@@ -55,7 +56,7 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
     string16 name;
     string16 value;
     NodeExpansionState expansion_state;
-    // TODO(scottmg): Name for a var object or something.
+    //scoped_ptr<DebugVariable> backend_variable;
   };
   VariableData FindExistingOrCreateVariableData(const TypeNameValue& local);
   bool IsTypeExpandable(const string16& type);

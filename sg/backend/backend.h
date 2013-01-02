@@ -75,6 +75,13 @@ class DebugNotification {
   virtual void OnInternalDebugOutput(const string16& data) {}
 };
 
+class DebugVariable {
+ public:
+  virtual ~DebugVariable() {}
+
+  // TODO
+};
+
 class ThreadCallStack {
  public:
   virtual ~ThreadCallStack() {}

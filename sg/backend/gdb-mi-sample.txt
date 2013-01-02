@@ -112,3 +112,40 @@ q
 ^done,variables=[{name="f",type="double",value="42.432000000000002"},{name="result",type="int",value="440"},{name="argc",arg="1",type="int",value="1"},{name="argv",arg="1",type="char **",value="0x22e30"}]
 (gdb)
 
+
+
+(gdb)
+This is the test binary!
+~"21\t  printf(\"argc: %d\\n\", argc);\n"
+*stopped,frame={addr="0x004013dc",func="main",args=[{name="argc",value="1"},{name="argv",value="0x5c1938"}],file="test_binary.cc",fullname="c:\\Users\\sgraham\\code\\seaborgium\\test_data\\test_binary.cc",line="21"},thread-id="1",stopped-threads="all"
+(gdb)
+-var-create - @ argv
+^done,name="var1",numchild="1",value="0x5c1938",type="char **",thread-id="1",has_more="0"
+(gdb)
+-var-info-num-children var1
+^done,numchild="1"
+(gdb)
+-var-list-children var1
+^done,numchild="1",children=[child={name="var1.*argv",exp="*argv",numchild="1",type="char *",thread-id="1"}],has_more="0"
+(gdb)
+-var-list-children var1*.argv
+^error,msg="Variable object not found"
+(gdb)
+-enable-pretty-printing
+^done
+(gdb)
+-var-info-num-children var1
+^done,numchild="1"
+(gdb)
+-var-list-children var1
+^done,numchild="1",children=[child={name="var1.*argv",exp="*argv",numchild="1",type="char *",thread-id="1"}],has_more="0"
+(gdb)
+-var-list-children --all-values var1
+^done,numchild="1",children=[child={name="var1.*argv",exp="*argv",numchild="1",value="0x5c17f9 \"c:\\\\Users\\\\sgraham\\\\code\\\\seaborgium\\\\test_data\\\\test_binary_mingw.exe\"",type="char *",thread-id="1"}],has_more="0"
+(gdb)
+-var-list-children --all-values var1.*argv
+^done,numchild="1",children=[child={name="var1.*argv.**argv",exp="**argv",numchild="0",value="99 'c'",type="char",thread-id="1"}],has_more="0"
+(gdb)
+-var-list-children --all-values var1.*argv.**argv
+^done,numchild="0",has_more="0"
+
