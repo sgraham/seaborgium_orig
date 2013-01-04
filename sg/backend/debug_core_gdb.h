@@ -53,6 +53,7 @@ class DebugCoreGdb : public base::NonThreadSafe,
 
   virtual void GetStack();
   virtual void GetLocals();
+  virtual void UpdateWatches();
 
   // |id| should be created via GenerateNewVariableIdentifier.
   virtual void CreateWatch(const std::string& id, const string16& name);

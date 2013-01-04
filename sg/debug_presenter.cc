@@ -204,7 +204,15 @@ void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
 }
 
 void DebugPresenter::OnWatchCreated(const WatchCreatedData& data) {
-  display_->SetLocalValue(data.variable_id, data.has_children, data.value);
+  display_->SetLocalValue(data.variable_id, data.value);
+  display_->SetLocalHasChildren(data.variable_id, data.has_children);
+}
+
+void DebugPresenter::OnWatchesUpdated(const WatchesUpdatedData& data) {
+  for (size_t i = 0; i < data.watches.size(); ++i) {
+    const WatchesUpdatedData::Item& item = data.watches[i];
+    display_->SetLocalValue(item.variable_id, item.value);
+  }
 }
 
 void DebugPresenter::OnConsoleOutput(const string16& data) {
@@ -239,4 +247,6 @@ void DebugPresenter::UpdatePassiveDisplays() {
       base::Bind(&DebugCoreGdb::GetStack, debug_core_));
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::GetLocals, debug_core_));
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::UpdateWatches, debug_core_));
 }

@@ -160,3 +160,24 @@ WatchCreatedData WatchCreatedDataFromRecordResults(
   data.type = UTF8ToUTF16(FindStringValue("type", results));
   return data;
 }
+
+WatchesUpdatedData WatchesUpdatedDataFromChangesList(base::Value* value) {
+  WatchesUpdatedData data;
+  base::ListValue* list_value;
+  CHECK(value->GetAsList(&list_value));
+  for (size_t i = 0; i < list_value->GetSize(); ++i) {
+    base::DictionaryValue* dict_value;
+    CHECK(list_value->GetDictionary(i, &dict_value));
+    WatchesUpdatedData::Item item;
+    string16 variable_id;
+    CHECK(dict_value->GetStringWithoutPathExpansion("name", &variable_id));
+    item.variable_id = UTF16ToUTF8(variable_id);
+    dict_value->GetStringWithoutPathExpansion("value", &item.value);
+    string16 type_changed;
+    CHECK(dict_value->GetStringWithoutPathExpansion(
+        "type_changed", &type_changed));
+    item.type_changed = type_changed == L"true";
+    data.watches.push_back(item);
+  }
+  return data;
+}

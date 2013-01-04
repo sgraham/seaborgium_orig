@@ -42,6 +42,7 @@ class DebugPresenter : public DebugPresenterNotify,
   virtual void OnRetrievedStack(const RetrievedStackData& data) OVERRIDE;
   virtual void OnRetrievedLocals(const RetrievedLocalsData& data) OVERRIDE;
   virtual void OnWatchCreated(const WatchCreatedData& data) OVERRIDE;
+  virtual void OnWatchesUpdated(const WatchesUpdatedData& data) OVERRIDE;
   virtual void OnConsoleOutput(const string16& data) OVERRIDE;
   virtual void OnInternalDebugOutput(const string16& data) OVERRIDE;
 

@@ -187,9 +187,12 @@ void Workspace::RemoveLocal(int local) {
   return locals_view_->RemoveLocal(local);
 }
 
-void Workspace::SetLocalValue(
-    const std::string& id, bool has_children, const string16& value) {
-  return locals_view_->SetLocalValue(id, has_children, value);
+void Workspace::SetLocalValue(const std::string& id, const string16& value) {
+  return locals_view_->SetLocalValue(id, value);
+}
+
+void Workspace::SetLocalHasChildren(const std::string& id, bool has_children) {
+  return locals_view_->SetLocalHasChildren(id, has_children);
 }
 
 void Workspace::AddOutput(const string16& text) {

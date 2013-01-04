@@ -68,6 +68,18 @@ class WatchCreatedData {
   string16 type;
 };
 
+class WatchesUpdatedData {
+ public:
+  struct Item {
+    std::string variable_id;
+    string16 value;
+    bool type_changed;
+    // TODO(scottmg): Children changes.
+  };
+  std::vector<Item> watches;
+};
+
+
 class DebugNotification {
  public:
   virtual ~DebugNotification() {}
@@ -80,6 +92,7 @@ class DebugNotification {
   virtual void OnRetrievedStack(const RetrievedStackData& data) {}
   virtual void OnRetrievedLocals(const RetrievedLocalsData& data) {}
   virtual void OnWatchCreated(const WatchCreatedData& data) {}
+  virtual void OnWatchesUpdated(const WatchesUpdatedData& data) {}
   virtual void OnConsoleOutput(const string16& data) {}
   virtual void OnInternalDebugOutput(const string16& data) {}
 };

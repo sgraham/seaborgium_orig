@@ -132,7 +132,7 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
     DCHECK(record->results().size() == 1 &&
            record->results()[0]->variable() == "variables");
     RetrievedLocalsData data =
-      RetrievedLocalsDataFromList(record->results()[0]->value());
+        RetrievedLocalsDataFromList(record->results()[0]->value());
     AppThread::PostTask(AppThread::UI, FROM_HERE,
         base::Bind(&DebugNotification::OnRetrievedLocals,
                    base::Unretained(debug_notification_), data));
@@ -144,6 +144,18 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
     AppThread::PostTask(AppThread::UI, FROM_HERE,
         base::Bind(&DebugNotification::OnWatchCreated,
                    base::Unretained(debug_notification_), data));
+  }
+
+  void HandlerVariableUpdates(const GdbRecord* record) {
+    DCHECK(record->results().size() == 1 &&
+           record->results()[0]->variable() == "changelist");
+    WatchesUpdatedData data =
+        WatchesUpdatedDataFromChangesList(record->results()[0]->value());
+    if (data.watches.size() > 0) {
+      AppThread::PostTask(AppThread::UI, FROM_HERE,
+          base::Bind(&DebugNotification::OnWatchesUpdated,
+                     base::Unretained(debug_notification_), data));
+    }
   }
 
   void SendNotifications(GdbOutput* output) {
@@ -427,6 +439,15 @@ void DebugCoreGdb::GetLocals() {
                          base::Unretained(reader_writer_.get())),
               L"-stack-list-variables",
               L"--simple-values");
+}
+
+void DebugCoreGdb::UpdateWatches() {
+  SendCommand(NewToken(),
+              base::Bind(&ReaderWriter::HandlerVariableUpdates,
+                         base::Unretained(reader_writer_.get())),
+              L"-var-update",
+              L"--simple-values",
+              L"*");
 }
 
 void DebugCoreGdb::CreateWatch(const std::string& id, const string16& name) {

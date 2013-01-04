@@ -58,15 +58,23 @@ void LocalsView::RemoveLocal(int local) {
   lines_.erase(lines_.begin() + local);
 }
 
-void LocalsView::SetLocalValue(
-    const std::string& id, bool has_children, const string16& value) {
+void LocalsView::SetLocalValue(const std::string& id, const string16& value) {
+  for (size_t i = 0; i < lines_.size(); ++i) {
+    if (lines_[i].debug_presenter_variable.backend_id() == id) {
+      lines_[i].value = value;
+      break;
+    }
+  }
+}
+
+void LocalsView::SetLocalHasChildren(
+    const std::string& id, bool has_children) {
   for (size_t i = 0; i < lines_.size(); ++i) {
     if (lines_[i].debug_presenter_variable.backend_id() == id) {
       if (has_children && lines_[i].expansion_state == kNotExpandable)
         lines_[i].expansion_state = kCollapsed;
       else if (!has_children)
         lines_[i].expansion_state = kNotExpandable;
-      lines_[i].value = value;
       break;
     }
   }

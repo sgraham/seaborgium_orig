@@ -39,4 +39,6 @@ LibraryLoadedData LibraryLoadedDataFromRecordResults(
 WatchCreatedData WatchCreatedDataFromRecordResults(
     const std::vector<GdbRecordResult*>& results);
 
+WatchesUpdatedData WatchesUpdatedDataFromChangesList(base::Value* list_value);
+
 #endif  // SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_
