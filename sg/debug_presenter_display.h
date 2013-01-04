@@ -48,6 +48,8 @@ class DebugPresenterDisplay {
   virtual DebugPresenterVariable GetLocal(int local) = 0;
   virtual void SetLocal(int local, const DebugPresenterVariable& variable) = 0;
   virtual void RemoveLocal(int local) = 0;
+  virtual void SetLocalValue(
+      const std::string& id, bool has_children, const string16& value) = 0;
 
   virtual void AddOutput(const string16& text) = 0;
 

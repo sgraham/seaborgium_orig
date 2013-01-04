@@ -5,6 +5,7 @@
 #ifndef SG_BACKEND_DEBUG_CORE_GDB_H_
 #define SG_BACKEND_DEBUG_CORE_GDB_H_
 
+#include <string>
 #include <vector>
 
 #include "base/memory/weak_ptr.h"
@@ -21,7 +22,10 @@
 // interface from this level to be async, so when we write commands to gdb we
 // can assume there's no need to coordinate with the output it's giving us.
 
+class GdbRecord;
 class ReaderWriter;
+
+typedef base::Callback<void (const GdbRecord*)> RecordHandler;
 
 class DebugCoreGdb : public base::NonThreadSafe,
                      public base::SupportsWeakPtr<DebugCoreGdb> {
@@ -50,18 +54,14 @@ class DebugCoreGdb : public base::NonThreadSafe,
   virtual void GetStack();
   virtual void GetLocals();
 
-  virtual void CreateWatch(const string16& name);
+  // |id| should be created via GenerateNewVariableIdentifier.
+  virtual void CreateWatch(const std::string& id, const string16& name);
 
   void DeleteSelf();
 
   static base::WeakPtr<DebugCoreGdb> Create();
 
-
  private:
-  DebugNotification* debug_notification_;
-  Subprocess gdb_;
-  scoped_ptr<ReaderWriter> reader_writer_;
-
   void SendCommand(const string16& arg0);
   void SendCommand(const string16& arg0, const string16& arg1);
   void SendCommand(
@@ -72,12 +72,20 @@ class DebugCoreGdb : public base::NonThreadSafe,
       const string16& arg2,
       const string16& arg3);
 
-  void SendCommand(int64 token, const string16& arg0);
-  void SendCommand(int64 token, const string16& arg0, const string16& arg1);
-  void SendCommand(
-      int64 token, const string16& arg0, const string16& arg1,
-      const string16& arg2);
+  void SendCommand(int64 token, RecordHandler handler, const string16& arg0);
+  void SendCommand(int64 token, RecordHandler handler, const string16& arg0,
+                   const string16& arg1);
+  void SendCommand(int64 token, RecordHandler handler, const string16& arg0,
+                   const string16& arg1, const string16& arg2);
+  void SendCommand(int64 token, RecordHandler handler, const string16& arg0,
+                   const string16& arg1, const string16& arg2,
+                   const string16& arg3);
 
+  int64 NewToken();
+
+  DebugNotification* debug_notification_;
+  Subprocess gdb_;
+  scoped_ptr<ReaderWriter> reader_writer_;
   int64 token_;
 
   DISALLOW_COPY_AND_ASSIGN(DebugCoreGdb);

@@ -67,6 +67,15 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
     scoped_ptr<GdbOutput> output(
         gdb_mi_reader_.Parse(unused_read_data_, &bytes_consumed));
     if (output.get()) {
+#ifndef NDEBUG
+      if (debug_notification_) {
+        AppThread::PostTask(AppThread::UI, FROM_HERE,
+            base::Bind(&DebugNotification::OnInternalDebugOutput,
+                      base::Unretained(debug_notification_),
+                      L"\x2190 " +
+                      UTF8ToUTF16(unused_read_data_.substr(0, bytes_consumed))));
+      }
+#endif
       unused_read_data_ = unused_read_data_.substr(bytes_consumed);
       SendNotifications(output.get());
     }
@@ -90,6 +99,53 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
     debug_notification_ = debug_notification;
   }
 
+  // Handlers for various commands that return result records.
+  void HandlerStack(const GdbRecord* record) {
+    DCHECK(record->results().size() == 1 &&
+           record->results()[0]->variable() == "stack");
+    RetrievedStackData data =
+      RetrievedStackDataFromList(record->results()[0]->value());
+    stack_without_arguments_ = data;
+    got_stack_frames_waiting_for_arguments_ = true;
+    // Possibly want to post here if the stack-args is too slow.
+    // On small stacks though, it just causes one frame of flicker,
+    // so just defer until we get the argument data.
+  }
+
+  void HandlerStackArgs(const GdbRecord* record) {
+    // The -stack-list-frames (above, "stack"), doesn't include any
+    // information about the function other than the name, so we
+    // also request the argument information, merge it in, and send
+    // stack results again.
+    DCHECK(record->results().size() == 1 &&
+           record->results()[0]->variable() == "stack-args");
+    DCHECK(got_stack_frames_waiting_for_arguments_);
+    RetrievedStackData data = MergeArgumentsIntoStackFrameData(
+        stack_without_arguments_, record->results()[0]->value());
+    AppThread::PostTask(AppThread::UI, FROM_HERE,
+        base::Bind(&DebugNotification::OnRetrievedStack,
+                   base::Unretained(debug_notification_), data));
+    got_stack_frames_waiting_for_arguments_ = false;
+  }
+
+  void HandlerVariables(const GdbRecord* record) {
+    DCHECK(record->results().size() == 1 &&
+           record->results()[0]->variable() == "variables");
+    RetrievedLocalsData data =
+      RetrievedLocalsDataFromList(record->results()[0]->value());
+    AppThread::PostTask(AppThread::UI, FROM_HERE,
+        base::Bind(&DebugNotification::OnRetrievedLocals,
+                   base::Unretained(debug_notification_), data));
+  }
+
+  void HandlerCreateVariable(const GdbRecord* record) {
+    WatchCreatedData data =
+        WatchCreatedDataFromRecordResults(record->results());
+    AppThread::PostTask(AppThread::UI, FROM_HERE,
+        base::Bind(&DebugNotification::OnWatchCreated,
+                   base::Unretained(debug_notification_), data));
+  }
+
   void SendNotifications(GdbOutput* output) {
     // TODO(scottmg): It'd be nice to not have AppThread here.
     for (size_t i = 0; i < output->size(); ++i) {
@@ -97,40 +153,13 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
       switch (record->record_type()) {
         case GdbRecord::RT_RESULT_RECORD:
           if (record->ResultClass() == "done") {
-            if (record->results().size() == 1 &&
-                record->results()[0]->variable() == "stack") {
-              RetrievedStackData data =
-                  RetrievedStackDataFromList(record->results()[0]->value());
-              stack_without_arguments_ = data;
-              got_stack_frames_waiting_for_arguments_ = true;
-              // Possibly want to post here if the stack-args is too slow.
-              // On small stacks though, it just causes one frame of flicker,
-              // so just defer until we get the argument data.
+            if (handler_for_result_.find(record->token()) !=
+                handler_for_result_.end()) {
+              handler_for_result_[record->token()].Run(record);
               continue;
-            } else if (record->results().size() == 1 &&
-                       record->results()[0]->variable() == "stack-args") {
-              // The -stack-list-frames (above, "stack"), doesn't include any
-              // information about the function other than the name, so we
-              // also request the argument information, merge it in, and send
-              // stack results again.
-              RetrievedStackData data =
-                  MergeArgumentsIntoStackFrameData(
-                      stack_without_arguments_,
-                      record->results()[0]->value());
-              AppThread::PostTask(AppThread::UI, FROM_HERE,
-                  base::Bind(&DebugNotification::OnRetrievedStack,
-                             base::Unretained(debug_notification_), data));
-              got_stack_frames_waiting_for_arguments_ = false;
-              continue;
-            } else if (record->results().size() == 1 &&
-                       record->results()[0]->variable() == "variables") {
-              RetrievedLocalsData data =
-                  RetrievedLocalsDataFromList(record->results()[0]->value());
-              AppThread::PostTask(AppThread::UI, FROM_HERE,
-                  base::Bind(&DebugNotification::OnRetrievedLocals,
-                             base::Unretained(debug_notification_), data));
             }
-            got_stack_frames_waiting_for_arguments_ = false;
+            // TODO: Necessary?
+            // got_stack_frames_waiting_for_arguments_ = false;
           }
           goto notimplemented;
         case GdbRecord::RT_EXEC_ASYNC_OUTPUT:
@@ -198,10 +227,24 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
       CHECK(ERROR_IO_PENDING == GetLastError());
   }
 
+  void SendStringWithHandler(
+      const string16& string, int64 token, RecordHandler handler) {
+    handler_for_result_[base::Int64ToString(token)] = handler;
+    SendString(string);
+  }
+
   void SendString(const string16& string) {
     if (write_state_.is_pending) {
       pending_writes_.push_back(string);
     } else {
+#ifndef NDEBUG
+      if (debug_notification_) {
+        AppThread::PostTask(AppThread::UI, FROM_HERE,
+            base::Bind(&DebugNotification::OnInternalDebugOutput,
+                       base::Unretained(debug_notification_),
+                       L"\x2192 " + string));
+      }
+#endif
       std::string narrow = UTF16ToUTF8(string);
       CHECK(narrow.size() <= sizeof(write_state_.buffer));
 #ifndef NDEBUG
@@ -238,6 +281,12 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
   std::list<string16> pending_writes_;
 
   bool terminating_;
+
+  // Mapping from outstanding token to handler function that should handle it.
+  // This is necessary because some result records don't have any indication
+  // of the command that caused them, and we may have more than one
+  // submitted.
+  std::map<std::string, RecordHandler> handler_for_result_;
 
   RetrievedStackData stack_without_arguments_;
   bool got_stack_frames_waiting_for_arguments_;
@@ -290,26 +339,43 @@ void DebugCoreGdb::SendCommand(const string16& arg0,
   reader_writer_->SendString(command);
 }
 
-void DebugCoreGdb::SendCommand(int64 token, const string16& arg0) {
+void DebugCoreGdb::SendCommand(
+    int64 token, RecordHandler handler, const string16& arg0) {
   string16 command = base::Int64ToString16(token) + arg0 + L"\r\n";
-  reader_writer_->SendString(command);
+  reader_writer_->SendStringWithHandler(command, token, handler);
 }
 
-void DebugCoreGdb::SendCommand(int64 token,
-                               const string16& arg0,
-                               const string16& arg1) {
+void DebugCoreGdb::SendCommand(
+    int64 token,
+    RecordHandler handler,
+    const string16& arg0,
+    const string16& arg1) {
   string16 command = base::Int64ToString16(token) +
                      arg0 + L" " + arg1 + L"\r\n";
-  reader_writer_->SendString(command);
+  reader_writer_->SendStringWithHandler(command, token, handler);
 }
 
-void DebugCoreGdb::SendCommand(int64 token,
-                               const string16& arg0,
-                               const string16& arg1,
-                               const string16& arg2) {
+void DebugCoreGdb::SendCommand(
+    int64 token,
+    RecordHandler handler,
+    const string16& arg0,
+    const string16& arg1,
+    const string16& arg2) {
   string16 command = base::Int64ToString16(token) +
                      arg0 + L" " + arg1 + L" " + arg2 + L"\r\n";
-  reader_writer_->SendString(command);
+  reader_writer_->SendStringWithHandler(command, token, handler);
+}
+
+void DebugCoreGdb::SendCommand(
+    int64 token,
+    RecordHandler handler,
+    const string16& arg0,
+    const string16& arg1,
+    const string16& arg2,
+    const string16& arg3) {
+  string16 command = base::Int64ToString16(token) +
+                     arg0 + L" " + arg1 + L" " + arg2 + L" " + arg3 + L"\r\n";
+  reader_writer_->SendStringWithHandler(command, token, handler);
 }
 
 void DebugCoreGdb::LoadProcess(
@@ -344,19 +410,34 @@ void DebugCoreGdb::StepOut() {
 }
 
 void DebugCoreGdb::GetStack() {
-  SendCommand(token_, L"-stack-list-frames");
-  SendCommand(token_, L"-stack-list-arguments", L"--simple-values");
-  // return token_++;
+  SendCommand(NewToken(),
+              base::Bind(&ReaderWriter::HandlerStack,
+                         base::Unretained(reader_writer_.get())),
+              L"-stack-list-frames");
+  SendCommand(NewToken(),
+              base::Bind(&ReaderWriter::HandlerStackArgs,
+                         base::Unretained(reader_writer_.get())),
+              L"-stack-list-arguments",
+              L"--simple-values");
 }
 
 void DebugCoreGdb::GetLocals() {
-  SendCommand(token_++, L"-stack-list-variables", L"--simple-values");
-  // return token_++;
+  SendCommand(NewToken(),
+              base::Bind(&ReaderWriter::HandlerVariables,
+                         base::Unretained(reader_writer_.get())),
+              L"-stack-list-variables",
+              L"--simple-values");
 }
 
-void DebugCoreGdb::CreateWatch(const string16& name) {
+void DebugCoreGdb::CreateWatch(const std::string& id, const string16& name) {
   // Note, currently always "floating", should support fixed + ui for it.
-  SendCommand(L"-var-create", L"-", L"@", name);
+  SendCommand(NewToken(),
+              base::Bind(&ReaderWriter::HandlerCreateVariable,
+                         base::Unretained(reader_writer_.get())),
+              L"-var-create",
+              UTF8ToUTF16(id),
+              L"@",
+              name);
 }
 
 
@@ -371,4 +452,8 @@ void DebugCoreGdb::SetDebugNotification(DebugNotification* debug_notification) {
 base::WeakPtr<DebugCoreGdb> DebugCoreGdb::Create() {
   DebugCoreGdb* result = new DebugCoreGdb;
   return result->AsWeakPtr();
+}
+
+int64 DebugCoreGdb::NewToken() {
+  return token_++;
 }

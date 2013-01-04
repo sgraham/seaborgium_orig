@@ -143,3 +143,20 @@ LibraryLoadedData LibraryLoadedDataFromRecordResults(
   return data;
 }
 
+WatchCreatedData WatchCreatedDataFromRecordResults(
+    const std::vector<GdbRecordResult*>& results) {
+  WatchCreatedData data;
+  data.variable_id = FindStringValue("name", results);
+  std::string numchild_str = FindStringValue("numchild", results);
+  std::string has_more_str = FindStringValue("has_more", results);
+  data.has_children = false;
+  int numchild_int, has_more_int;
+  if (base::StringToInt(numchild_str, &numchild_int) &&
+      base::StringToInt(has_more_str, &has_more_int) &&
+      (numchild_int > 0 || has_more_int != 0)) {
+    data.has_children = true;
+  }
+  data.value = UTF8ToUTF16(FindStringValue("value", results));
+  data.type = UTF8ToUTF16(FindStringValue("type", results));
+  return data;
+}

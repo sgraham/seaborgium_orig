@@ -25,6 +25,8 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
   DebugPresenterVariable GetLocal(int local);
   void SetLocal(int local, const DebugPresenterVariable& variable);
   void RemoveLocal(int local);
+  void SetLocalValue(
+      const std::string& id, bool has_children, const string16& value);
 
   // Implementation of TreeViewHelperDataProvider:
   virtual double GetColumnWidth(int column) OVERRIDE;

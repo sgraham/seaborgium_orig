@@ -10,6 +10,7 @@
 #include "base/bind.h"
 #include "base/command_line.h"
 #include "base/file_util.h"
+#include "base/string_number_conversions.h"
 #include "base/string_util.h"
 #include "sg/app_thread.h"
 #include "sg/backend/debug_core_gdb.h"
@@ -21,6 +22,7 @@
 
 DebugPresenter::DebugPresenter(SourceFiles* source_files)
     : source_files_(source_files),
+      variable_counter_(0),
       running_(false) {
   const CommandLine& command_line = *CommandLine::ForCurrentProcess();
   // TODO(scottmg): Temporary obviously.
@@ -145,6 +147,12 @@ void DebugPresenter::OnRetrievedStack(const RetrievedStackData& data) {
   display_->SetStackData(data.frames, 0);
 }
 
+// This should be moved to the debug core so that the ids can be created in a
+// method that makes sense for it, but it's complex to do so asynchronously.
+std::string DebugPresenter::GenerateNewVariableIdentifier() {
+  return "V" + base::Int64ToString(variable_counter_++);
+}
+
 void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
   typedef std::map<string16, DebugPresenterVariable> KeyToVariableMap;
 
@@ -166,15 +174,17 @@ void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
     view_indices[variable.key()] = i;
   }
 
-  for (KeyToVariableMap::const_iterator i(new_locals.begin());
+  for (KeyToVariableMap::iterator i(new_locals.begin());
        i != new_locals.end(); ++i) {
     // If we already have it, then don't do anything (to preserve any existing
     // backend variable), otherwise append the new variable.
     if (in_view.find(i->first) == in_view.end()) {
+      std::string id = GenerateNewVariableIdentifier();
+      i->second.set_backend_id(id);
       display_->SetLocal(display_->NumLocals(), i->second);
       AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
           base::Bind(&DebugCoreGdb::CreateWatch,
-                     debug_core_, i->second.name()));
+                     debug_core_, id, i->second.name()));
     }
   }
 
@@ -191,6 +201,10 @@ void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
   std::reverse(indices_to_remove.begin(), indices_to_remove.end());
   for (size_t i = 0; i < indices_to_remove.size(); ++i)
     display_->RemoveLocal(indices_to_remove[i]);
+}
+
+void DebugPresenter::OnWatchCreated(const WatchCreatedData& data) {
+  display_->SetLocalValue(data.variable_id, data.has_children, data.value);
 }
 
 void DebugPresenter::OnConsoleOutput(const string16& data) {

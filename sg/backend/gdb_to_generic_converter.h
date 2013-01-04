@@ -36,4 +36,7 @@ RetrievedLocalsData RetrievedLocalsDataFromList(base::Value* list_value);
 LibraryLoadedData LibraryLoadedDataFromRecordResults(
     const std::vector<GdbRecordResult*>& results);
 
+WatchCreatedData WatchCreatedDataFromRecordResults(
+    const std::vector<GdbRecordResult*>& results);
+
 #endif  // SG_BACKEND_GDB_TO_GENERIC_CONVERTER_H_

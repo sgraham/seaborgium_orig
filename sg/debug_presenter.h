@@ -41,6 +41,7 @@ class DebugPresenter : public DebugPresenterNotify,
   virtual void OnLibraryUnloaded(const LibraryUnloadedData& data) OVERRIDE;
   virtual void OnRetrievedStack(const RetrievedStackData& data) OVERRIDE;
   virtual void OnRetrievedLocals(const RetrievedLocalsData& data) OVERRIDE;
+  virtual void OnWatchCreated(const WatchCreatedData& data) OVERRIDE;
   virtual void OnConsoleOutput(const string16& data) OVERRIDE;
   virtual void OnInternalDebugOutput(const string16& data) OVERRIDE;
 
@@ -51,10 +52,14 @@ class DebugPresenter : public DebugPresenterNotify,
   // On stopping, starts requests for stack, values of locals, etc.
   void UpdatePassiveDisplays();
 
+  std::string GenerateNewVariableIdentifier();
+
   string16 binary_;
   DebugPresenterDisplay* display_;
   SourceFiles* source_files_;
   base::WeakPtr<DebugCoreGdb> debug_core_;
+
+  int64 variable_counter_;
 
   // Map from Type+Name+Value to variable id on the backend.
   std::map<string16, std::string> backend_variables_;

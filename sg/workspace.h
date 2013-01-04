@@ -59,6 +59,8 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   virtual void SetLocal(
       int local, const DebugPresenterVariable& variable) OVERRIDE;
   virtual void RemoveLocal(int local) OVERRIDE;
+  virtual void SetLocalValue(
+    const std::string& id, bool has_children, const string16& value) OVERRIDE;
   virtual void AddOutput(const string16& text) OVERRIDE;
   virtual void AddLog(const string16& text) OVERRIDE;
   virtual void SetRenderTime(double ms_per_frame) OVERRIDE;

@@ -370,7 +370,7 @@ def main():
                'app_thread',
                #'backend/backend_native_win',
                'backend/debug_core_gdb',
-               'backend/debug_core_native_win',
+               #'backend/debug_core_native_win',
                'backend/gdb_mi_parse',
                'backend/gdb_to_generic_converter',
                #'backend/process_native_win',
