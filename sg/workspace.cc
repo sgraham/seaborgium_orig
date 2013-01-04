@@ -108,6 +108,7 @@ void Workspace::SetDelegate(ApplicationWindow* delegate) {
 
 void Workspace::SetDebugPresenterNotify(DebugPresenterNotify* debug_presenter) {
   debug_presenter_notify_ = debug_presenter;
+  locals_view_->SetDebugPresenterNotify(debug_presenter);
 }
 
 void Workspace::SetScreenRect(const Rect& rect) {

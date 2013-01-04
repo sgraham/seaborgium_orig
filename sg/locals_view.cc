@@ -8,29 +8,18 @@
 #include "base/string_number_conversions.h"
 #include "base/string_util.h"
 #include "sg/display_util.h"
+#include "sg/debug_presenter_notify.h"
 #include "sg/render/renderer.h"
 #include "sg/ui/skin.h"
 
 LocalsView::LocalsView()
-    : tree_view_(this, Skin::current().text_line_height(), 3) {
+    : tree_view_(this, Skin::current().text_line_height(), 3),
+      notify_(NULL) {
   // TODO(config): Save this.
   column_widths_[0] = .25;
   column_widths_[1] = .80;
   column_widths_[2] = 1.;
 }
-
-/*
-void LocalsView::SetData(const std::vector<TypeNameValue>& locals) {
-  std::vector<VariableData> new_lines;
-  for (size_t i = 0; i < locals.size(); ++i) {
-    VariableData variable_data = FindExistingOrCreateVariableData(locals[i]);
-    variable_data.value = locals[i].value;
-    new_lines.push_back(variable_data);
-  }
-  lines_ = new_lines;
-  Invalidate();
-}
-*/
 
 int LocalsView::NumLocals() {
   return static_cast<int>(lines_.size());
@@ -78,6 +67,10 @@ void LocalsView::SetLocalHasChildren(
       break;
     }
   }
+}
+
+void LocalsView::SetDebugPresenterNotify(DebugPresenterNotify* notify) {
+  notify_ = notify;
 }
 
 void LocalsView::Render(Renderer* renderer) {
@@ -147,39 +140,12 @@ void LocalsView::SetNodeExpansionState(
   int node_index;
   CHECK(base::StringToInt(node, &node_index));
   lines_[node_index].expansion_state = state;
+  notify_->NotifyVariableExpansionStateChanged(node, state == kExpanded);
 }
 
 Size LocalsView::GetTreeViewScreenSize() {
   return Size(GetScreenRect().w, GetScreenRect().h);
 }
-
-/*
-LocalsView::VariableData LocalsView::FindExistingOrCreateVariableData(
-    const TypeNameValue& local) {
-  for (size_t i = 0; i < lines_.size(); ++i) {
-    if (lines_[i].name == local.name && lines_[i].type == local.type)
-      return lines_[i];
-  }
-  VariableData variable_data(local);
-  // Start as kNotExpandable, and start creation of a backend variable to
-  // discover what the real structure of this variable is.
-  variable_data.expansion_state = kNotExpandable;
-  return variable_data;
-}
-*/
-
-/*
-bool LocalsView::IsTypeExpandable(const string16& type) {
-  // TODO(scottmg): Hmm. Need to lift this into a Type for all these
-  // manipulations. Probably requires backend queries.
-  if (EndsWith(type, L"*", true))
-    return true;
-  if (type == L"int" || type == L"float" || type == L"double" || type == L"char") {
-    return false;
-  }
-  return true;
-}
-*/
 
 // TODO(scottmg): For all of these, if the tree view doesn't handle, forward
 // on to a scroll helper.

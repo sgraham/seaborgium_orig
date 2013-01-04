@@ -72,7 +72,7 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
         AppThread::PostTask(AppThread::UI, FROM_HERE,
             base::Bind(&DebugNotification::OnInternalDebugOutput,
                       base::Unretained(debug_notification_),
-                      L"\x2190 " +
+                      L"\x2190\n" +
                       UTF8ToUTF16(unused_read_data_.substr(0, bytes_consumed))));
       }
 #endif
@@ -156,6 +156,9 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
           base::Bind(&DebugNotification::OnWatchesUpdated,
                      base::Unretained(debug_notification_), data));
     }
+  }
+
+  void HandlerVariableListChildren(const GdbRecord* record) {
   }
 
   void SendNotifications(GdbOutput* output) {
@@ -254,7 +257,7 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
         AppThread::PostTask(AppThread::UI, FROM_HERE,
             base::Bind(&DebugNotification::OnInternalDebugOutput,
                        base::Unretained(debug_notification_),
-                       L"\x2192 " + string));
+                       L"\x2192\n" + string));
       }
 #endif
       std::string narrow = UTF16ToUTF8(string);
@@ -448,6 +451,21 @@ void DebugCoreGdb::UpdateWatches() {
               L"-var-update",
               L"--simple-values",
               L"*");
+}
+
+void DebugCoreGdb::SetWatchExpanded(const std::string& id, bool expanded) {
+  if (expanded) {
+    SendCommand(NewToken(),
+                base::Bind(&ReaderWriter::HandlerVariableListChildren,
+                           base::Unretained(reader_writer_.get())),
+                L"-var-list-children",
+                L"--simple-values",
+                UTF8ToUTF16(id));
+  } else {
+    SendCommand(L"-var-delete",
+                L"-c",
+                UTF8ToUTF16(id));
+  }
 }
 
 void DebugCoreGdb::CreateWatch(const std::string& id, const string16& name) {

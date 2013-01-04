@@ -11,8 +11,8 @@
 #include "base/basictypes.h"
 #include "base/file_path.h"
 #include "base/memory/weak_ptr.h"
-#include "sg/debug_presenter_notify.h"
 #include "sg/backend/backend.h"
+#include "sg/debug_presenter_notify.h"
 
 class DebugCoreGdb;
 class DebugPresenterDisplay;
@@ -27,12 +27,14 @@ class DebugPresenter : public DebugPresenterNotify,
   virtual void SetDisplay(DebugPresenterDisplay* display);
   virtual void SetDebugCore(base::WeakPtr<DebugCoreGdb> debug_core);
 
-  // Implementation of DebugPresenterNotify.
+  // Implementation of DebugPresenterNotify:
   virtual void NotifyFramePainted(double frame_time_in_ms) OVERRIDE;
   virtual bool NotifyKey(
       InputKey key, bool down, const InputModifiers& modifiers) OVERRIDE;
+  virtual void NotifyVariableExpansionStateChanged(
+      const std::string& id, bool expanded) OVERRIDE;
 
-  // Implementation of DebugNotification
+  // Implementation of DebugNotification:
   virtual void OnStoppedAtBreakpoint(
       const StoppedAtBreakpointData& data) OVERRIDE;
   virtual void OnStoppedAfterStepping(

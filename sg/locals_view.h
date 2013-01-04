@@ -15,6 +15,8 @@
 #include "sg/ui/dockable.h"
 #include "sg/ui/tree_view_helper.h"
 
+class DebugPresenterNotify;
+
 class LocalsView : public Dockable, public TreeViewHelperDataProvider {
  public:
   LocalsView();
@@ -27,6 +29,8 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
   void RemoveLocal(int local);
   void SetLocalValue(const std::string& id, const string16& value);
   void SetLocalHasChildren(const std::string& id, bool has_children);
+
+  void SetDebugPresenterNotify(DebugPresenterNotify* notify);
 
   // Implementation of TreeViewHelperDataProvider:
   virtual double GetColumnWidth(int column) OVERRIDE;
@@ -65,6 +69,8 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
   //bool IsTypeExpandable(const string16& type);
 
   std::vector<VariableData> lines_;
+
+  DebugPresenterNotify* notify_;
 
   TreeViewHelper tree_view_;
   double column_widths_[3];

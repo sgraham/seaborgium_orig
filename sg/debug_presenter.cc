@@ -40,7 +40,7 @@ void DebugPresenter::SetDisplay(DebugPresenterDisplay* display) {
   display_ = display;
   if (!running_)
     display_->SetFileData("\n"
-                          "Binary from command line (or default test) loaded.\n"
+                          "Binary from command line (or sample) loaded.\n"
                           "\n"
                           "Seaborgium ghetto quickstart:\n"
                           "\n"
@@ -60,10 +60,6 @@ void DebugPresenter::SetDisplay(DebugPresenterDisplay* display) {
 void DebugPresenter::NotifyFramePainted(double frame_time_in_ms) {
   // Should really store this to some model.
   display_->SetRenderTime(frame_time_in_ms);
-}
-
-void DebugPresenter::ReadFileOnFILE(FilePath path, std::string* result) {
-  file_util::ReadFileToString(path, result);
 }
 
 bool DebugPresenter::NotifyKey(
@@ -109,6 +105,12 @@ bool DebugPresenter::NotifyKey(
   return false;
 }
 
+void DebugPresenter::NotifyVariableExpansionStateChanged(
+    const std::string& id, bool expanded) {
+  AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+      base::Bind(&DebugCoreGdb::SetWatchExpanded, debug_core_, id, expanded));
+}
+
 void DebugPresenter::FileLoadCompleted(
     FilePath path, std::string* result) {
   // TODO(scottmg): mtime.
@@ -125,6 +127,10 @@ void DebugPresenter::SetDebugCore(base::WeakPtr<DebugCoreGdb> debug_core) {
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::LoadProcess,
                  debug_core, binary_, L"", std::vector<string16>(), L""));
+}
+
+void DebugPresenter::ReadFileOnFILE(FilePath path, std::string* result) {
+  file_util::ReadFileToString(path, result);
 }
 
 void DebugPresenter::OnStoppedAtBreakpoint(
