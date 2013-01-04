@@ -90,19 +90,17 @@ void TreeViewHelper::RenderNodes(
     std::string child_id = data_provider_->GetIdForChild(root, i);
     NodeExpansionState expansion_state =
         data_provider_->GetNodeExpandability(child_id);
-    // TODO(rendering): Textures.
-    if (expansion_state == kExpanded ||
-        expansion_state == kCollapsed) {
-      int button_size = buttons_width_ - 6;
-      renderer->DrawHorizontalLine(3, *y + num_pixels_in_row_ / 2,
-                                   button_size);
-      Rect button_rect = Rect(3, *y + 3, button_size, button_size);
+    if (expansion_state == kCollapsed ||
+        expansion_state == kExpanded) {
+      const Texture* texture = expansion_state == kCollapsed ?
+          skin.tree_collapsed_texture() : skin.tree_expanded_texture();
+      Rect button_rect = Rect(
+          (buttons_width_ - texture->width) / 2,
+          (buttons_width_ - texture->height) / 2,
+          texture->width, texture->height);
+      renderer->DrawTexturedRect(texture, button_rect, 0, 0, 1, 1);
       renderer->TranslateByRenderOffset(&button_rect);
       last_rendered_buttons_.push_back(RectAndId(button_rect, child_id));
-      if (expansion_state == kCollapsed) {
-        renderer->DrawVerticalLine(buttons_width_ / 2, *y + 3,
-                                   button_size);
-      }
     }
     for (int j = 0; j < num_columns_; ++j) {
       // TODO(rendering): Perhaps dispatch out to customizers here.
