@@ -68,6 +68,8 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
   //VariableData FindExistingOrCreateVariableData(const TypeNameValue& local);
   //bool IsTypeExpandable(const string16& type);
 
+  // TODO XXX This should be keyed by id, and displayed in alphabetical
+  // instead of all this crazy index based stuff.
   std::vector<VariableData> lines_;
 
   DebugPresenterNotify* notify_;
