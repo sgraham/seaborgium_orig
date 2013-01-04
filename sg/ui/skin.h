@@ -92,6 +92,12 @@ class Skin {
   const Texture* vscrollbar_bottom_texture() const {
     return &vscrollbar_bottom_texture_;
   }
+  const Texture* tree_collapsed_texture() const {
+    return  &tree_collapsed_texture_;
+  }
+  const Texture* tree_expanded_texture() const {
+    return  &tree_expanded_texture_;
+  }
 
   static const Skin& current();
   static void EnsureTexturesLoaded(Renderer* renderer);
@@ -116,6 +122,8 @@ class Skin {
   Texture vscrollbar_top_texture_;
   Texture vscrollbar_middle_texture_;
   Texture vscrollbar_bottom_texture_;
+  Texture tree_collapsed_texture_;
+  Texture tree_expanded_texture_;
 };
 
 #endif  // SG_UI_SKIN_H_

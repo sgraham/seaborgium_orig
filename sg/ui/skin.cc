@@ -70,6 +70,8 @@ Skin::Skin()
   vscrollbar_top_texture_.name = L"art/scrollbar-top.png";
   vscrollbar_middle_texture_.name = L"art/scrollbar-middle.png";
   vscrollbar_bottom_texture_.name = L"art/scrollbar-bottom.png";
+  tree_collapsed_texture_.name = L"art/tree-collapsed.png";
+  tree_expanded_texture_.name = L"art/tree-expanded.png";
 }
 
 // static
@@ -91,4 +93,6 @@ void Skin::EnsureTexturesLoaded(Renderer* renderer) {
   renderer->LoadTexture(&g_skin.vscrollbar_top_texture_);
   renderer->LoadTexture(&g_skin.vscrollbar_middle_texture_);
   renderer->LoadTexture(&g_skin.vscrollbar_bottom_texture_);
+  renderer->LoadTexture(&g_skin.tree_collapsed_texture_);
+  renderer->LoadTexture(&g_skin.tree_expanded_texture_);
 }
