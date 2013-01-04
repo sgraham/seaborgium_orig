@@ -170,8 +170,12 @@ void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
        i != new_locals.end(); ++i) {
     // If we already have it, then don't do anything (to preserve any existing
     // backend variable), otherwise append the new variable.
-    if (in_view.find(i->first) == in_view.end())
+    if (in_view.find(i->first) == in_view.end()) {
       display_->SetLocal(display_->NumLocals(), i->second);
+      AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+          base::Bind(&DebugCoreGdb::CreateWatch,
+                     debug_core_, i->second.name()));
+    }
   }
 
   // We've now added all the locals we want to exist, but not removed ones

@@ -282,6 +282,14 @@ void DebugCoreGdb::SendCommand(const string16& arg0,
   reader_writer_->SendString(command);
 }
 
+void DebugCoreGdb::SendCommand(const string16& arg0,
+                               const string16& arg1,
+                               const string16& arg2,
+                               const string16& arg3) {
+  string16 command = arg0 + L" " + arg1 + L" " + arg2 + L" " + arg3 + L"\r\n";
+  reader_writer_->SendString(command);
+}
+
 void DebugCoreGdb::SendCommand(int64 token, const string16& arg0) {
   string16 command = base::Int64ToString16(token) + arg0 + L"\r\n";
   reader_writer_->SendString(command);
@@ -345,6 +353,12 @@ void DebugCoreGdb::GetLocals() {
   SendCommand(token_++, L"-stack-list-variables", L"--simple-values");
   // return token_++;
 }
+
+void DebugCoreGdb::CreateWatch(const string16& name) {
+  // Note, currently always "floating", should support fixed + ui for it.
+  SendCommand(L"-var-create", L"-", L"@", name);
+}
+
 
 void DebugCoreGdb::StopDebugging() {
   SendCommand(L"-exec-abort");

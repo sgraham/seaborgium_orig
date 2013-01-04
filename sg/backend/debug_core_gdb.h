@@ -50,6 +50,8 @@ class DebugCoreGdb : public base::NonThreadSafe,
   virtual void GetStack();
   virtual void GetLocals();
 
+  virtual void CreateWatch(const string16& name);
+
   void DeleteSelf();
 
   static base::WeakPtr<DebugCoreGdb> Create();
@@ -64,6 +66,11 @@ class DebugCoreGdb : public base::NonThreadSafe,
   void SendCommand(const string16& arg0, const string16& arg1);
   void SendCommand(
       const string16& arg0, const string16& arg1, const string16& arg2);
+  void SendCommand(
+      const string16& arg0,
+      const string16& arg1,
+      const string16& arg2,
+      const string16& arg3);
 
   void SendCommand(int64 token, const string16& arg0);
   void SendCommand(int64 token, const string16& arg0, const string16& arg1);
