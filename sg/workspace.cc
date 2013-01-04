@@ -162,10 +162,6 @@ void Workspace::SetFileData(const std::string& utf8_text) {
   source_view_->SetData(utf8_text);
 }
 
-void Workspace::SetDebugState(const string16& debug_state) {
-  status_bar_->SetDebugState(debug_state);
-}
-
 void Workspace::SetRenderTime(double frame_time_in_ms) {
   status_bar_->SetRenderTime(frame_time_in_ms);
 }
@@ -175,8 +171,20 @@ void Workspace::SetStackData(
   stack_view_->SetData(frame_data, active);
 }
 
-void Workspace::SetLocalsData(const std::vector<TypeNameValue>& locals_data) {
-  locals_view_->SetData(locals_data);
+int Workspace::NumLocals() {
+  return locals_view_->NumLocals();
+}
+
+DebugPresenterVariable Workspace::GetLocal(int local) {
+  return locals_view_->GetLocal(local);
+}
+
+void Workspace::SetLocal(int local, const DebugPresenterVariable& variable) {
+  return locals_view_->SetLocal(local, variable);
+}
+
+void Workspace::RemoveLocal(int local) {
+  return locals_view_->RemoveLocal(local);
 }
 
 void Workspace::AddOutput(const string16& text) {

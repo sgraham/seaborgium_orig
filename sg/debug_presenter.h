@@ -5,6 +5,7 @@
 #ifndef SG_DEBUG_PRESENTER_H_
 #define SG_DEBUG_PRESENTER_H_
 
+#include <map>
 #include <string>
 
 #include "base/basictypes.h"
@@ -54,6 +55,9 @@ class DebugPresenter : public DebugPresenterNotify,
   DebugPresenterDisplay* display_;
   SourceFiles* source_files_;
   base::WeakPtr<DebugCoreGdb> debug_core_;
+
+  // Map from Type+Name+Value to variable id on the backend.
+  std::map<string16, std::string> backend_variables_;
 
   bool running_;
 

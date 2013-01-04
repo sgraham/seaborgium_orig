@@ -28,10 +28,6 @@ void StatusBar::SetRenderTime(double ms_per_frame) {
   */
 }
 
-void StatusBar::SetDebugState(const string16& status) {
-  debug_state_ = status;
-}
-
 void StatusBar::Render(Renderer* renderer) {
   /*
   const ColorScheme& color = skin_.GetColorScheme();

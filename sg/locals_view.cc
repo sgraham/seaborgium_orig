@@ -19,6 +19,7 @@ LocalsView::LocalsView()
   column_widths_[2] = 1.;
 }
 
+/*
 void LocalsView::SetData(const std::vector<TypeNameValue>& locals) {
   std::vector<VariableData> new_lines;
   for (size_t i = 0; i < locals.size(); ++i) {
@@ -28,6 +29,34 @@ void LocalsView::SetData(const std::vector<TypeNameValue>& locals) {
   }
   lines_ = new_lines;
   Invalidate();
+}
+*/
+
+int LocalsView::NumLocals() {
+  return static_cast<int>(lines_.size());
+}
+
+DebugPresenterVariable LocalsView::GetLocal(int local) {
+  DCHECK(local >= 0 && local < lines_.size());
+  return lines_[local].debug_presenter_variable;
+}
+
+void LocalsView::SetLocal(int local, const DebugPresenterVariable& variable) {
+  DCHECK(local >= 0);
+  DCHECK(local <= lines_.size()); // == is OK and means append.
+  if (local == lines_.size()) {
+    VariableData variable_data;
+    variable_data.debug_presenter_variable = variable;
+    variable_data.expansion_state = kNotExpandable;
+    lines_.push_back(variable_data);
+  } else {
+    lines_[local].debug_presenter_variable = variable;
+  }
+  // TODO: Start refresh of value.
+}
+
+void LocalsView::RemoveLocal(int local) {
+  lines_.erase(lines_.begin() + local);
 }
 
 void LocalsView::Render(Renderer* renderer) {
@@ -77,11 +106,11 @@ string16 LocalsView::GetNodeDataForColumn(const std::string& node, int column) {
   int node_index;
   CHECK(base::StringToInt(node, &node_index));
   if (column == 0)
-    return lines_[node_index].name;
+    return lines_[node_index].debug_presenter_variable.name();
   else if (column == 1)
     return lines_[node_index].value;
   else if (column == 2)
-    return TidyTypeName(lines_[node_index].type);
+    return TidyTypeName(lines_[node_index].debug_presenter_variable.type());
   NOTREACHED();
   return L"";
 }
@@ -103,6 +132,7 @@ Size LocalsView::GetTreeViewScreenSize() {
   return Size(GetScreenRect().w, GetScreenRect().h);
 }
 
+/*
 LocalsView::VariableData LocalsView::FindExistingOrCreateVariableData(
     const TypeNameValue& local) {
   for (size_t i = 0; i < lines_.size(); ++i) {
@@ -110,11 +140,14 @@ LocalsView::VariableData LocalsView::FindExistingOrCreateVariableData(
       return lines_[i];
   }
   VariableData variable_data(local);
-  if (IsTypeExpandable(variable_data.type))
-    variable_data.expansion_state = kCollapsed;
+  // Start as kNotExpandable, and start creation of a backend variable to
+  // discover what the real structure of this variable is.
+  variable_data.expansion_state = kNotExpandable;
   return variable_data;
 }
+*/
 
+/*
 bool LocalsView::IsTypeExpandable(const string16& type) {
   // TODO(scottmg): Hmm. Need to lift this into a Type for all these
   // manipulations. Probably requires backend queries.
@@ -125,6 +158,7 @@ bool LocalsView::IsTypeExpandable(const string16& type) {
   }
   return true;
 }
+*/
 
 // TODO(scottmg): For all of these, if the tree view doesn't handle, forward
 // on to a scroll helper.
@@ -150,11 +184,4 @@ bool LocalsView::NotifyMouseButton(
   if (modified)
     Invalidate();
   return modified;
-}
-
-LocalsView::VariableData::VariableData(const TypeNameValue& type_name_value)
-    : type(type_name_value.type),
-      name(type_name_value.name),
-      value(type_name_value.value),
-      expansion_state(kNotExpandable) {
 }

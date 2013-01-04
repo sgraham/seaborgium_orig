@@ -10,6 +10,7 @@
 
 #include "base/string16.h"
 #include "sg/backend/backend.h"
+#include "sg/debug_presenter_display.h"
 #include "sg/render/font.h"
 #include "sg/ui/dockable.h"
 #include "sg/ui/tree_view_helper.h"
@@ -20,7 +21,10 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
 
   virtual void Render(Renderer* renderer);
 
-  virtual void SetData(const std::vector<TypeNameValue>& locals);
+  int NumLocals();
+  DebugPresenterVariable GetLocal(int local);
+  void SetLocal(int local, const DebugPresenterVariable& variable);
+  void RemoveLocal(int local);
 
   // Implementation of TreeViewHelperDataProvider:
   virtual double GetColumnWidth(int column) OVERRIDE;
@@ -51,15 +55,12 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
 
  private:
   struct VariableData {
-    explicit VariableData(const TypeNameValue& type_name_value);
-    string16 type;
-    string16 name;
+    DebugPresenterVariable debug_presenter_variable;
     string16 value;
     NodeExpansionState expansion_state;
-    //scoped_ptr<DebugVariable> backend_variable;
   };
-  VariableData FindExistingOrCreateVariableData(const TypeNameValue& local);
-  bool IsTypeExpandable(const string16& type);
+  //VariableData FindExistingOrCreateVariableData(const TypeNameValue& local);
+  //bool IsTypeExpandable(const string16& type);
 
   std::vector<VariableData> lines_;
 

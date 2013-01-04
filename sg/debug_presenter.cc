@@ -4,6 +4,7 @@
 
 #include "sg/debug_presenter.h"
 
+#include <algorithm>
 #include <vector>
 
 #include "base/bind.h"
@@ -37,7 +38,7 @@ void DebugPresenter::SetDisplay(DebugPresenterDisplay* display) {
   display_ = display;
   if (!running_)
     display_->SetFileData("\n"
-                          "Binary from command line loaded.\n"
+                          "Binary from command line (or default test) loaded.\n"
                           "\n"
                           "Seaborgium ghetto quickstart:\n"
                           "\n"
@@ -145,7 +146,47 @@ void DebugPresenter::OnRetrievedStack(const RetrievedStackData& data) {
 }
 
 void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
-  display_->SetLocalsData(data.locals);
+  typedef std::map<string16, DebugPresenterVariable> KeyToVariableMap;
+
+  // Make |DebugPresenterVariable|s for all the ones we want to display now.
+  KeyToVariableMap new_locals;
+  for (size_t i = 0; i < data.locals.size(); ++i) {
+    DebugPresenterVariable new_variable(
+        data.locals[i].type, data.locals[i].name);
+    new_locals[new_variable.key()] = new_variable;
+  }
+
+  // Get all the locals currently in the view, mapped by key.
+  KeyToVariableMap in_view;
+  typedef std::map<string16, int> KeyToIndexMap;
+  KeyToIndexMap view_indices;
+  for (int i = 0; i < display_->NumLocals(); ++i) {
+    const DebugPresenterVariable& variable = display_->GetLocal(i);
+    in_view[variable.key()] = variable;
+    view_indices[variable.key()] = i;
+  }
+
+  for (KeyToVariableMap::const_iterator i(new_locals.begin());
+       i != new_locals.end(); ++i) {
+    // If we already have it, then don't do anything (to preserve any existing
+    // backend variable), otherwise append the new variable.
+    if (in_view.find(i->first) == in_view.end())
+      display_->SetLocal(display_->NumLocals(), i->second);
+  }
+
+  // We've now added all the locals we want to exist, but not removed ones
+  // that have gone out of scope. Walk the view, and remove any that aren't in
+  // new_locals.
+  std::vector<int> indices_to_remove;
+  for (KeyToVariableMap::const_iterator i(in_view.begin());
+       i != in_view.end(); ++i) {
+    if (new_locals.find(i->first) == new_locals.end())
+      indices_to_remove.push_back(view_indices[i->first]);
+  }
+  std::sort(indices_to_remove.begin(), indices_to_remove.end());
+  std::reverse(indices_to_remove.begin(), indices_to_remove.end());
+  for (size_t i = 0; i < indices_to_remove.size(); ++i)
+    display_->RemoveLocal(indices_to_remove[i]);
 }
 
 void DebugPresenter::OnConsoleOutput(const string16& data) {

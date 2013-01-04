@@ -4,5 +4,14 @@
 
 #include "sg/debug_presenter_display.h"
 
+DebugPresenterVariable::DebugPresenterVariable() {}
+
+DebugPresenterVariable::DebugPresenterVariable(
+    const string16& type, const string16& name)
+    : type_(type),
+      name_(name) {
+  key_ = type + L"\t" + name;
+}
+
 DebugPresenterDisplay::~DebugPresenterDisplay() {
 }
