@@ -96,7 +96,7 @@ void TreeViewHelper::RenderNodes(
           skin.tree_collapsed_texture() : skin.tree_expanded_texture();
       Rect button_rect = Rect(
           (buttons_width_ - texture->width) / 2,
-          (buttons_width_ - texture->height) / 2,
+          (buttons_width_ - texture->height) / 2 + *y,
           texture->width, texture->height);
       renderer->DrawTexturedRect(texture, button_rect, 0, 0, 1, 1);
       renderer->TranslateByRenderOffset(&button_rect);
