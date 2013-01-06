@@ -5,6 +5,7 @@
 #ifndef SG_BACKEND_BACKEND_H_
 #define SG_BACKEND_BACKEND_H_
 
+#include <string>
 #include <vector>
 
 #include "base/string16.h"
@@ -109,6 +110,6 @@ class DebugNotification {
   virtual void OnInternalDebugOutput(const string16& data) {}
 };
 
-// TODO: Generic-ize debug_core_gdb to here.
+// TODO(backend): Generic-ize debug_core_gdb to here.
 
 #endif  // SG_BACKEND_BACKEND_H_

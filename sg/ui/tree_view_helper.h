@@ -6,6 +6,7 @@
 #define SG_UI_TREE_VIEW_HELPER_H_
 
 #include <string>
+#include <vector>
 
 #include "base/string16.h"
 #include "sg/basic_geometric_types.h"

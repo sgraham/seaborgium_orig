@@ -5,6 +5,8 @@
 #ifndef SG_DEBUG_PRESENTER_NOTIFY_H_
 #define SG_DEBUG_PRESENTER_NOTIFY_H_
 
+#include <string>
+
 #include "base/string16.h"
 #include "sg/ui/input.h"
 

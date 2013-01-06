@@ -5,6 +5,7 @@
 #include "sg/backend/debug_core_gdb.h"
 
 #include <list>
+#include <map>
 #include <string>
 
 #include "base/bind.h"
@@ -70,10 +71,11 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
 #ifndef NDEBUG
       if (debug_notification_) {
         AppThread::PostTask(AppThread::UI, FROM_HERE,
-            base::Bind(&DebugNotification::OnInternalDebugOutput,
-                      base::Unretained(debug_notification_),
-                      L"\x2190\n" +
-                      UTF8ToUTF16(unused_read_data_.substr(0, bytes_consumed))));
+            base::Bind(
+                &DebugNotification::OnInternalDebugOutput,
+                base::Unretained(debug_notification_),
+                L"\x2190\n" +
+                    UTF8ToUTF16(unused_read_data_.substr(0, bytes_consumed))));
       }
 #endif
       unused_read_data_ = unused_read_data_.substr(bytes_consumed);
@@ -181,8 +183,6 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
               // TODO: Remove!
               continue;
             }
-            // TODO: Necessary?
-            // got_stack_frames_waiting_for_arguments_ = false;
           }
           goto notimplemented;
         case GdbRecord::RT_EXEC_ASYNC_OUTPUT:

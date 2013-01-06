@@ -206,8 +206,8 @@ void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
       }
     }
     // TODO(scottmg): There's a race here. If we step again before this delete
-    // completes, we'll get updates for variables we don't expect to exist,
-    // and the locals view will dcheck. There could be a delete confirmation that
+    // completes, we'll get updates for variables we don't expect to exist, and
+    // the locals view will dcheck. There could be a delete confirmation that
     // removes them from local_to_backend_, but then the case of creating a
     // variable while a delete is pending needs to be handled too. More
     // investigation and thought required.
