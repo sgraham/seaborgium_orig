@@ -24,7 +24,7 @@ TreeViewHelper::TreeViewHelper(
     : data_provider_(data_provider),
       num_pixels_in_row_(num_pixels_in_row),
       num_columns_(num_columns) {
-  indent_size_ = num_pixels_in_row_;
+  indent_size_ = num_pixels_in_row_ / 2;
   buttons_width_ = num_pixels_in_row_;
 }
 
@@ -95,7 +95,7 @@ void TreeViewHelper::RenderNodes(
       const Texture* texture = expansion_state == kCollapsed ?
           skin.tree_collapsed_texture() : skin.tree_expanded_texture();
       Rect button_rect = Rect(
-          (buttons_width_ - texture->width) / 2,
+          (buttons_width_ - texture->width) / 2 + indent,
           (buttons_width_ - texture->height) / 2 + *y,
           texture->width, texture->height);
       renderer->DrawTexturedRect(texture, button_rect, 0, 0, 1, 1);
@@ -105,9 +105,11 @@ void TreeViewHelper::RenderNodes(
     for (int j = 0; j < num_columns_; ++j) {
       // TODO(rendering): Perhaps dispatch out to customizers here.
       // TODO(rendering): Clip.
+      int x = GetStartXForColumn(j) + kFromSidePadding;
+      if (j == 0)
+        x += indent;
       renderer->RenderText(
-          skin.ui_font(),
-          Point(GetStartXForColumn(j) + kFromSidePadding, *y),
+          skin.ui_font(), Point(x, *y),
           data_provider_->GetNodeDataForColumn(child_id, j));
     }
     *y += num_pixels_in_row_;

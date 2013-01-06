@@ -108,6 +108,11 @@ bool DebugPresenter::NotifyKey(
 
 void DebugPresenter::NotifyVariableExpansionStateChanged(
     const std::string& id, bool expanded) {
+  if (!expanded) {
+    int num_children = display_->GetLocalsChildCount(id);
+    for (int i = num_children - 1; i >= 0; --i)
+      display_->RemoveLocalsNode(display_->GetLocalsIdOfChild(id, i));
+  }
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::SetWatchExpanded, debug_core_, id, expanded));
 }
@@ -207,6 +212,20 @@ void DebugPresenter::OnWatchesUpdated(const WatchesUpdatedData& data) {
     const WatchesUpdatedData::Item& item = data.watches[i];
     display_->SetLocalsNodeData(
         item.variable_id, NULL, &item.value, NULL, NULL);
+  }
+}
+
+void DebugPresenter::OnWatchChildList(const WatchesChildListData& data) {
+  for (size_t i = 0; i < data.children.size(); ++i) {
+    const WatchesChildListData::Child& child = data.children[i];
+    display_->AddLocalsChild(data.parent, child.variable_id);
+    display_->SetLocalsNodeData(
+      child.variable_id,
+      &child.expression,
+      &child.value,
+      &child.type,
+      NULL);
+    // TODO: Need to know has_children here.
   }
 }
 

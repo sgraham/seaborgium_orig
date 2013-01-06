@@ -53,6 +53,7 @@ void LocalsView::SetNodeData(
 void LocalsView::RemoveNode(const std::string& id) {
   for (size_t i = 0; i < children_[id].size(); ++i)
     RemoveNode(children_[id][i]);
+  children_.erase(node_data_[id].parent_id);
   children_.erase(id);
   node_data_.erase(id);
 }
