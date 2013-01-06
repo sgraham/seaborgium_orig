@@ -83,6 +83,7 @@ class DebugCoreGdb : public base::NonThreadSafe,
   void SendCommand(int64 token, RecordHandler handler, const string16& arg0,
                    const string16& arg1, const string16& arg2,
                    const string16& arg3);
+  string16 Quote(const string16& arg);
 
   int64 NewToken();
 

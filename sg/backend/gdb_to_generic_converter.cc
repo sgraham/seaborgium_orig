@@ -52,9 +52,10 @@ const base::ListValue* FindListValue(
 FrameData FrameDataFromDictionaryValue(const base::DictionaryValue* dict) {
   std::string addr_string, filename_string, function_string, line_string;
   CHECK(dict->GetStringWithoutPathExpansion("addr", &addr_string));
-  CHECK(dict->GetStringWithoutPathExpansion("file", &filename_string));
   CHECK(dict->GetStringWithoutPathExpansion("func", &function_string));
-  CHECK(dict->GetStringWithoutPathExpansion("line", &line_string));
+  // file and line may not be available if we have no symbols.
+  dict->GetStringWithoutPathExpansion("file", &filename_string);
+  dict->GetStringWithoutPathExpansion("line", &line_string);
   FrameData data;
   CHECK(addr_string[0] == '0' && addr_string[1] == 'x');
   int temp;
@@ -63,7 +64,8 @@ FrameData FrameDataFromDictionaryValue(const base::DictionaryValue* dict) {
   data.address = static_cast<uintptr_t>(temp);
   data.function = UTF8ToUTF16(function_string);
   data.filename = UTF8ToUTF16(filename_string);
-  CHECK(base::StringToInt(line_string, &data.line_number));
+  data.line_number = 0;
+  base::StringToInt(line_string, &data.line_number);
   return data;
 }
 
@@ -211,8 +213,11 @@ WatchesChildListData WatchesChildListDataFromRecordResults(
     CHECK(
         child_dict->GetStringWithoutPathExpansion("name", &child.variable_id));
     CHECK(child_dict->GetStringWithoutPathExpansion("exp", &child.expression));
-    CHECK(child_dict->GetStringWithoutPathExpansion("value", &child.value));
-    CHECK(child_dict->GetStringWithoutPathExpansion("type", &child.type));
+    // No value for complex types.
+    child_dict->GetStringWithoutPathExpansion("value", &child.value);
+    // No type for stupid public/private pseudo members.
+    // TODO(scottmg): Figure out how to (at least normally) hide public, etc.
+    child_dict->GetStringWithoutPathExpansion("type", &child.type);
     string16 numchild_str;
     CHECK(child_dict->GetStringWithoutPathExpansion("numchild", &numchild_str));
     int numchild_int;  // TODO(gdb-python): has_more?

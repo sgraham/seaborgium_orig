@@ -12,8 +12,9 @@
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop.h"
-#include "base/string_number_conversions.h"
 #include "base/string16.h"
+#include "base/string_number_conversions.h"
+#include "base/string_util.h"
 #include "base/utf_string_conversions.h"
 #include "sg/app_thread.h"
 #include "sg/backend/gdb_mi_parse.h"
@@ -338,19 +339,21 @@ void DebugCoreGdb::DeleteSelf() {
 
 // TODO(scottmg): Not sure what escaping is expected here, C-style?
 void DebugCoreGdb::SendCommand(const string16& arg0) {
-  string16 command = arg0 + L"\r\n";
+  string16 command = Quote(arg0) + L"\r\n";
   reader_writer_->SendString(command);
 }
 
 void DebugCoreGdb::SendCommand(const string16& arg0, const string16& arg1) {
-  string16 command = arg0 + L" " + arg1 + L"\r\n";
+  string16 command = Quote(arg0) + L" " + Quote(arg1) + L"\r\n";
   reader_writer_->SendString(command);
 }
 
 void DebugCoreGdb::SendCommand(const string16& arg0,
                                const string16& arg1,
                                const string16& arg2) {
-  string16 command = arg0 + L" " + arg1 + L" " + arg2 + L"\r\n";
+  string16 command = Quote(arg0) + L" " +
+                     Quote(arg1) + L" " +
+                     Quote(arg2) + L"\r\n";
   reader_writer_->SendString(command);
 }
 
@@ -358,13 +361,16 @@ void DebugCoreGdb::SendCommand(const string16& arg0,
                                const string16& arg1,
                                const string16& arg2,
                                const string16& arg3) {
-  string16 command = arg0 + L" " + arg1 + L" " + arg2 + L" " + arg3 + L"\r\n";
+  string16 command = Quote(arg0) + L" " +
+                     Quote(arg1) + L" " +
+                     Quote(arg2) + L" " +
+                     Quote(arg3) + L"\r\n";
   reader_writer_->SendString(command);
 }
 
 void DebugCoreGdb::SendCommand(
     int64 token, RecordHandler handler, const string16& arg0) {
-  string16 command = base::Int64ToString16(token) + arg0 + L"\r\n";
+  string16 command = base::Int64ToString16(token) + Quote(arg0) + L"\r\n";
   reader_writer_->SendStringWithHandler(command, token, handler);
 }
 
@@ -374,7 +380,7 @@ void DebugCoreGdb::SendCommand(
     const string16& arg0,
     const string16& arg1) {
   string16 command = base::Int64ToString16(token) +
-                     arg0 + L" " + arg1 + L"\r\n";
+                     Quote(arg0) + L" " + Quote(arg1) + L"\r\n";
   reader_writer_->SendStringWithHandler(command, token, handler);
 }
 
@@ -385,7 +391,9 @@ void DebugCoreGdb::SendCommand(
     const string16& arg1,
     const string16& arg2) {
   string16 command = base::Int64ToString16(token) +
-                     arg0 + L" " + arg1 + L" " + arg2 + L"\r\n";
+                     Quote(arg0) + L" " +
+                     Quote(arg1) + L" " +
+                     Quote(arg2) + L"\r\n";
   reader_writer_->SendStringWithHandler(command, token, handler);
 }
 
@@ -397,8 +405,20 @@ void DebugCoreGdb::SendCommand(
     const string16& arg2,
     const string16& arg3) {
   string16 command = base::Int64ToString16(token) +
-                     arg0 + L" " + arg1 + L" " + arg2 + L" " + arg3 + L"\r\n";
+                     Quote(arg0) + L" " +
+                     Quote(arg1) + L" " +
+                     Quote(arg2) + L" " +
+                     Quote(arg3) + L"\r\n";
   reader_writer_->SendStringWithHandler(command, token, handler);
+}
+
+string16 DebugCoreGdb::Quote(const string16& arg) {
+  if (arg.find_first_of(L" \"") != string16::npos) {
+    string16 result = arg;
+    ReplaceSubstringsAfterOffset(&result, 0, L"\"", L"\\\"");
+    return L"\"" + result + L"\"";
+  }
+  return arg;
 }
 
 void DebugCoreGdb::LoadProcess(

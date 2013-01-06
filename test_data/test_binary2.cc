@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Hopefully this will be first binary we can load successfully.
-
 #include <stdio.h>
 #include <windows.h>
 
