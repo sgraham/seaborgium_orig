@@ -213,6 +213,11 @@ WatchesChildListData WatchesChildListDataFromRecordResults(
     CHECK(child_dict->GetStringWithoutPathExpansion("exp", &child.expression));
     CHECK(child_dict->GetStringWithoutPathExpansion("value", &child.value));
     CHECK(child_dict->GetStringWithoutPathExpansion("type", &child.type));
+    string16 numchild_str;
+    CHECK(child_dict->GetStringWithoutPathExpansion("numchild", &numchild_str));
+    int numchild_int; // TODO(gdb-python): has_more?
+    child.has_children =
+        base::StringToInt(numchild_str, &numchild_int) && numchild_int > 0;
     data.children.push_back(child);
   }
   return data;

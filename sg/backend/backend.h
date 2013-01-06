@@ -85,6 +85,7 @@ class WatchesChildListData {
     string16 expression;
     string16 value;
     string16 type;
+    bool has_children;
   };
   std::string parent;
   std::vector<Child> children;

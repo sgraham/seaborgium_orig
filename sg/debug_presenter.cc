@@ -224,8 +224,7 @@ void DebugPresenter::OnWatchChildList(const WatchesChildListData& data) {
       &child.expression,
       &child.value,
       &child.type,
-      NULL);
-    // TODO: Need to know has_children here.
+      &child.has_children);
   }
 }
 
