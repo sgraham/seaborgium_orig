@@ -27,6 +27,7 @@ void LocalsView::AddChild(
   data.expansion_state = kNotExpandable;
   data.parent_id = parent_id;
   node_data_[child_id] = data;
+  Invalidate();
 }
 
 void LocalsView::SetNodeData(
@@ -48,6 +49,7 @@ void LocalsView::SetNodeData(
     variable_data->expansion_state =
         *has_children ? kCollapsed : kNotExpandable;
   }
+  Invalidate();
 }
 
 void LocalsView::RemoveNode(const std::string& id) {
@@ -63,6 +65,7 @@ void LocalsView::RemoveNode(const std::string& id) {
   parents_children.erase(i);
   children_.erase(id);
   node_data_.erase(id);
+  Invalidate();
 }
 
 void LocalsView::SetDebugPresenterNotify(DebugPresenterNotify* notify) {
