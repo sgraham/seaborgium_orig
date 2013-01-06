@@ -44,13 +44,14 @@ class DebugPresenterDisplay {
   virtual void SetStackData(const std::vector<FrameData>& frame_data,
                             int active) = 0;
 
-  virtual int NumLocals() = 0;
-  virtual DebugPresenterVariable GetLocal(int local) = 0;
-  virtual void SetLocal(int local, const DebugPresenterVariable& variable) = 0;
-  virtual void RemoveLocal(int local) = 0;
-  virtual void SetLocalValue(const std::string& id, const string16& value) = 0;
-  virtual void SetLocalHasChildren(
-      const std::string& id, bool has_children) = 0;
+  virtual void AddLocalsChild(
+      const std::string& parent_id, const std::string& child_id) = 0;
+  virtual void SetLocalsNodeData(
+      const std::string& id,
+      const string16* expression,
+      const string16* value,
+      const string16* type) = 0;
+  virtual void RemoveLocalsNode(const std::string& id) = 0;
 
   virtual void AddOutput(const string16& text) = 0;
 

@@ -172,28 +172,21 @@ void Workspace::SetStackData(
   stack_view_->SetData(frame_data, active);
 }
 
-int Workspace::NumLocals() {
-  return locals_view_->NumLocals();
+void Workspace::AddLocalsChild(
+    const std::string& parent_id, const std::string& child_id) {
+  locals_view_->AddChild(parent_id, child_id);
 }
 
-DebugPresenterVariable Workspace::GetLocal(int local) {
-  return locals_view_->GetLocal(local);
+void Workspace::SetLocalsNodeData(
+      const std::string& id,
+      const string16* expression,
+      const string16* value,
+      const string16* type) {
+  locals_view_->SetNodeData(id, expression, value, type);
 }
 
-void Workspace::SetLocal(int local, const DebugPresenterVariable& variable) {
-  return locals_view_->SetLocal(local, variable);
-}
-
-void Workspace::RemoveLocal(int local) {
-  return locals_view_->RemoveLocal(local);
-}
-
-void Workspace::SetLocalValue(const std::string& id, const string16& value) {
-  return locals_view_->SetLocalValue(id, value);
-}
-
-void Workspace::SetLocalHasChildren(const std::string& id, bool has_children) {
-  return locals_view_->SetLocalHasChildren(id, has_children);
+void Workspace::RemoveLocalsNode(const std::string& id) {
+  locals_view_->RemoveNode(id);
 }
 
 void Workspace::AddOutput(const string16& text) {

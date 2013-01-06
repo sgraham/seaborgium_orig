@@ -5,6 +5,7 @@
 #ifndef SG_LOCALS_VIEW_H_
 #define SG_LOCALS_VIEW_H_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -23,12 +24,13 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
 
   virtual void Render(Renderer* renderer);
 
-  int NumLocals();
-  DebugPresenterVariable GetLocal(int local);
-  void SetLocal(int local, const DebugPresenterVariable& variable);
-  void RemoveLocal(int local);
-  void SetLocalValue(const std::string& id, const string16& value);
-  void SetLocalHasChildren(const std::string& id, bool has_children);
+  void AddChild(const std::string& parent_id, const std::string& child_id);
+  void SetNodeData(const std::string& id,
+                   const string16* expression,
+                   const string16* value,
+                   const string16* type);
+  void RemoveNode(const std::string& id);
+  // See also some of TreeViewHelperDataProvider below.
 
   void SetDebugPresenterNotify(DebugPresenterNotify* notify);
 
@@ -60,17 +62,18 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
   virtual bool WantMouseEvents() OVERRIDE { return true; }
 
  private:
-  struct VariableData {
-    DebugPresenterVariable debug_presenter_variable;
-    string16 value;
-    NodeExpansionState expansion_state;
-  };
-  //VariableData FindExistingOrCreateVariableData(const TypeNameValue& local);
-  //bool IsTypeExpandable(const string16& type);
+  // Map from id to list of children.
+  std::map<std::string, std::vector<std::string> > children_;
 
-  // TODO XXX This should be keyed by id, and displayed in alphabetical
-  // instead of all this crazy index based stuff.
-  std::vector<VariableData> lines_;
+  struct VariableData {
+    string16 expression;
+    string16 value;
+    string16 type;
+    NodeExpansionState expansion_state;
+    std::string parent_id;
+  };
+  // Data for each node, mapped by id.
+  std::map<std::string, VariableData> node_data_;
 
   DebugPresenterNotify* notify_;
 

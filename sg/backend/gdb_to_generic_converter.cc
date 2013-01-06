@@ -35,6 +35,20 @@ const base::DictionaryValue* FindDictionaryValue(
   return NULL;
 }
 
+const base::ListValue* FindListValue(
+    const std::string& key,
+    const std::vector<GdbRecordResult*>& results) {
+  for (size_t i = 0; i < results.size(); ++i) {
+    if (results[i]->variable() == key) {
+      const ListValue* result;
+      if (results[i]->value()->GetAsList(&result))
+        return result;
+    }
+  }
+  NOTREACHED();
+  return NULL;
+}
+
 FrameData FrameDataFromDictionaryValue(const base::DictionaryValue* dict) {
   std::string addr_string, filename_string, function_string, line_string;
   CHECK(dict->GetStringWithoutPathExpansion("addr", &addr_string));
@@ -125,7 +139,9 @@ RetrievedLocalsData RetrievedLocalsDataFromList(base::Value* value) {
   for (size_t i = 0; i < list_value->GetSize(); ++i) {
     base::DictionaryValue* dict_value;
     CHECK(list_value->GetDictionary(i, &dict_value));
-    data.locals.push_back(DictionaryToTypeNameValue(dict_value));
+    string16 name;
+    CHECK(dict_value->GetStringWithoutPathExpansion("name", &name));
+    data.local_names.push_back(name);
   }
   return data;
 }
@@ -178,6 +194,26 @@ WatchesUpdatedData WatchesUpdatedDataFromChangesList(base::Value* value) {
         "type_changed", &type_changed));
     item.type_changed = type_changed == L"true";
     data.watches.push_back(item);
+  }
+  return data;
+}
+
+WatchesChildListData WatchesChildListDataFromRecordResults(
+    const std::vector<GdbRecordResult*>& results) {
+  WatchesChildListData data;
+  const base::ListValue* children = FindListValue("children", results);
+  for (size_t i = 0; i < children->GetSize(); ++i) {
+    WatchesChildListData::Child child;
+    const base::DictionaryValue* dict_value;
+    const base::DictionaryValue* child_dict;
+    CHECK(children->GetDictionary(i, &dict_value));
+    CHECK(dict_value->GetDictionaryWithoutPathExpansion("child", &child_dict));
+    CHECK(
+        child_dict->GetStringWithoutPathExpansion("name", &child.variable_id));
+    CHECK(child_dict->GetStringWithoutPathExpansion("exp", &child.expression));
+    CHECK(child_dict->GetStringWithoutPathExpansion("value", &child.value));
+    CHECK(child_dict->GetStringWithoutPathExpansion("type", &child.type));
+    data.children.push_back(child);
   }
   return data;
 }

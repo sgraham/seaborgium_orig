@@ -57,7 +57,7 @@ class RetrievedStackData {
 
 class RetrievedLocalsData {
  public:
-  std::vector<TypeNameValue> locals;
+  std::vector<string16> local_names;
 };
 
 class WatchCreatedData {
@@ -74,11 +74,21 @@ class WatchesUpdatedData {
     std::string variable_id;
     string16 value;
     bool type_changed;
-    // TODO(scottmg): Children changes.
   };
   std::vector<Item> watches;
 };
 
+class WatchesChildListData {
+ public:
+  struct Child {
+    std::string variable_id;
+    string16 expression;
+    string16 value;
+    string16 type;
+  };
+  std::string parent;
+  std::vector<Child> children;
+};
 
 class DebugNotification {
  public:
@@ -93,6 +103,7 @@ class DebugNotification {
   virtual void OnRetrievedLocals(const RetrievedLocalsData& data) {}
   virtual void OnWatchCreated(const WatchCreatedData& data) {}
   virtual void OnWatchesUpdated(const WatchesUpdatedData& data) {}
+  virtual void OnWatchChildList(const WatchesChildListData& data) {}
   virtual void OnConsoleOutput(const string16& data) {}
   virtual void OnInternalDebugOutput(const string16& data) {}
 };

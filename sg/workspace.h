@@ -54,15 +54,16 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   virtual void SetProgramCounterLine(int line_number) OVERRIDE;
   virtual void SetStackData(
       const std::vector<FrameData>& frame_data, int active) OVERRIDE;
-  virtual int NumLocals() OVERRIDE;
-  virtual DebugPresenterVariable GetLocal(int local) OVERRIDE;
-  virtual void SetLocal(
-      int local, const DebugPresenterVariable& variable) OVERRIDE;
-  virtual void RemoveLocal(int local) OVERRIDE;
-  virtual void SetLocalValue(
-    const std::string& id, const string16& value) OVERRIDE;
-  virtual void SetLocalHasChildren(
-    const std::string& id, bool has_children) OVERRIDE;
+
+  virtual void AddLocalsChild(
+      const std::string& parent_id, const std::string& child_id) OVERRIDE;
+  virtual void SetLocalsNodeData(
+      const std::string& id,
+      const string16* expression,
+      const string16* value,
+      const string16* type) OVERRIDE;
+  virtual void RemoveLocalsNode(const std::string& id) OVERRIDE;
+
   virtual void AddOutput(const string16& text) OVERRIDE;
   virtual void AddLog(const string16& text) OVERRIDE;
   virtual void SetRenderTime(double ms_per_frame) OVERRIDE;

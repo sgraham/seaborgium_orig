@@ -21,6 +21,21 @@ LocalsView::LocalsView()
   column_widths_[2] = 1.;
 }
 
+void LocalsView::AddChild(
+    const std::string& parent_id, const std::string& child_id) {
+}
+
+void LocalsView::SetNodeData(
+    const std::string& id,
+    const string16* expression,
+    const string16* value,
+    const string16* type) {
+}
+
+void LocalsView::RemoveNode(const std::string& id) {
+}
+
+  /*
 int LocalsView::NumLocals() {
   return static_cast<int>(lines_.size());
 }
@@ -68,6 +83,7 @@ void LocalsView::SetLocalHasChildren(
     }
   }
 }
+*/
 
 void LocalsView::SetDebugPresenterNotify(DebugPresenterNotify* notify) {
   notify_ = notify;
@@ -106,10 +122,7 @@ string16 LocalsView::GetColumnTitle(int column) {
 }
 
 int LocalsView::GetNodeChildCount(const std::string& node) {
-  // TODO
-  if (node == "")
-    return lines_.size();
-  return 0;
+  return children_[node].size();
 }
 
 std::string LocalsView::GetIdForChild(const std::string& node, int child) {
@@ -117,29 +130,23 @@ std::string LocalsView::GetIdForChild(const std::string& node, int child) {
 }
 
 string16 LocalsView::GetNodeDataForColumn(const std::string& node, int column) {
-  int node_index;
-  CHECK(base::StringToInt(node, &node_index));
   if (column == 0)
-    return lines_[node_index].debug_presenter_variable.name();
+    return node_data_[node].expression;
   else if (column == 1)
-    return lines_[node_index].value;
+    return node_data_[node].value;
   else if (column == 2)
-    return TidyTypeName(lines_[node_index].debug_presenter_variable.type());
+    return TidyTypeName(node_data_[node].type);
   NOTREACHED();
   return L"";
 }
 
 NodeExpansionState LocalsView::GetNodeExpandability(const std::string& node) {
-  int node_index;
-  CHECK(base::StringToInt(node, &node_index));
-  return lines_[node_index].expansion_state;
+  return node_data_[node].expansion_state;
 }
 
 void LocalsView::SetNodeExpansionState(
     const std::string& node, NodeExpansionState state) {
-  int node_index;
-  CHECK(base::StringToInt(node, &node_index));
-  lines_[node_index].expansion_state = state;
+  node_data_[node].expansion_state = state;
   notify_->NotifyVariableExpansionStateChanged(node, state == kExpanded);
 }
 

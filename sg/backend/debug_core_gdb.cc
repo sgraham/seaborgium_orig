@@ -158,7 +158,14 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
     }
   }
 
-  void HandlerVariableListChildren(const GdbRecord* record) {
+  void HandlerVariableListChildren(const std::string& parent,
+                                   const GdbRecord* record) {
+    WatchesChildListData data =
+      WatchesChildListDataFromRecordResults(record->results());
+    data.parent = parent;
+    AppThread::PostTask(AppThread::UI, FROM_HERE,
+        base::Bind(&DebugNotification::OnWatchChildList,
+                   base::Unretained(debug_notification_), data));
   }
 
   void SendNotifications(GdbOutput* output) {
@@ -171,6 +178,7 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
             if (handler_for_result_.find(record->token()) !=
                 handler_for_result_.end()) {
               handler_for_result_[record->token()].Run(record);
+              // TODO: Remove!
               continue;
             }
             // TODO: Necessary?
@@ -437,11 +445,13 @@ void DebugCoreGdb::GetStack() {
 }
 
 void DebugCoreGdb::GetLocals() {
+  // We don't request values here because we need to create variables for them
+  // get more information anyway.
   SendCommand(NewToken(),
               base::Bind(&ReaderWriter::HandlerVariables,
                          base::Unretained(reader_writer_.get())),
               L"-stack-list-variables",
-              L"--simple-values");
+              L"--no-values");
 }
 
 void DebugCoreGdb::UpdateWatches() {
@@ -457,7 +467,8 @@ void DebugCoreGdb::SetWatchExpanded(const std::string& id, bool expanded) {
   if (expanded) {
     SendCommand(NewToken(),
                 base::Bind(&ReaderWriter::HandlerVariableListChildren,
-                           base::Unretained(reader_writer_.get())),
+                           base::Unretained(reader_writer_.get()),
+                           id),
                 L"-var-list-children",
                 L"--simple-values",
                 UTF8ToUTF16(id));

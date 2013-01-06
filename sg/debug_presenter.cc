@@ -160,6 +160,7 @@ std::string DebugPresenter::GenerateNewVariableIdentifier() {
 }
 
 void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
+  /*
   typedef std::map<string16, DebugPresenterVariable> KeyToVariableMap;
 
   // Make |DebugPresenterVariable|s for all the ones we want to display now.
@@ -207,18 +208,24 @@ void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
   std::reverse(indices_to_remove.begin(), indices_to_remove.end());
   for (size_t i = 0; i < indices_to_remove.size(); ++i)
     display_->RemoveLocal(indices_to_remove[i]);
+  // TODO: delete in backend too.
+  */
 }
 
 void DebugPresenter::OnWatchCreated(const WatchCreatedData& data) {
+  /*
   display_->SetLocalValue(data.variable_id, data.value);
   display_->SetLocalHasChildren(data.variable_id, data.has_children);
+  */
 }
 
 void DebugPresenter::OnWatchesUpdated(const WatchesUpdatedData& data) {
+  /*
   for (size_t i = 0; i < data.watches.size(); ++i) {
     const WatchesUpdatedData::Item& item = data.watches[i];
     display_->SetLocalValue(item.variable_id, item.value);
   }
+  */
 }
 
 void DebugPresenter::OnConsoleOutput(const string16& data) {
