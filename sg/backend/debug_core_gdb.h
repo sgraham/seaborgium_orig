@@ -58,6 +58,7 @@ class DebugCoreGdb : public base::NonThreadSafe,
 
   // |id| should be created via GenerateNewVariableIdentifier.
   virtual void CreateWatch(const std::string& id, const string16& name);
+  virtual void DeleteWatch(const std::string& id);
 
   void DeleteSelf();
 

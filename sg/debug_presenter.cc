@@ -5,7 +5,6 @@
 #include "sg/debug_presenter.h"
 
 #include <algorithm>
-#include <set>
 #include <vector>
 
 #include "base/bind.h"
@@ -166,7 +165,7 @@ std::string DebugPresenter::GenerateNewVariableIdentifier() {
 }
 
 void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
-  std::set<std::string> active_locals;
+  std::map<std::string, string16> active_locals;
 
   // For each local, make sure we have a backend variable.
   for (size_t i = 0; i < data.local_names.size(); ++i) {
@@ -181,9 +180,9 @@ void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
       AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
           base::Bind(&DebugCoreGdb::CreateWatch,
                      debug_core_, id, local));
-      active_locals.insert(id);
+      active_locals[id] = local;
     } else {
-      active_locals.insert(j->second);
+      active_locals[j->second] = j->first;
     }
   }
 
@@ -196,10 +195,26 @@ void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
       to_remove.push_back(child);
   }
 
-  for (size_t i = 0; i < to_remove.size(); ++i)
+  for (size_t i = 0; i < to_remove.size(); ++i) {
     display_->RemoveLocalsNode(to_remove[i]);
-
-  // TODO: Backend cleanup.
+    // TODO(scottmg): This search sucks.
+    for (std::map<string16, std::string>::iterator j(local_to_backend_.begin());
+         j != local_to_backend_.end(); ++j) {
+      if (j->second == to_remove[i]) {
+        local_to_backend_.erase(j->first);
+        break;
+      }
+    }
+    // TODO(scottmg): There's a race here. If we step again before this delete
+    // completes, we'll get updates for variables we don't expect to exist,
+    // and the locals view will dcheck. There could be a delete confirmation that
+    // removes them from local_to_backend_, but then the case of creating a
+    // variable while a delete is pending needs to be handled too. More
+    // investigation and thought required.
+    AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
+        base::Bind(&DebugCoreGdb::DeleteWatch,
+                   debug_core_, to_remove[i]));
+  }
 }
 
 void DebugPresenter::OnWatchCreated(const WatchCreatedData& data) {
@@ -210,6 +225,9 @@ void DebugPresenter::OnWatchCreated(const WatchCreatedData& data) {
 void DebugPresenter::OnWatchesUpdated(const WatchesUpdatedData& data) {
   for (size_t i = 0; i < data.watches.size(); ++i) {
     const WatchesUpdatedData::Item& item = data.watches[i];
+    // Has been deleted/removed.
+    if (item.value == L"")
+      continue;
     display_->SetLocalsNodeData(
         item.variable_id, NULL, &item.value, NULL, NULL);
   }

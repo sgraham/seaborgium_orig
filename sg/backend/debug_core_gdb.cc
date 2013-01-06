@@ -490,6 +490,10 @@ void DebugCoreGdb::CreateWatch(const std::string& id, const string16& name) {
               name);
 }
 
+void DebugCoreGdb::DeleteWatch(const std::string& id) {
+  // TODO(backend): Probably need notification, see DebugPresenter's usage.
+  SendCommand(L"-var-delete", UTF8ToUTF16(id));
+}
 
 void DebugCoreGdb::StopDebugging() {
   SendCommand(L"-exec-abort");
