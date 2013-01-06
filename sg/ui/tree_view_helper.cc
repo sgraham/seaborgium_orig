@@ -24,7 +24,7 @@ TreeViewHelper::TreeViewHelper(
     : data_provider_(data_provider),
       num_pixels_in_row_(num_pixels_in_row),
       num_columns_(num_columns) {
-  indent_size_ = num_pixels_in_row_ / 2;
+  indent_size_ = num_pixels_in_row_;
   buttons_width_ = num_pixels_in_row_;
 }
 
