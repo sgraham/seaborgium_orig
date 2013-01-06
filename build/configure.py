@@ -490,7 +490,7 @@ def main():
 
   for name in [
                'lexer_test',
-               'backend/debug_core_native_win_test',
+               #'backend/debug_core_native_win_test',
                'backend/debug_core_gdb_test',
                'backend/gdb_mi_parse_test',
                'backend/subprocess_test',
