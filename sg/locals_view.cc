@@ -5,7 +5,6 @@
 #include "sg/locals_view.h"
 
 #include "base/logging.h"
-#include "base/string_number_conversions.h"
 #include "base/string_util.h"
 #include "sg/display_util.h"
 #include "sg/debug_presenter_notify.h"
@@ -23,67 +22,40 @@ LocalsView::LocalsView()
 
 void LocalsView::AddChild(
     const std::string& parent_id, const std::string& child_id) {
+  children_[parent_id].push_back(child_id);
+  VariableData data;
+  data.expansion_state = kNotExpandable;
+  data.parent_id = parent_id;
+  node_data_[child_id] = data;
 }
 
 void LocalsView::SetNodeData(
     const std::string& id,
     const string16* expression,
     const string16* value,
-    const string16* type) {
+    const string16* type,
+    const bool* has_children) {
+  DCHECK(node_data_.find(id) != node_data_.end());
+  std::map<std::string, VariableData>::iterator i = node_data_.find(id);
+  VariableData* variable_data = &i->second;
+  if (expression)
+    variable_data->expression = *expression;
+  if (value)
+    variable_data->value = *value;
+  if (type)
+    variable_data->type = *type;
+  if (has_children) {
+    variable_data->expansion_state =
+        *has_children ? kCollapsed : kNotExpandable;
+  }
 }
 
 void LocalsView::RemoveNode(const std::string& id) {
+  for (size_t i = 0; i < children_[id].size(); ++i)
+    RemoveNode(children_[id][i]);
+  children_.erase(id);
+  node_data_.erase(id);
 }
-
-  /*
-int LocalsView::NumLocals() {
-  return static_cast<int>(lines_.size());
-}
-
-DebugPresenterVariable LocalsView::GetLocal(int local) {
-  DCHECK(local >= 0 && local < lines_.size());
-  return lines_[local].debug_presenter_variable;
-}
-
-void LocalsView::SetLocal(int local, const DebugPresenterVariable& variable) {
-  DCHECK(local >= 0);
-  DCHECK(local <= lines_.size()); // == is OK and means append.
-  if (local == lines_.size()) {
-    VariableData variable_data;
-    variable_data.debug_presenter_variable = variable;
-    variable_data.expansion_state = kNotExpandable;
-    lines_.push_back(variable_data);
-  } else {
-    lines_[local].debug_presenter_variable = variable;
-  }
-}
-
-void LocalsView::RemoveLocal(int local) {
-  lines_.erase(lines_.begin() + local);
-}
-
-void LocalsView::SetLocalValue(const std::string& id, const string16& value) {
-  for (size_t i = 0; i < lines_.size(); ++i) {
-    if (lines_[i].debug_presenter_variable.backend_id() == id) {
-      lines_[i].value = value;
-      break;
-    }
-  }
-}
-
-void LocalsView::SetLocalHasChildren(
-    const std::string& id, bool has_children) {
-  for (size_t i = 0; i < lines_.size(); ++i) {
-    if (lines_[i].debug_presenter_variable.backend_id() == id) {
-      if (has_children && lines_[i].expansion_state == kNotExpandable)
-        lines_[i].expansion_state = kCollapsed;
-      else if (!has_children)
-        lines_[i].expansion_state = kNotExpandable;
-      break;
-    }
-  }
-}
-*/
 
 void LocalsView::SetDebugPresenterNotify(DebugPresenterNotify* notify) {
   notify_ = notify;
@@ -126,7 +98,7 @@ int LocalsView::GetNodeChildCount(const std::string& node) {
 }
 
 std::string LocalsView::GetIdForChild(const std::string& node, int child) {
-  return base::IntToString(child);
+  return children_[node][child];
 }
 
 string16 LocalsView::GetNodeDataForColumn(const std::string& node, int column) {

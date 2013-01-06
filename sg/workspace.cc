@@ -181,12 +181,22 @@ void Workspace::SetLocalsNodeData(
       const std::string& id,
       const string16* expression,
       const string16* value,
-      const string16* type) {
-  locals_view_->SetNodeData(id, expression, value, type);
+      const string16* type,
+      const bool* has_children) {
+  locals_view_->SetNodeData(id, expression, value, type, has_children);
 }
 
 void Workspace::RemoveLocalsNode(const std::string& id) {
   locals_view_->RemoveNode(id);
+}
+
+int Workspace::GetLocalsChildCount(const std::string& id) {
+  return locals_view_->GetNodeChildCount(id);
+}
+
+std::string Workspace::GetLocalsIdOfChild(
+    const std::string& parent_id, int child_index) {
+  return locals_view_->GetIdForChild(parent_id, child_index);
 }
 
 void Workspace::AddOutput(const string16& text) {

@@ -5,6 +5,7 @@
 #include "sg/debug_presenter.h"
 
 #include <algorithm>
+#include <set>
 #include <vector>
 
 #include "base/bind.h"
@@ -160,72 +161,53 @@ std::string DebugPresenter::GenerateNewVariableIdentifier() {
 }
 
 void DebugPresenter::OnRetrievedLocals(const RetrievedLocalsData& data) {
-  /*
-  typedef std::map<string16, DebugPresenterVariable> KeyToVariableMap;
+  std::set<std::string> active_locals;
 
-  // Make |DebugPresenterVariable|s for all the ones we want to display now.
-  KeyToVariableMap new_locals;
-  for (size_t i = 0; i < data.locals.size(); ++i) {
-    DebugPresenterVariable new_variable(
-        data.locals[i].type, data.locals[i].name);
-    new_locals[new_variable.key()] = new_variable;
-  }
-
-  // Get all the locals currently in the view, mapped by key.
-  KeyToVariableMap in_view;
-  typedef std::map<string16, int> KeyToIndexMap;
-  KeyToIndexMap view_indices;
-  for (int i = 0; i < display_->NumLocals(); ++i) {
-    const DebugPresenterVariable& variable = display_->GetLocal(i);
-    in_view[variable.key()] = variable;
-    view_indices[variable.key()] = i;
-  }
-
-  for (KeyToVariableMap::iterator i(new_locals.begin());
-       i != new_locals.end(); ++i) {
-    // If we already have it, then don't do anything (to preserve any existing
-    // backend variable), otherwise append the new variable.
-    if (in_view.find(i->first) == in_view.end()) {
+  // For each local, make sure we have a backend variable.
+  for (size_t i = 0; i < data.local_names.size(); ++i) {
+    const string16& local = data.local_names[i];
+    std::map<string16, std::string>::const_iterator j;
+    j = local_to_backend_.find(local);
+    if (j == local_to_backend_.end()) {
       std::string id = GenerateNewVariableIdentifier();
-      i->second.set_backend_id(id);
-      display_->SetLocal(display_->NumLocals(), i->second);
+      local_to_backend_[local] = id;
+      display_->AddLocalsChild("", id);
+      display_->SetLocalsNodeData(id, &local, NULL, NULL, NULL);
       AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
           base::Bind(&DebugCoreGdb::CreateWatch,
-                     debug_core_, id, i->second.name()));
+                     debug_core_, id, local));
+      active_locals.insert(id);
+    } else {
+      active_locals.insert(j->second);
     }
   }
 
-  // We've now added all the locals we want to exist, but not removed ones
-  // that have gone out of scope. Walk the view, and remove any that aren't in
-  // new_locals.
-  std::vector<int> indices_to_remove;
-  for (KeyToVariableMap::const_iterator i(in_view.begin());
-       i != in_view.end(); ++i) {
-    if (new_locals.find(i->first) == new_locals.end())
-      indices_to_remove.push_back(view_indices[i->first]);
+  // Remove anything left in the view that's no longer active, |data| is always
+  // a full set for this scope.
+  std::vector<std::string> to_remove;
+  for (int i = 0; i < display_->GetLocalsChildCount(""); ++i) {
+    const std::string& child = display_->GetLocalsIdOfChild("", i);
+    if (active_locals.find(child) == active_locals.end())
+      to_remove.push_back(child);
   }
-  std::sort(indices_to_remove.begin(), indices_to_remove.end());
-  std::reverse(indices_to_remove.begin(), indices_to_remove.end());
-  for (size_t i = 0; i < indices_to_remove.size(); ++i)
-    display_->RemoveLocal(indices_to_remove[i]);
-  // TODO: delete in backend too.
-  */
+
+  for (size_t i = 0; i < to_remove.size(); ++i)
+    display_->RemoveLocalsNode(to_remove[i]);
+
+  // TODO: Backend cleanup.
 }
 
 void DebugPresenter::OnWatchCreated(const WatchCreatedData& data) {
-  /*
-  display_->SetLocalValue(data.variable_id, data.value);
-  display_->SetLocalHasChildren(data.variable_id, data.has_children);
-  */
+  display_->SetLocalsNodeData(
+      data.variable_id, NULL, &data.value, &data.type, &data.has_children);
 }
 
 void DebugPresenter::OnWatchesUpdated(const WatchesUpdatedData& data) {
-  /*
   for (size_t i = 0; i < data.watches.size(); ++i) {
     const WatchesUpdatedData::Item& item = data.watches[i];
-    display_->SetLocalValue(item.variable_id, item.value);
+    display_->SetLocalsNodeData(
+        item.variable_id, NULL, &item.value, NULL, NULL);
   }
-  */
 }
 
 void DebugPresenter::OnConsoleOutput(const string16& data) {

@@ -28,7 +28,8 @@ class LocalsView : public Dockable, public TreeViewHelperDataProvider {
   void SetNodeData(const std::string& id,
                    const string16* expression,
                    const string16* value,
-                   const string16* type);
+                   const string16* type,
+                   const bool* has_children);
   void RemoveNode(const std::string& id);
   // See also some of TreeViewHelperDataProvider below.
 

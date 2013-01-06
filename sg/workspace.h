@@ -61,8 +61,12 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
       const std::string& id,
       const string16* expression,
       const string16* value,
-      const string16* type) OVERRIDE;
+      const string16* type,
+      const bool* has_children) OVERRIDE;
   virtual void RemoveLocalsNode(const std::string& id) OVERRIDE;
+  virtual int GetLocalsChildCount(const std::string& id) OVERRIDE;
+  virtual std::string GetLocalsIdOfChild(
+      const std::string& parent_id, int child_index) OVERRIDE;
 
   virtual void AddOutput(const string16& text) OVERRIDE;
   virtual void AddLog(const string16& text) OVERRIDE;

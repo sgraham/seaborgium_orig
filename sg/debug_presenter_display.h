@@ -50,8 +50,12 @@ class DebugPresenterDisplay {
       const std::string& id,
       const string16* expression,
       const string16* value,
-      const string16* type) = 0;
+      const string16* type,
+      const bool* has_children) = 0;
   virtual void RemoveLocalsNode(const std::string& id) = 0;
+  virtual int GetLocalsChildCount(const std::string& id) = 0;
+  virtual std::string GetLocalsIdOfChild(
+      const std::string& parent_id, int child_index) = 0;
 
   virtual void AddOutput(const string16& text) = 0;
 

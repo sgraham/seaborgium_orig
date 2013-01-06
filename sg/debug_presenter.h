@@ -64,8 +64,8 @@ class DebugPresenter : public DebugPresenterNotify,
 
   int64 variable_counter_;
 
-  // Map from Type+Name+Value to variable id on the backend.
-  std::map<string16, std::string> backend_variables_;
+  // Map from name to backend variable id, used for locals.
+  std::map<string16, std::string> local_to_backend_;
 
   bool running_;
 
