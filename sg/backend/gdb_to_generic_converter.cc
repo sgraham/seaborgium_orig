@@ -169,11 +169,10 @@ WatchCreatedData WatchCreatedDataFromRecordResults(
   std::string has_more_str = FindStringValue("has_more", results);
   data.has_children = false;
   int numchild_int, has_more_int;
-  if (base::StringToInt(numchild_str, &numchild_int) &&
-      base::StringToInt(has_more_str, &has_more_int) &&
-      (numchild_int > 0 || has_more_int != 0)) {
+  base::StringToInt(numchild_str, &numchild_int);
+  base::StringToInt(has_more_str, &has_more_int);
+  if (numchild_int > 0 || has_more_int != 0)
     data.has_children = true;
-  }
   data.value = UTF8ToUTF16(FindStringValue("value", results));
   data.type = UTF8ToUTF16(FindStringValue("type", results));
   return data;
@@ -195,9 +194,13 @@ WatchesUpdatedData WatchesUpdatedDataFromChangesList(base::Value* value) {
     CHECK(dict_value->GetStringWithoutPathExpansion(
         "type_changed", &type_changed));
     item.type_changed = type_changed == L"true";
+    std::string numchild_str;
     std::string has_more_str;
-    CHECK(dict_value->GetStringWithoutPathExpansion("has_more", &has_more_str));
-    item.has_children = has_more_str != "0";
+    dict_value->GetStringWithoutPathExpansion("numchild", &numchild_str);
+    dict_value->GetStringWithoutPathExpansion("has_more", &has_more_str);
+    int numchild_int;
+    base::StringToInt(numchild_str, &numchild_int);
+    item.has_children = has_more_str == "1" || numchild_int > 0;
     data.watches.push_back(item);
   }
   return data;
@@ -231,11 +234,10 @@ WatchesChildListData WatchesChildListDataFromRecordResults(
     child_dict->GetStringWithoutPathExpansion("has_more", &has_more_str);
     int numchild_int, has_more_int;
     child.has_children = false;
-    if (base::StringToInt(numchild_str, &numchild_int) &&
-        base::StringToInt(has_more_str, &has_more_int) &&
-        (numchild_int > 0 || has_more_int != 0)) {
+    base::StringToInt(numchild_str, &numchild_int);
+    base::StringToInt(has_more_str, &has_more_int);
+    if (numchild_int > 0 || has_more_int != 0)
       child.has_children = true;
-    }
     data.children.push_back(child);
   }
   return data;
