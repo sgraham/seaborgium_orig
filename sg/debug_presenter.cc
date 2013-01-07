@@ -228,7 +228,7 @@ void DebugPresenter::OnWatchesUpdated(const WatchesUpdatedData& data) {
     if (item.value == L"")
       continue;
     display_->SetLocalsNodeData(
-        item.variable_id, NULL, &item.value, NULL, NULL);
+        item.variable_id, NULL, &item.value, NULL, &item.has_children);
   }
 }
 

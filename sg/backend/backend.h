@@ -75,6 +75,7 @@ class WatchesUpdatedData {
     std::string variable_id;
     string16 value;
     bool type_changed;
+    bool has_children;
   };
   std::vector<Item> watches;
 };

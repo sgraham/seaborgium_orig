@@ -165,6 +165,9 @@ class StdVectorPrinter:
             self.item = start
             self.finish = finish
             self.count = 0
+            # TODO(scottmg): Hack for hang on uninited variables.
+            if int(finish - start) > 10000 or finish < start:
+                self.item = self.finish
 
         def __iter__(self):
             return self

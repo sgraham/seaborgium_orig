@@ -494,11 +494,14 @@ void DebugCoreGdb::SetWatchExpanded(const std::string& id, bool expanded) {
                 L"-var-list-children",
                 L"--simple-values",
                 UTF8ToUTF16(id));
-  } else {
+  }
+  /* TODO(backend): This works OK with real data, but for pretty-printed
+   * things they don't reopen. Not sure why yet.
+  else {
     SendCommand(L"-var-delete",
                 L"-c",
                 UTF8ToUTF16(id));
-  }
+  }*/
 }
 
 void DebugCoreGdb::CreateWatch(const std::string& id, const string16& name) {
