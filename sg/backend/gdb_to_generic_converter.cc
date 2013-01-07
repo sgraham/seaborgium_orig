@@ -203,6 +203,9 @@ WatchesUpdatedData WatchesUpdatedDataFromChangesList(base::Value* value) {
 WatchesChildListData WatchesChildListDataFromRecordResults(
     const std::vector<GdbRecordResult*>& results) {
   WatchesChildListData data;
+  std::string numchild = FindStringValue("numchild", results);
+  if (numchild == "0")
+    return data;
   const base::ListValue* children = FindListValue("children", results);
   for (size_t i = 0; i < children->GetSize(); ++i) {
     WatchesChildListData::Child child;

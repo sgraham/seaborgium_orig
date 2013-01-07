@@ -61,8 +61,7 @@ void StartAndStopImmediately(base::WeakPtr<DebugCoreGdb> debug_core) {
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::LoadProcess,
                  debug_core,
-                 // TODO(scottmg): Relative to gdb location.
-                 L"../test_data/test_binary_mingw.exe",
+                 L"test_data/test_binary_mingw.exe",
                  L"", std::vector<string16>(), L""));
 
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
@@ -115,8 +114,7 @@ void StartAndRunUntilMain(
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,
       base::Bind(&DebugCoreGdb::LoadProcess,
                  debug_core,
-                 // TODO(scottmg): Relative to gdb location.
-                 L"../test_data/test_binary_mingw.exe",
+                 L"test_data/test_binary_mingw.exe",
                  L"", std::vector<string16>(), L""));
 
   AppThread::PostTask(AppThread::BACKEND, FROM_HERE,

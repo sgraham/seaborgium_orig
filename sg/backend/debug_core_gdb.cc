@@ -320,8 +320,10 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
 
 DebugCoreGdb::DebugCoreGdb() : token_(0) {
   CHECK(gdb_.Start(L"gdb_win_binaries/gdb-python27.exe",
-                   L"--fullname -nx --interpreter=mi2 --quiet",
-                   L"gdb_win_binaries"));
+                   (L"--data-directory=gdb_win_binaries\\gdb "
+                      L"-ix gdb_win_binaries\\sginit "
+                      L"--fullname -nx --interpreter=mi2 --quiet"),
+                   L"."));
   reader_writer_.reset(new ReaderWriter(
         gdb_.GetInputPipe(), gdb_.GetOutputPipe()));
   SendCommand(L"-enable-pretty-printing");
