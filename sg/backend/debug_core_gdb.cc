@@ -9,6 +9,7 @@
 #include <string>
 
 #include "base/bind.h"
+#include "base/file_util.h"
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop.h"
@@ -19,6 +20,11 @@
 #include "sg/app_thread.h"
 #include "sg/backend/gdb_mi_parse.h"
 #include "sg/backend/gdb_to_generic_converter.h"
+
+#ifndef NDEBUG
+static FilePath g_debug_log_path =
+    FilePath(FILE_PATH_LITERAL("gdb_log.txt"));
+#endif
 
 // Handles async reads and writes to subprocess. Read and write on the same
 // object to simplify blocking on shutdown.
@@ -35,6 +41,10 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
     read_state_.context.handler = this;
     write_state_.context.handler = this;
     StartRead();
+#ifndef NDEBUG
+    // Empty it out at startup, appended to in SendString.
+    file_util::WriteFile(g_debug_log_path, "", 0);
+#endif
   }
 
   virtual ~ReaderWriter() {
@@ -78,6 +88,10 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
                 L"\x2190\n" +
                     UTF8ToUTF16(unused_read_data_.substr(0, bytes_consumed))));
       }
+      file_util::AppendToFile(
+          g_debug_log_path,
+          unused_read_data_.substr(0, bytes_consumed).c_str(),
+          bytes_consumed);
 #endif
       unused_read_data_ = unused_read_data_.substr(bytes_consumed);
       SendNotifications(output.get());
@@ -268,6 +282,8 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
                        base::Unretained(debug_notification_),
                        L"\x2192\n" + string));
       }
+      file_util::AppendToFile(
+          g_debug_log_path, UTF16ToUTF8(string).c_str(), string.size());
 #endif
       std::string narrow = UTF16ToUTF8(string);
       CHECK(narrow.size() <= sizeof(write_state_.buffer));

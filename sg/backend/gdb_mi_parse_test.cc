@@ -201,4 +201,30 @@ TEST(GdbMiParse, IncrementalWithMultibyteLineEnding) {
   EXPECT_EQ("<http blahblah", output->at(0)->OutputString());
 }
 
+TEST(GdbMiParse, FailingVariableUpdate) {
+  GdbMiReader reader;
+  int num_bytes;
+  std::string str = "20^done,changelist=[{name=\"V1\",value=\"0x522c68 "
+                    "\\\"\\\\r\\360\\255\\272\\\\r\\360\\255\\272\\\"\","
+                    "in_scope=\"true\",type_changed=\"false\",has_more=\"0\"}]"
+                    "\r(gdb) \r";
+  scoped_ptr<GdbOutput> output(reader.Parse(str, &num_bytes));
+  EXPECT_NE(static_cast<GdbOutput*>(NULL), output.get());
+  EXPECT_EQ(1, output->size());
+  EXPECT_EQ(GdbRecord::RT_RESULT_RECORD, output->at(0)->record_type());
+  EXPECT_EQ("20", output->at(0)->token());
+  EXPECT_EQ("done", output->at(0)->ResultClass());
+  EXPECT_EQ("changelist", output->at(0)->results()[0]->variable());
+  base::ListValue* list_value;
+  EXPECT_TRUE(output->at(0)->results()[0]->value()->GetAsList(&list_value));
+  base::DictionaryValue* dict_value;
+  EXPECT_TRUE(list_value->GetDictionary(0, &dict_value));
+  string16 name_str, value_str;
+  EXPECT_TRUE(dict_value->GetStringWithoutPathExpansion("name", &name_str));
+  EXPECT_EQ(L"V1", name_str);
+  EXPECT_TRUE(dict_value->GetStringWithoutPathExpansion("value", &value_str));
+  // TODO(scottmg): I'm not actually sure if this decode is right.
+  EXPECT_EQ(L"0x522c68 \"\\r\xEA0\xE5D\xE6A\\r\xEA0\xE5D\xE6A\"", value_str);
+}
+
 // TODO(testing): Bad/unexpected outputs.

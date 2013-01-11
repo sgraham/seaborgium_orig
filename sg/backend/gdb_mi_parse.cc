@@ -7,6 +7,7 @@
 #include <ctype.h>
 
 #include "base/logging.h"
+#include "base/utf_string_conversions.h"
 #include "base/values.h"
 
 namespace {
@@ -212,6 +213,26 @@ std::string GdbMiParser::ConsumeString() {
         case 'v':
           result.push_back('\v');
           break;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': {
+          // Not sure what this is. I assume octal, and always 3 digits.
+          int digit = (*(pos_ - 1) * 64) + *(pos_) * 8 + *(pos_ + 1);
+          pos_ += 2;
+          string16 wide;
+          wide.push_back(digit);
+          std::string as_utf8(UTF16ToUTF8(wide));
+          for (size_t i = 0; i < as_utf8.size(); ++i)
+            result.push_back(as_utf8[i]);
+          break;
+        }
         default:
           ReportError();
           return std::string();
