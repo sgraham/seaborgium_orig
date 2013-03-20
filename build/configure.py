@@ -248,7 +248,7 @@ def main():
               '/wd4530', '/wd4100', '/wd4706', '/wd4245', '/wd4018',
               '/wd4512', '/wd4800', '/wd4702', '/wd4819', '/wd4355',
               '/wd4996', '/wd4481', '/wd4127', '/wd4310', '/wd4244',
-              '/wd4701', '/wd4201', '/wd4389', '/wd4722',
+              '/wd4701', '/wd4201', '/wd4389', '/wd4722', '/wd4703',
               '/GR-',  # Disable RTTI.
               '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
               '/DUNICODE', '/D_UNICODE',
@@ -509,7 +509,7 @@ def main():
   n.newline()
 
   reader_writer_objs = []
-  reader_writer_objs += cxx('backend/reader_writer_test')
+  reader_writer_objs += cxx('backend/reader_writer_test') + pch_objs
   reader_writer_test = n.build(binary('reader_writer_test'), 'link',
                                inputs=reader_writer_objs,
                                implicit=pch_implicit,
