@@ -40,6 +40,8 @@ def GetChromiumBaseFileList(base_dir, platform):
               'allocator\\', # Kind of overly involved for user-configuration.
               'field_trial.cc', # Has screwy winsock inclusion, don't need it.
               'i18n\\', # Requires icu (I think)
+              '_ozone',
+              'mock_',
               ):
       result = [y for y in result if x not in y]
     if 'windows' in for_types:
@@ -63,7 +65,8 @@ def GetChromiumBaseFileList(base_dir, platform):
     if 'lib' in for_types:
       for x in ('README', 'LICENSE', 'OWNERS', '.h', '.patch', 'unittest',
                 'PRESUBMIT', 'DEPS', '.gyp', '.py', '.isolate', '.nc', 'test\\',
-                'test/', '.git', '_browsertest.cc', 'base64.cc' # TEMP
+                'test/', '.git', '_browsertest.cc', 'base64.cc', # TEMP
+                'testing_', 'testing_',
                 ):
         result = [y for y in result if x not in y]
     return result
@@ -253,7 +256,7 @@ def main():
               '/wd4512', '/wd4800', '/wd4702', '/wd4819', '/wd4355',
               '/wd4996', '/wd4481', '/wd4127', '/wd4310', '/wd4244',
               '/wd4701', '/wd4201', '/wd4389', '/wd4722', '/wd4703',
-              '/wd4510', '/wd4610',
+              '/wd4510', '/wd4610', '/wd4189',
               '/GR-',  # Disable RTTI.
               '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
               '/DUNICODE', '/D_UNICODE',
