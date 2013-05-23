@@ -143,7 +143,7 @@ bool Subprocess::Start(
 
   // CreateProcessW can modify input buffer so we have to make a copy here.
   string16 combined = application + L" " + command_line;
-  scoped_array<char16> command_copy(new char16[combined.size() + 1]);
+  scoped_ptr<char16[]> command_copy(new char16[combined.size() + 1]);
   combined.copy(command_copy.get(), combined.size());
   command_copy[combined.size()] = 0;
 

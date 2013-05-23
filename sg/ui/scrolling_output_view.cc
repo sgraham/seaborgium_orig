@@ -4,7 +4,7 @@
 
 #include "sg/ui/scrolling_output_view.h"
 
-#include "base/string_split.h"
+#include "base/strings/string_split.h"
 #include "sg/render/renderer.h"
 #include "sg/ui/skin.h"
 

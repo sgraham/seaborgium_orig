@@ -1,4 +1,4 @@
-# Copyright 2012 Google Inc. All Rights Reserved.
+# Copyright 2013 The Chromium Authors. All Rights Reserved.
 
 from optparse import OptionParser
 import os
@@ -253,6 +253,7 @@ def main():
               '/wd4512', '/wd4800', '/wd4702', '/wd4819', '/wd4355',
               '/wd4996', '/wd4481', '/wd4127', '/wd4310', '/wd4244',
               '/wd4701', '/wd4201', '/wd4389', '/wd4722', '/wd4703',
+              '/wd4510', '/wd4610',
               '/GR-',  # Disable RTTI.
               '/DNOMINMAX', '/D_CRT_SECURE_NO_WARNINGS',
               '/DUNICODE', '/D_UNICODE',

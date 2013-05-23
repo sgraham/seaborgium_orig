@@ -49,7 +49,7 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   virtual bool WantKeyEvents() OVERRIDE { return true; }
 
   // Implementation of DebugPresenterDisplay.
-  virtual void SetFileName(const FilePath& filename) OVERRIDE;
+  virtual void SetFileName(const base::FilePath& filename) OVERRIDE;
   virtual void SetFileData(const std::string& utf8_text) OVERRIDE;
   virtual void SetProgramCounterLine(int line_number) OVERRIDE;
   virtual void SetStackData(

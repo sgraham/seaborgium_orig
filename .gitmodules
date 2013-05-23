@@ -3,10 +3,10 @@
 	url = git://github.com/martine/ninja.git
 [submodule "third_party/testing/gtest"]
 	path = third_party/testing/gtest
-	url = http://git.chromium.org/external/googletest.git
+	url = https://chromium.googlesource.com/external/googletest
 [submodule "third_party/base"]
 	path = third_party/base
-	url = http://git.chromium.org/chromium/src/base.git
+	url = git clone https://chromium.googlesource.com/chromium/src/base
 [submodule "third_party/freetype"]
 	path = third_party/freetype
 	url = git://git.sv.nongnu.org/freetype/freetype2.git

@@ -116,7 +116,7 @@ void DebugPresenter::NotifyVariableExpansionStateChanged(
 }
 
 void DebugPresenter::FileLoadCompleted(
-    FilePath path, std::string* result) {
+    base::FilePath path, std::string* result) {
   // TODO(scottmg): mtime.
   source_files_->SetFileData(path, 0, *result);
   display_->SetFileName(path);
@@ -133,7 +133,7 @@ void DebugPresenter::SetDebugCore(base::WeakPtr<DebugCoreGdb> debug_core) {
                  debug_core, binary_, L"", std::vector<string16>(), L""));
 }
 
-void DebugPresenter::ReadFileOnFILE(FilePath path, std::string* result) {
+void DebugPresenter::ReadFileOnFILE(base::FilePath path, std::string* result) {
   file_util::ReadFileToString(path, result);
 }
 
@@ -142,7 +142,7 @@ void DebugPresenter::OnStoppedAtBreakpoint(
   std::string* result = new std::string;
   // TODO(scottmg): Need to relativize to binary location (or search in some
   // reasonable way anyway).
-  FilePath path(string16(L"test_data/") + data.frame.filename);
+  base::FilePath path(string16(L"test_data/") + data.frame.filename);
   AppThread::PostTaskAndReply(AppThread::FILE, FROM_HERE,
     base::Bind(&DebugPresenter::ReadFileOnFILE,
                base::Unretained(this), path, result),

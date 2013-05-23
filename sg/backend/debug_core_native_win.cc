@@ -27,7 +27,7 @@ void DebugCoreNativeWin::ProcessStart(
   DCHECK_EQ(0, environment.size()) << "todo;";
 
   // CreateProcessW can modify input buffer so we have to make a copy here.
-  scoped_array<char16> command_line_copy(new char16[command_line.size() + 1]);
+  scoped_ptr<char16[]> command_line_copy(new char16[command_line.size() + 1]);
   command_line.copy(command_line_copy.get(), command_line.size());
   command_line_copy[command_line.size()] = 0;
 

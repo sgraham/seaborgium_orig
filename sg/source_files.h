@@ -9,7 +9,7 @@
 #include <string>
 
 #include "base/basictypes.h"
-#include "base/file_path.h"
+#include "base/files/file_path.h"
 
 // Model for source code.
 class SourceFiles {
@@ -18,15 +18,15 @@ class SourceFiles {
   ~SourceFiles();
 
   void SetFileData(
-      const FilePath& filename, int mtime, const std::string& contents);
+      const base::FilePath& filename, int mtime, const std::string& contents);
 
  private:
   struct SourceFileData {
-    FilePath filename;
+    base::FilePath filename;
     int mtime;
     std::string contents;
   };
-  std::map<FilePath, SourceFileData> files_;
+  std::map<base::FilePath, SourceFileData> files_;
 
   DISALLOW_COPY_AND_ASSIGN(SourceFiles);
 };

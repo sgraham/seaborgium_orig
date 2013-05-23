@@ -9,7 +9,7 @@
 #include <string>
 
 #include "base/basictypes.h"
-#include "base/file_path.h"
+#include "base/files/file_path.h"
 #include "base/memory/weak_ptr.h"
 #include "sg/backend/backend.h"
 #include "sg/debug_presenter_notify.h"
@@ -50,8 +50,8 @@ class DebugPresenter : public DebugPresenterNotify,
   virtual void OnInternalDebugOutput(const string16& data) OVERRIDE;
 
  private:
-  void ReadFileOnFILE(FilePath path, std::string* result);
-  void FileLoadCompleted(FilePath path, std::string* result);
+  void ReadFileOnFILE(base::FilePath path, std::string* result);
+  void FileLoadCompleted(base::FilePath path, std::string* result);
 
   // On stopping, starts requests for stack, values of locals, etc.
   void UpdatePassiveDisplays();

@@ -150,7 +150,7 @@ void Workspace::Render(Renderer* renderer) {
     draggable_->Render(renderer);
 }
 
-void Workspace::SetFileName(const FilePath& filename) {
+void Workspace::SetFileName(const base::FilePath& filename) {
   /*source_view_container_->SetTitle(source_view_, filename.LossyDisplayName());
    */
 }
