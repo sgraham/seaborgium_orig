@@ -375,76 +375,76 @@ def GetChromiumBaseFileList(base_dir, platform):
 
 def GetRe2FileList():
   files = [
-    're2/bitstate',
-    're2/compile',
-    're2/dfa',
-    're2/filtered_re2',
-    're2/mimics_pcre',
-    're2/nfa',
-    're2/onepass',
-    're2/parse',
-    're2/perl_groups',
-    're2/prefilter',
-    're2/prefilter_tree',
-    're2/prog',
-    're2/re2',
-    're2/regexp',
-    're2/set',
-    're2/simplify',
-    're2/tostring',
-    're2/unicode_casefold',
-    're2/unicode_groups',
-    'util/arena',
-    'util/hash',
-    'util/rune',
-    'util/stringpiece',
-    'util/stringprintf',
-    'util/strutil',
-    'util/valgrind',
+    're2/bitstate.cc',
+    're2/compile.cc',
+    're2/dfa.cc',
+    're2/filtered_re2.cc',
+    're2/mimics_pcre.cc',
+    're2/nfa.cc',
+    're2/onepass.cc',
+    're2/parse.cc',
+    're2/perl_groups.cc',
+    're2/prefilter.cc',
+    're2/prefilter_tree.cc',
+    're2/prog.cc',
+    're2/re2.cc',
+    're2/regexp.cc',
+    're2/set.cc',
+    're2/simplify.cc',
+    're2/tostring.cc',
+    're2/unicode_casefold.cc',
+    're2/unicode_groups.cc',
+    'util/arena.cc',
+    'util/hash.cc',
+    'util/rune.cc',
+    'util/stringpiece.cc',
+    'util/stringprintf.cc',
+    'util/strutil.cc',
+    'util/valgrind.cc',
     ]
   return [os.path.normpath(p) for p in files]
 
 
 def GetFreetypeFileList():
   files = [
-    'src/autofit/autofit',
-    'src/base/ftbase',
-    'src/base/ftbbox',
-    'src/base/ftbitmap',
-    'src/base/ftdebug',
-    'src/base/ftfstype',
-    'src/base/ftgasp',
-    'src/base/ftglyph',
-    'src/base/ftgxval',
-    'src/base/ftinit',
-    'src/base/ftlcdfil',
-    'src/base/ftmm',
-    'src/base/ftpatent',
-    'src/base/ftpfr',
-    'src/base/ftstroke',
-    'src/base/ftsynth',
-    'src/base/ftsystem',
-    'src/base/fttype1',
-    'src/base/ftwinfnt',
-    'src/base/ftxf86',
-    'src/bdf/bdf',
-    'src/cache/ftcache',
-    'src/cff/cff',
-    'src/cid/type1cid',
-    'src/gzip/ftgzip',
-    'src/lzw/ftlzw',
-    'src/pcf/pcf',
-    'src/pfr/pfr',
-    'src/psaux/psaux',
-    'src/pshinter/pshinter',
-    'src/psnames/psmodule',
-    'src/raster/raster',
-    'src/sfnt/sfnt',
-    'src/smooth/smooth',
-    'src/truetype/truetype',
-    'src/type1/type1',
-    'src/type42/type42',
-    'src/winfonts/winfnt',
+    'src/autofit/autofit.c',
+    'src/base/ftbase.c',
+    'src/base/ftbbox.c',
+    'src/base/ftbitmap.c',
+    'src/base/ftdebug.c',
+    'src/base/ftfstype.c',
+    'src/base/ftgasp.c',
+    'src/base/ftglyph.c',
+    'src/base/ftgxval.c',
+    'src/base/ftinit.c',
+    'src/base/ftlcdfil.c',
+    'src/base/ftmm.c',
+    'src/base/ftpatent.c',
+    'src/base/ftpfr.c',
+    'src/base/ftstroke.c',
+    'src/base/ftsynth.c',
+    'src/base/ftsystem.c',
+    'src/base/fttype1.c',
+    'src/base/ftwinfnt.c',
+    'src/base/ftxf86.c',
+    'src/bdf/bdf.c',
+    'src/cache/ftcache.c',
+    'src/cff/cff.c',
+    'src/cid/type1cid.c',
+    'src/gzip/ftgzip.c',
+    'src/lzw/ftlzw.c',
+    'src/pcf/pcf.c',
+    'src/pfr/pfr.c',
+    'src/psaux/psaux.c',
+    'src/pshinter/pshinter.c',
+    'src/psnames/psmodule.c',
+    'src/raster/raster.c',
+    'src/sfnt/sfnt.c',
+    'src/smooth/smooth.c',
+    'src/truetype/truetype.c',
+    'src/type1/type1.c',
+    'src/type42/type42.c',
+    'src/winfonts/winfnt.c',
   ]
   return [os.path.normpath(p) for p in files]
 
@@ -525,12 +525,9 @@ def main():
   def cc(name, src=src, **kwargs):
     # No pch on cc because it's only ft2, and it doesn't like pch anyway (and
     # also, we have to build a separate pch so it's a bit of a mess).
-    return n.build(built(name + objext), 'cc', src(name + '.c'), **kwargs)
+    return n.build(built(name + objext), 'cc', src(name), **kwargs)
   def cxx(name, src=src, **kwargs):
-    return n.build(built(name + objext), 'cxx', src(name + '.cc'),
-                   implicit=pch_implicit, **kwargs)
-  def cpp(name, src=src, **kwargs):
-    return n.build(built(name + objext), 'cxx', src(name + '.cpp'),
+    return n.build(built(name + objext), 'cxx', src(name),
                    implicit=pch_implicit, **kwargs)
   def rc(name, src=src, **kwargs):
     return n.build(built(name + objext), 'rc', src(name + '.rc'), **kwargs)
@@ -673,41 +670,41 @@ def main():
   sg_objs = []
   n.comment('Core source files.')
   core_sources = [
-               'app_thread',
-               #'backend/backend_native_win',
-               'backend/debug_core_gdb',
-               #'backend/debug_core_native_win',
-               'backend/gdb_mi_parse',
-               'backend/gdb_to_generic_converter',
-               #'backend/process_native_win',
-               'backend/subprocess_win',
-               'cpp_lexer',
-               'debug_presenter',
-               'debug_presenter_display',
-               'display_util',
-               'lexer',
-               'lexer_state',
-               'locals_view',
-               'main_loop',
-               'render/renderer',
-               'render/scoped_render_offset',
-               'render/texture',
-               'source_files',
-               'source_view',
-               'status_bar',
-               'stack_view',
-               'ui/dockable',
-               'ui/docking_resizer',
-               'ui/docking_split_container',
-               'ui/docking_tool_window',
-               'ui/docking_workspace',
-               'ui/focus',
-               'ui/scroll_helper',
-               'ui/scrolling_output_view',
-               'ui/skin',
-               'ui/tool_window_dragger',
-               'ui/tree_view_helper',
-               'workspace',
+               'app_thread.cc',
+               #'backend/backend_native_win.cc',
+               'backend/debug_core_gdb.cc',
+               #'backend/debug_core_native_win.cc',
+               'backend/gdb_mi_parse.cc',
+               'backend/gdb_to_generic_converter.cc',
+               #'backend/process_native_win.cc',
+               'backend/subprocess_win.cc',
+               'cpp_lexer.cc',
+               'debug_presenter.cc',
+               'debug_presenter_display.cc',
+               'display_util.cc',
+               'lexer.cc',
+               'lexer_state.cc',
+               'locals_view.cc',
+               'main_loop.cc',
+               'render/renderer.cc',
+               'render/scoped_render_offset.cc',
+               'render/texture.cc',
+               'source_files.cc',
+               'source_view.cc',
+               'status_bar.cc',
+               'stack_view.cc',
+               'ui/dockable.cc',
+               'ui/docking_resizer.cc',
+               'ui/docking_split_container.cc',
+               'ui/docking_tool_window.cc',
+               'ui/docking_workspace.cc',
+               'ui/focus.cc',
+               'ui/scroll_helper.cc',
+               'ui/scrolling_output_view.cc',
+               'ui/skin.cc',
+               'ui/tool_window_dragger.cc',
+               'ui/tree_view_helper.cc',
+               'workspace.cc',
               ]
   for name in FilterForPlatform(core_sources, platform):
     sg_objs += cxx(name)
@@ -729,8 +726,7 @@ def main():
   crfiles = GetChromiumBaseFileList('third_party/base', platform)
   base_objs = []
   for name in crfiles:
-    base, ext = os.path.splitext(name)
-    base_objs += cxx(base, src=base_src)
+    base_objs += cxx(name, src=base_src)
   n.newline()
 
   libs = ['advapi32.lib',
@@ -754,11 +750,11 @@ def main():
 
   n.comment('Main executable is library plus main() and some startup goop.')
   main_objs = []
-  base_sources = ['application',
-               'render/application_window_win',
-               'render/gpu_win',
-               'render/direct2d_win',
-               'main_win'
+  base_sources = ['application.cc',
+               'render/application_window_win.cc',
+               'render/gpu_win.cc',
+               'render/direct2d_win.cc',
+               'main_win.cc',
                ]
   for base in FilterForPlatform(base_sources, platform):
     main_objs += cxx(base)
@@ -795,12 +791,12 @@ def main():
                           '-I%s' % os.path.join(path, 'include')]
 
   for name in [
-               'lexer_test',
-               #'backend/debug_core_native_win_test',
-               'backend/debug_core_gdb_test',
-               'backend/gdb_mi_parse_test',
-               'backend/subprocess_test',
-               'ui/docking_test',
+               'lexer_test.cc',
+               #'backend/debug_core_native_win_test.cc',
+               'backend/debug_core_gdb_test.cc',
+               'backend/gdb_mi_parse_test.cc',
+               'backend/subprocess_test.cc',
+               'ui/docking_test.cc',
               ]:
     test_objs += cxx(name, variables=[('cflags', test_cflags)])
 
@@ -815,7 +811,7 @@ def main():
   n.newline()
 
   reader_writer_objs = []
-  reader_writer_objs += cxx('backend/reader_writer_test') + pch_objs
+  reader_writer_objs += cxx('backend/reader_writer_test.cc') + pch_objs
   reader_writer_test = n.build(binary('reader_writer_test'), 'link',
                                inputs=reader_writer_objs,
                                implicit=pch_implicit,
