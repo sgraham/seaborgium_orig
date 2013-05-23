@@ -154,19 +154,23 @@ def FilterForPlatform(sources_list, platform):
     return filter(lambda x: not x.endswith('_win'), sources_list)
   elif platform == 'windows':
     return filter(lambda x: not x.endswith('_linux'), sources_list)
+  elif platform == 'mac':
+    return filter(lambda x: not x.endswith('_mac'), sources_list)
 
 
 def main():
   platform = 'windows'
   if sys.platform.startswith('linux'):
     platform = 'linux'
+  elif sys.platform.startswith('darwin'):
+    platform = 'mac'
 
   if platform == 'windows':
     CXX = 'cl'
     CC = 'cl'
     objext = '.obj'
     exeext = '.exe'
-  elif platform == 'linux':
+  else:
     CXX = os.environ.get('CXX', 'g++')
     CC = os.environ.get('CC', 'gcc')
     objext = '.o'
