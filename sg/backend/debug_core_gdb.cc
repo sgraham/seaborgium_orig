@@ -22,8 +22,8 @@
 #include "sg/backend/gdb_to_generic_converter.h"
 
 #ifndef NDEBUG
-static FilePath g_debug_log_path =
-    FilePath(FILE_PATH_LITERAL("gdb_log.txt"));
+static base::FilePath g_debug_log_path =
+    base::FilePath(FILE_PATH_LITERAL("gdb_log.txt"));
 #endif
 
 // Handles async reads and writes to subprocess. Read and write on the same

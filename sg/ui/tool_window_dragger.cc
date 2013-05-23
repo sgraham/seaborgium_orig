@@ -102,8 +102,7 @@ void PlaceIndicatorsAtCenter(
 ToolWindowDragger::ToolWindowDragger(
     DockingToolWindow* dragging,
     DragSetup* drag_setup)
-    : dragging_(dragging),
-      on_drop_target_(NULL),
+    : on_drop_target_(NULL),
       docking_workspace_(drag_setup->docking_workspace) {
   pick_up_offset_ = dragging->ToClient(drag_setup->screen_position);
   initial_screen_rect_ = dragging->GetScreenRect();
