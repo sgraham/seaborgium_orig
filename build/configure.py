@@ -486,8 +486,7 @@ def main():
     os.chdir(old_dir)
 
   parser = OptionParser()
-  parser.add_option('--debug', action='store_true',
-                    help='enable debugging extras',)
+  parser.add_option('-d', '--debug', action='store_true')
   (options, args) = parser.parse_args()
   if args:
     print 'ERROR: extra unparsed command-line arguments:', args
@@ -510,8 +509,6 @@ def main():
     return os.path.normpath(os.path.join('third_party', 'base', filename))
   def gwen_src(filename):
     return os.path.normpath(os.path.join('third_party', 'gwen', filename))
-  def ft2_src(filename):
-    return os.path.normpath(os.path.join('third_party', 'freetype', filename))
   def re2_src(filename):
     return os.path.normpath(os.path.join('third_party', 're2', filename))
   def built(filename):
@@ -522,10 +519,6 @@ def main():
   if pch_enabled:
     pch_implicit = pch_name
     pch_compile = '/Fp' + pch_name + ' /Yusg/global.h'
-  def cc(name, src=src, **kwargs):
-    # No pch on cc because it's only ft2, and it doesn't like pch anyway (and
-    # also, we have to build a separate pch so it's a bit of a mess).
-    return n.build(built(name + objext), 'cc', src(name), **kwargs)
   def cxx(name, src=src, **kwargs):
     return n.build(built(name + objext), 'cxx', src(name),
                    implicit=pch_implicit, **kwargs)
@@ -540,13 +533,13 @@ def main():
     os.makedirs('out')
   n.variable('builddir', 'out')
   n.variable('cxx', CXX)
-  n.variable('cc', CC)
 
   if platform == 'windows':
     cflags = ['/nologo',  # Don't print startup banner.
               '/Zi',  # Create pdb with debug info.
               '/W4',  # Highest warning level.
               '/WX',  # Warnings as errors.
+              '/FS',  # 2013 PDBs.
               '/wd4530', '/wd4100', '/wd4706', '/wd4245', '/wd4018',
               '/wd4512', '/wd4800', '/wd4702', '/wd4819', '/wd4355',
               '/wd4996', '/wd4481', '/wd4127', '/wd4310', '/wd4244',
@@ -625,20 +618,6 @@ def main():
       depfile='$out.d',
       description='CXX $out')
     n.newline()
-
-  if platform == 'windows':
-    cc_compiler = 'ninja -t msvc -o $out -- $cc /showIncludes'
-    n.rule('cc',
-      command=('%s $cflags $ccflags '
-              '-c $in /Fo$out' % cc_compiler),
-      depfile='$out.d',
-      description='CC $out')
-  else:
-    n.rule('cc',
-      command='$cc -MMD -MT $out -MF $out.d $cflags $ccflags -c $in -o $out',
-      depfile='$out.d',
-      description='CXX $out')
-  n.newline()
 
   n.rule('link',
         command='$cxx $in $libs /nologo /link $ldflags /out:$out',
