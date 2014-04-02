@@ -695,12 +695,6 @@ def main():
     re2_objs += cxx(base, src=re2_src)
   n.newline()
 
-  ft2_objs = []
-  n.comment('Freetype.')
-  for base in GetFreetypeFileList():
-    ft2_objs += cc(base, src=ft2_src)
-  n.newline()
-
   n.comment('Chromium base.')
   crfiles = GetChromiumBaseFileList('third_party/base', platform)
   base_objs = []
