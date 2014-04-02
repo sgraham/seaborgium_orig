@@ -195,7 +195,7 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
             if (handler_for_result_.find(record->token()) !=
                 handler_for_result_.end()) {
               handler_for_result_[record->token()].Run(record);
-              // TODO: Remove!
+              // TODO(scottmg): Remove!
               continue;
             }
           }
