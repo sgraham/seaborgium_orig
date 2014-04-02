@@ -507,8 +507,6 @@ def main():
     return os.path.normpath(os.path.join('sg', filename))
   def base_src(filename):
     return os.path.normpath(os.path.join('third_party', 'base', filename))
-  def gwen_src(filename):
-    return os.path.normpath(os.path.join('third_party', 'gwen', filename))
   def re2_src(filename):
     return os.path.normpath(os.path.join('third_party', 're2', filename))
   def built(filename):
@@ -553,7 +551,8 @@ def main():
               '/DDYNAMIC_ANNOTATIONS_ENABLED=0',
               '-I.', '-Ithird_party',
               '-Ithird_party/re2',
-              '-Ibuild', '-Ithird_party/freetype/include',
+              '-Ibuild',
+              '-Ithird_party/sdl2/win/include',
               '-FIsg/global.h']
     if options.debug:
       cflags += ['/D_DEBUG', '/MTd']
@@ -584,7 +583,7 @@ def main():
               '-Wno-missing-field-initializers',
               '-I.', '-Ithird_party',
               '-Ithird_party/re2',
-              '-Ibuild', '-Ithird_party/freetype/include',
+              '-Ibuild',
               '-include', 'sg/global.h',
               ]
     if options.debug:
@@ -687,7 +686,7 @@ def main():
               ]
   for name in FilterForPlatform(core_sources, platform):
     sg_objs += cxx(name)
-  n.newline() 
+  n.newline()
 
   re2_objs = []
   n.comment('RE2.')
@@ -702,20 +701,24 @@ def main():
     base_objs += cxx(name, src=base_src)
   n.newline()
 
-  libs = ['advapi32.lib',
-          'comdlg32.lib',
-          'dbghelp.lib',
-          'd2d1.lib',
-          'dwrite.lib',
-          'gdi32.lib',
-          'ole32.lib',
-          'oleaut32.lib',
-          'opengl32.lib',
-          'shell32.lib',
-          'user32.lib',
-          'version.lib',
-          'windowscodecs.lib',
-         ]
+  libs = [
+      'advapi32.lib',
+      'comdlg32.lib',
+      'd2d1.lib',
+      'dbghelp.lib',
+      'dwrite.lib',
+      'gdi32.lib',
+      'ole32.lib',
+      'oleaut32.lib',
+      'opengl32.lib',
+      'shell32.lib',
+      'third_party/sdl2/win/lib/x86/SDL2.lib',
+      'third_party/sdl2/win/lib/x86/SDL2_ttf.lib',
+      'third_party/sdl2/win/lib/x86/SDL2main.lib',
+      'user32.lib',
+      'version.lib',
+      'windowscodecs.lib',
+      ]
 
   all_targets = []
 
@@ -724,8 +727,8 @@ def main():
   n.comment('Main executable is library plus main() and some startup goop.')
   main_objs = []
   base_sources = ['application.cc',
-               'render/application_window_win.cc',
-               'render/gpu_win.cc',
+               'render/application_window_sdl.cc',
+               #'render/gpu_win.cc',
                'render/direct2d_win.cc',
                'main_win.cc',
                ]
