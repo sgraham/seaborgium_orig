@@ -719,7 +719,7 @@ def main():
 
   all_targets = []
 
-  app_objs = sg_objs + base_objs + re2_objs + ft2_objs + pch_objs
+  app_objs = sg_objs + base_objs + re2_objs + pch_objs
 
   n.comment('Main executable is library plus main() and some startup goop.')
   main_objs = []

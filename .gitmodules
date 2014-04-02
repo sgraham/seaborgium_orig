@@ -7,6 +7,3 @@
 [submodule "third_party/base"]
 	path = third_party/base
 	url = https://chromium.googlesource.com/chromium/src/base
-[submodule "third_party/freetype"]
-	path = third_party/freetype
-	url = git://git.sv.nongnu.org/freetype/freetype2.git
