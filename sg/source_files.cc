@@ -11,7 +11,7 @@ SourceFiles::~SourceFiles() {
 }
 
 void SourceFiles::SetFileData(
-    const base::FilePath& filename, int mtime, const std::string& contents) {
+    const string16& filename, int mtime, const std::string& contents) {
   SourceFileData data;
   data.filename = filename;
   data.mtime = mtime;

@@ -18,15 +18,15 @@ class SourceFiles {
   ~SourceFiles();
 
   void SetFileData(
-      const base::FilePath& filename, int mtime, const std::string& contents);
+      const string16& filename, int mtime, const std::string& contents);
 
  private:
   struct SourceFileData {
-    base::FilePath filename;
+    string16 filename;
     int mtime;
     std::string contents;
   };
-  std::map<base::FilePath, SourceFileData> files_;
+  std::map<string16, SourceFileData> files_;
 
   DISALLOW_COPY_AND_ASSIGN(SourceFiles);
 };

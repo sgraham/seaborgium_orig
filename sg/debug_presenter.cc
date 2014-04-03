@@ -9,7 +9,9 @@
 
 #include "base/bind.h"
 #include "base/command_line.h"
+#if 0
 #include "base/file_util.h"
+#endif
 #include "base/string_number_conversions.h"
 #include "base/string_util.h"
 #include "sg/app_thread.h"
@@ -115,8 +117,7 @@ void DebugPresenter::NotifyVariableExpansionStateChanged(
       base::Bind(&DebugCoreGdb::SetWatchExpanded, debug_core_, id, expanded));
 }
 
-void DebugPresenter::FileLoadCompleted(
-    base::FilePath path, std::string* result) {
+void DebugPresenter::FileLoadCompleted(string16 path, std::string* result) {
   // TODO(scottmg): mtime.
   source_files_->SetFileData(path, 0, *result);
   display_->SetFileName(path);
@@ -133,8 +134,10 @@ void DebugPresenter::SetDebugCore(base::WeakPtr<DebugCoreGdb> debug_core) {
                  debug_core, binary_, L"", std::vector<string16>(), L""));
 }
 
-void DebugPresenter::ReadFileOnFILE(base::FilePath path, std::string* result) {
+void DebugPresenter::ReadFileOnFILE(string16 path, std::string* result) {
+#if 0
   file_util::ReadFileToString(path, result);
+#endif
 }
 
 void DebugPresenter::OnStoppedAtBreakpoint(
@@ -142,7 +145,7 @@ void DebugPresenter::OnStoppedAtBreakpoint(
   std::string* result = new std::string;
   // TODO(scottmg): Need to relativize to binary location (or search in some
   // reasonable way anyway).
-  base::FilePath path(string16(L"test_data/") + data.frame.filename);
+  string16 path(string16(L"test_data/") + data.frame.filename);
   AppThread::PostTaskAndReply(AppThread::FILE, FROM_HERE,
     base::Bind(&DebugPresenter::ReadFileOnFILE,
                base::Unretained(this), path, result),

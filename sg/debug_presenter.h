@@ -50,8 +50,8 @@ class DebugPresenter : public DebugPresenterNotify,
   virtual void OnInternalDebugOutput(const string16& data) OVERRIDE;
 
  private:
-  void ReadFileOnFILE(base::FilePath path, std::string* result);
-  void FileLoadCompleted(base::FilePath path, std::string* result);
+  void ReadFileOnFILE(string16 path, std::string* result);
+  void FileLoadCompleted(string16 path, std::string* result);
 
   // On stopping, starts requests for stack, values of locals, etc.
   void UpdatePassiveDisplays();

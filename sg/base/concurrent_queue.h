@@ -16,8 +16,7 @@ class ConcurrentQueue {
  public:
   void Wait(T* item) {
     std::unique_lock<std::mutex> mlock(mutex_);
-    while (queue_.empty())
-      cond_.wait(mlock);
+    cond_.wait(mlock, [&]() { return !queue_.empty(); });
     *item = queue_.front();
     queue_.pop();
   }
@@ -25,16 +24,16 @@ class ConcurrentQueue {
   // TODO(scottmg): bool Pop(T* item) ?
 
   void Push(const T& item) {
-    std::unique_lock<std::mutex> mlock(mutex_);
+    mutex_.lock();
     queue_.push(item);
-    mlock.unlock();
+    mutex_.unlock();
     cond_.notify_one();
   }
 
   void Push(T&& item) {
-    std::unique_lock<std::mutex> mlock(mutex_);
+    mutex_.lock();
     queue_.push(std::move(item));
-    mlock.unlock();
+    mutex_.unlock();
     cond_.notify_one();
   }
 

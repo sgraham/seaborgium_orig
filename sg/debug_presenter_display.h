@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-#include "base/file_util.h"
 #include "sg/base/string16.h"
 
 class FrameData;
@@ -37,7 +36,7 @@ class DebugPresenterDisplay {
  public:
   virtual ~DebugPresenterDisplay();
 
-  virtual void SetFileName(const base::FilePath& filename) = 0;
+  virtual void SetFileName(const string16& filename) = 0;
   virtual void SetFileData(const std::string& utf8_text) = 0;
   virtual void SetProgramCounterLine(int line_number) = 0;
 
