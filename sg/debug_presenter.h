@@ -9,7 +9,6 @@
 #include <string>
 
 #include "base/basictypes.h"
-#include "base/files/file_path.h"
 #include "base/memory/weak_ptr.h"
 #include "sg/backend/backend.h"
 #include "sg/debug_presenter_notify.h"

@@ -9,9 +9,6 @@
 #include <string>
 
 #include "base/bind.h"
-#if 0
-#include "base/file_util.h"
-#endif
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop.h"

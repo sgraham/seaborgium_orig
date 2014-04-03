@@ -9,9 +9,6 @@
 
 #include "base/bind.h"
 #include "base/command_line.h"
-#if 0
-#include "base/file_util.h"
-#endif
 #include "base/string_number_conversions.h"
 #include "base/string_util.h"
 #include "sg/app_thread.h"
