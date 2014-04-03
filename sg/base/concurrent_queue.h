@@ -5,12 +5,11 @@
 #ifndef SG_BASE_CONCURRENT_QUEUE_H_
 #define SG_BASE_CONCURRENT_QUEUE_H_
 
-#include "sg/base/macros.h"
-
 #include <condition_variable>
 #include <mutex>
 #include <queue>
-#include <thread>
+
+#include "sg/base/macros.h"
 
 template <typename T>
 class ConcurrentQueue {

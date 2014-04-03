@@ -73,48 +73,6 @@ char (&ArraySizeHelper(const T (&array)[N]))[N];
 
 #define arraysize(array) (sizeof(ArraySizeHelper(array)))
 
-// ARRAYSIZE_UNSAFE performs essentially the same calculation as arraysize,
-// but can be used on anonymous types or types defined inside
-// functions.  It's less safe than arraysize as it accepts some
-// (although not all) pointers.  Therefore, you should use arraysize
-// whenever possible.
-//
-// The expression ARRAYSIZE_UNSAFE(a) is a compile-time constant of type
-// size_t.
-//
-// ARRAYSIZE_UNSAFE catches a few type errors.  If you see a compiler error
-//
-//   "warning: division by zero in ..."
-//
-// when using ARRAYSIZE_UNSAFE, you are (wrongfully) giving it a pointer.
-// You should only use ARRAYSIZE_UNSAFE on statically allocated arrays.
-//
-// The following comments are on the implementation details, and can
-// be ignored by the users.
-//
-// ARRAYSIZE_UNSAFE(arr) works by inspecting sizeof(arr) (the # of bytes in
-// the array) and sizeof(*(arr)) (the # of bytes in one array
-// element).  If the former is divisible by the latter, perhaps arr is
-// indeed an array, in which case the division result is the # of
-// elements in the array.  Otherwise, arr cannot possibly be an array,
-// and we generate a compiler error to prevent the code from
-// compiling.
-//
-// Since the size of bool is implementation-defined, we need to cast
-// !(sizeof(a) & sizeof(*(a))) to size_t in order to ensure the final
-// result has type size_t.
-//
-// This macro is not perfect as it wrongfully accepts certain
-// pointers, namely where the pointer size is divisible by the pointee
-// size.  Since all our code has to go through a 32-bit compiler,
-// where a pointer is 4 bytes, this means all pointers to a type whose
-// size is 3 or greater than 4 will be (righteously) rejected.
-
-#define ARRAYSIZE_UNSAFE(a) \
-  ((sizeof(a) / sizeof(*(a))) / \
-   static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
-
-
 // Use implicit_cast as a safe version of static_cast or const_cast
 // for upcasting in the type hierarchy (i.e. casting a pointer to Foo
 // to a pointer to SuperclassOfFoo or casting a pointer to Foo to
@@ -136,80 +94,6 @@ template<typename To, typename From>
 inline To implicit_cast(From const &f) {
   return f;
 }
-
-// The COMPILE_ASSERT macro can be used to verify that a compile time
-// expression is true. For example, you could use it to verify the
-// size of a static array:
-//
-//   COMPILE_ASSERT(ARRAYSIZE_UNSAFE(content_type_names) == CONTENT_NUM_TYPES,
-//                  content_type_names_incorrect_size);
-//
-// or to make sure a struct is smaller than a certain size:
-//
-//   COMPILE_ASSERT(sizeof(foo) < 128, foo_too_large);
-//
-// The second argument to the macro is the name of the variable. If
-// the expression is false, most compilers will issue a warning/error
-// containing the name of the variable.
-
-#undef COMPILE_ASSERT
-
-#if __cplusplus >= 201103L
-
-// Under C++11, just use static_assert.
-#define COMPILE_ASSERT(expr, msg) static_assert(expr, #msg)
-
-#else
-
-template <bool>
-struct CompileAssert {
-};
-
-#define COMPILE_ASSERT(expr, msg) \
-  typedef CompileAssert<(bool(expr))> msg[bool(expr) ? 1 : -1] ALLOW_UNUSED
-
-// Implementation details of COMPILE_ASSERT:
-//
-// - COMPILE_ASSERT works by defining an array type that has -1
-//   elements (and thus is invalid) when the expression is false.
-//
-// - The simpler definition
-//
-//     #define COMPILE_ASSERT(expr, msg) typedef char msg[(expr) ? 1 : -1]
-//
-//   does not work, as gcc supports variable-length arrays whose sizes
-//   are determined at run-time (this is gcc's extension and not part
-//   of the C++ standard).  As a result, gcc fails to reject the
-//   following code with the simple definition:
-//
-//     int foo;
-//     COMPILE_ASSERT(foo, msg); // not supposed to compile as foo is
-//                               // not a compile-time constant.
-//
-// - By using the type CompileAssert<(bool(expr))>, we ensures that
-//   expr is a compile-time constant.  (Template arguments must be
-//   determined at compile-time.)
-//
-// - The outer parentheses in CompileAssert<(bool(expr))> are necessary
-//   to work around a bug in gcc 3.4.4 and 4.0.1.  If we had written
-//
-//     CompileAssert<bool(expr)>
-//
-//   instead, these compilers will refuse to compile
-//
-//     COMPILE_ASSERT(5 > 0, some_message);
-//
-//   (They seem to think the ">" in "5 > 0" marks the end of the
-//   template argument list.)
-//
-// - The array size is (bool(expr) ? 1 : -1), instead of simply
-//
-//     ((expr) ? 1 : -1).
-//
-//   This is to avoid running into a bug in MS VC 7.1, which
-//   causes ((0.0) ? 1 : -1) to incorrectly evaluate to 1.
-
-#endif
 
 // bit_cast<Dest,Source> is a template function that implements the
 // equivalent of "*reinterpret_cast<Dest*>(&source)".  We need this in
@@ -267,7 +151,7 @@ struct CompileAssert {
 
 template <class Dest, class Source>
 inline Dest bit_cast(const Source& source) {
-  COMPILE_ASSERT(sizeof(Dest) == sizeof(Source), VerifySizesAreEqual);
+  static_assert(sizeof(Dest) == sizeof(Source), "unequal sizes");
 
   Dest dest;
   memcpy(&dest, &source, sizeof(dest));
@@ -300,6 +184,7 @@ inline void ignore_result(const T&) {
 // and invoked as
 //       static MyClass my_variable_name(base::LINKER_INITIALIZED);
 namespace base {
+
 enum LinkerInitialized { LINKER_INITIALIZED };
 
 // Use these to declare and define a static local variable (static T;) so that
@@ -308,6 +193,6 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 #define CR_DEFINE_STATIC_LOCAL(type, name, arguments) \
   static type& name = *new type arguments
 
-}  // base
+}  // namespace base
 
 #endif  // SG_BASE_MACROS_H_

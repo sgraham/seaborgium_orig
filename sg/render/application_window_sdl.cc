@@ -4,6 +4,8 @@
 
 #include "sg/render/application_window.h"
 
+#include <SDL.h>
+
 #include "base/basictypes.h"
 #include "base/bind.h"
 #include "sg/app_thread.h"
@@ -13,8 +15,6 @@
 #endif
 #include "sg/ui/input.h"
 #include "sg/workspace.h"
-
-#include "SDL.h"
 
 namespace {
 

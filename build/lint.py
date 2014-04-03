@@ -10,6 +10,7 @@ import cpplint_chromium
 src_root = os.path.normpath(os.path.join(root, 'sg'))
 os.chdir(src_root)
 extra_check_functions = [cpplint_chromium.CheckPointerDeclarationWhitespace]
+cpplint.ParseArguments(['--filter=-build/include_what_you_use', 'dummy'])
 for root, dirs, files in os.walk(src_root):
   for file in files:
     ext = os.path.splitext(file)[1]
@@ -17,5 +18,6 @@ for root, dirs, files in os.walk(src_root):
       cpplint.ProcessFile(os.path.join(root, file),
                           cpplint._cpplint_state.verbose_level,
                           extra_check_functions)
+
 
 print "Total errors found: %d\n" % cpplint._cpplint_state.error_count

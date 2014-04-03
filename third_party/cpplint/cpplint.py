@@ -2239,17 +2239,18 @@ def CheckStyle(filename, clean_lines, linenum, file_extension, class_state,
       error(filename, linenum, 'whitespace/line_length', 2,
             'Lines should be <= 80 characters long')
 
-  if (cleansed_line.count(';') > 1 and
-      # for loops are allowed two ;'s (and may run over two lines).
-      cleansed_line.find('for') == -1 and
-      (GetPreviousNonBlankLine(clean_lines, linenum)[0].find('for') == -1 or
-       GetPreviousNonBlankLine(clean_lines, linenum)[0].find(';') != -1) and
-      # It's ok to have many commands in a switch case that fits in 1 line
-      not ((cleansed_line.find('case ') != -1 or
-            cleansed_line.find('default:') != -1) and
-           cleansed_line.find('break;') != -1)):
-    error(filename, linenum, 'whitespace/newline', 4,
-          'More than one command on the same line')
+      # TODO(scottmg): Broken with lambdas.
+  #if (cleansed_line.count(';') > 1 and
+      ## for loops are allowed two ;'s (and may run over two lines).
+      #cleansed_line.find('for') == -1 and
+      #(GetPreviousNonBlankLine(clean_lines, linenum)[0].find('for') == -1 or
+       #GetPreviousNonBlankLine(clean_lines, linenum)[0].find(';') != -1) and
+      ## It's ok to have many commands in a switch case that fits in 1 line
+      #not ((cleansed_line.find('case ') != -1 or
+            #cleansed_line.find('default:') != -1) and
+           #cleansed_line.find('break;') != -1)):
+    #error(filename, linenum, 'whitespace/newline', 4,
+          #'More than one command on the same line')
 
   # Some more style checks
   CheckBraces(filename, clean_lines, linenum, error)

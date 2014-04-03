@@ -13,7 +13,7 @@ namespace {
 void PushRangeAndSleepRandomly(ConcurrentQueue<int>* q, int low, int high) {
   for (int i = low; i != high; ++i) {
     q->Push(i);
-    if ((rand() % 4) == 0)
+    if ((rand() % 4) == 0)  // NOLINT(runtime/threadsafe_fn)
       std::this_thread::sleep_for(std::chrono::seconds(0));
   }
 }

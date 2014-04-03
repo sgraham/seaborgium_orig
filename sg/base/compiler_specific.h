@@ -196,18 +196,6 @@
 // If available, it would look like:
 //   __attribute__((format(wprintf, format_param, dots_param)))
 
-// MemorySanitizer annotations.
-#if defined(MEMORY_SANITIZER) && !defined(OS_NACL)
-#include <sanitizer/msan_interface.h>
-
-// Mark a memory region fully initialized.
-// Use this to annotate code that deliberately reads uninitialized data, for
-// example a GC scavenging root set pointers from the stack.
-#define MSAN_UNPOISON(p, s)  __msan_unpoison(p, s)
-#else  // MEMORY_SANITIZER
-#define MSAN_UNPOISON(p, s)
-#endif  // MEMORY_SANITIZER
-
 // Macro useful for writing cross-platform function pointers.
 #if !defined(CDECL)
 #if defined(OS_WIN)
