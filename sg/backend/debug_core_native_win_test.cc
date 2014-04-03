@@ -8,7 +8,6 @@
 
 #include "base/at_exit.h"
 #include "base/run_loop.h"
-#include "base/synchronization/waitable_event.h"
 #include "base/task_runner_util.h"
 #include "base/threading/thread.h"
 #include "sg/backend/debug_core_native_win.h"

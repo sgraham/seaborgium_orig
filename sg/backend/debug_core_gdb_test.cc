@@ -10,7 +10,6 @@
 #include "base/memory/weak_ptr.h"
 #include "base/message_loop.h"
 #include "base/run_loop.h"
-#include "base/synchronization/waitable_event.h"
 #include "base/task_runner_util.h"
 #include "base/threading/thread.h"
 #include "base/threading/thread_restrictions.h"
