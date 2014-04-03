@@ -27,8 +27,8 @@
 #include <queue>
 
 #include "base/platform_file.h"
-#include "base/string16.h"
 #include "sg/backend/exit_status.h"
+#include "sg/base/string16.h"
 
 // Subprocess wraps a single async subprocess.  It is entirely
 // passive: it expects the caller to notify it when its fds are ready

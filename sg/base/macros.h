@@ -29,13 +29,6 @@
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
-// An older, deprecated, politically incorrect name for the above.
-// NOTE: The usage of this macro was banned from our code base, but some
-// third_party libraries are yet using it.
-// TODO(tfarina): Figure out how to fix the usage of this macro in the
-// third_party libraries and get rid of it.
-#define DISALLOW_EVIL_CONSTRUCTORS(TypeName) DISALLOW_COPY_AND_ASSIGN(TypeName)
-
 // A macro to disallow all the implicit constructors, namely the
 // default constructor, copy constructor and operator= functions.
 //
@@ -72,28 +65,6 @@ char (&ArraySizeHelper(const T (&array)[N]))[N];
 #endif
 
 #define arraysize(array) (sizeof(ArraySizeHelper(array)))
-
-// Use implicit_cast as a safe version of static_cast or const_cast
-// for upcasting in the type hierarchy (i.e. casting a pointer to Foo
-// to a pointer to SuperclassOfFoo or casting a pointer to Foo to
-// a const pointer to Foo).
-// When you use implicit_cast, the compiler checks that the cast is safe.
-// Such explicit implicit_casts are necessary in surprisingly many
-// situations where C++ demands an exact type match instead of an
-// argument type convertible to a target type.
-//
-// The From type can be inferred, so the preferred syntax for using
-// implicit_cast is the same as for static_cast etc.:
-//
-//   implicit_cast<ToType>(expr)
-//
-// implicit_cast would have been part of the C++ standard library,
-// but the proposal was submitted too late.  It will probably make
-// its way into the language in the future.
-template<typename To, typename From>
-inline To implicit_cast(From const &f) {
-  return f;
-}
 
 // bit_cast<Dest,Source> is a template function that implements the
 // equivalent of "*reinterpret_cast<Dest*>(&source)".  We need this in
@@ -157,42 +128,5 @@ inline Dest bit_cast(const Source& source) {
   memcpy(&dest, &source, sizeof(dest));
   return dest;
 }
-
-// Used to explicitly mark the return value of a function as unused. If you are
-// really sure you don't want to do anything with the return value of a function
-// that has been marked WARN_UNUSED_RESULT, wrap it with this. Example:
-//
-//   scoped_ptr<MyType> my_var = ...;
-//   if (TakeOwnership(my_var.get()) == SUCCESS)
-//     ignore_result(my_var.release());
-//
-template<typename T>
-inline void ignore_result(const T&) {
-}
-
-// The following enum should be used only as a constructor argument to indicate
-// that the variable has static storage class, and that the constructor should
-// do nothing to its state.  It indicates to the reader that it is legal to
-// declare a static instance of the class, provided the constructor is given
-// the base::LINKER_INITIALIZED argument.  Normally, it is unsafe to declare a
-// static variable that has a constructor or a destructor because invocation
-// order is undefined.  However, IF the type can be initialized by filling with
-// zeroes (which the loader does for static variables), AND the destructor also
-// does nothing to the storage, AND there are no virtual methods, then a
-// constructor declared as
-//       explicit MyClass(base::LinkerInitialized x) {}
-// and invoked as
-//       static MyClass my_variable_name(base::LINKER_INITIALIZED);
-namespace base {
-
-enum LinkerInitialized { LINKER_INITIALIZED };
-
-// Use these to declare and define a static local variable (static T;) so that
-// it is leaked so that its destructors are not called at exit. If you need
-// thread-safe initialization, use base/lazy_instance.h instead.
-#define CR_DEFINE_STATIC_LOCAL(type, name, arguments) \
-  static type& name = *new type arguments
-
-}  // namespace base
 
 #endif  // SG_BASE_MACROS_H_

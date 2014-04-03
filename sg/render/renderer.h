@@ -32,7 +32,7 @@
 #ifndef SG_RENDER_RENDERER_H_
 #define SG_RENDER_RENDERER_H_
 
-#include "base/string16.h"
+#include "sg/base/string16.h"
 #include "sg/basic_geometric_types.h"
 
 class Font;

@@ -5,7 +5,7 @@
 #ifndef SG_BACKEND_BACKEND_NATIVE_WIN_H_
 #define SG_BACKEND_BACKEND_NATIVE_WIN_H_
 
-#include "base/string16.h"
+#include "sg/base/string16.h"
 
 // Helpers shared amongst the native Windows backend.
 

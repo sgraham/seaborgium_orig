@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "base/string16.h"
+#include "sg/base/string16.h"
 #include "base/compiler_specific.h"
 #include "sg/backend/backend.h"
 #include "sg/render/font.h"

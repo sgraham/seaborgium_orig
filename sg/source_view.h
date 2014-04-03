@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "base/string16.h"
+#include "sg/base/string16.h"
 #include "sg/lexer.h"
 #include "sg/ui/dockable.h"
 #include "sg/ui/scroll_helper.h"

@@ -7,7 +7,7 @@
 
 #include "base/basictypes.h"
 #include "base/compiler_specific.h"
-#include "base/string16.h"
+#include "sg/base/string16.h"
 #include "sg/ui/dockable.h"
 
 // Renders window decoration, handles drag/re-dock interaction.

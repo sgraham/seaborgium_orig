@@ -13,13 +13,13 @@
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop.h"
-#include "base/string16.h"
 #include "base/string_number_conversions.h"
 #include "base/string_util.h"
 #include "base/utf_string_conversions.h"
 #include "sg/app_thread.h"
 #include "sg/backend/gdb_mi_parse.h"
 #include "sg/backend/gdb_to_generic_converter.h"
+#include "sg/base/string16.h"
 
 #ifndef NDEBUG
 static base::FilePath g_debug_log_path =

@@ -6,7 +6,7 @@
 #define SG_UI_SCROLL_HELPER_H_
 
 #include "base/bind.h"
-#include "base/string16.h"
+#include "sg/base/string16.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/input.h"
 

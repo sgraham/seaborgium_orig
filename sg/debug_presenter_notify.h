@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include "base/string16.h"
+#include "sg/base/string16.h"
 #include "sg/ui/input.h"
 
 // Notification from view back up to presenter.
