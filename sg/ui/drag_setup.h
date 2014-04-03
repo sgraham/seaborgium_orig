@@ -5,6 +5,8 @@
 #ifndef SG_UI_DRAG_SETUP_H_
 #define SG_UI_DRAG_SETUP_H_
 
+#include <memory>
+
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/drag_direction.h"
 
@@ -26,7 +28,7 @@ class DragSetup {
 
   // Filled out by drag initiator:
   DragDirection drag_direction;
-  scoped_ptr<Draggable>* draggable;
+  std::unique_ptr<Draggable>* draggable;
 };
 
 #endif  // SG_UI_DRAG_SETUP_H_

@@ -17,10 +17,11 @@
 #include "sg/backend/subprocess.h"
 
 #include <stdio.h>
+
 #include <algorithm>
+#include <memory>
 
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/stringprintf.h"
 #include "base/utf_string_conversions.h"
 
@@ -143,7 +144,7 @@ bool Subprocess::Start(
 
   // CreateProcessW can modify input buffer so we have to make a copy here.
   string16 combined = application + L" " + command_line;
-  scoped_ptr<char16[]> command_copy(new char16[combined.size() + 1]);
+  std::unique_ptr<char16[]> command_copy(new char16[combined.size() + 1]);
   combined.copy(command_copy.get(), combined.size());
   command_copy[combined.size()] = 0;
 

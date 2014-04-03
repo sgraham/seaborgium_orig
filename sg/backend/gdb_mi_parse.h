@@ -5,11 +5,11 @@
 #ifndef SG_BACKEND_GDB_MI_PARSE_H_
 #define SG_BACKEND_GDB_MI_PARSE_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/string_piece.h"
 #include "base/values.h"
 
@@ -42,7 +42,7 @@ class GdbRecordResult {
   base::Value* release_value() { return value_.release(); }
 
   std::string variable_;
-  scoped_ptr<base::Value> value_;
+  std::unique_ptr<base::Value> value_;
 
   DISALLOW_COPY_AND_ASSIGN(GdbRecordResult);
 };

@@ -5,7 +5,6 @@
 #include "sg/ui/tree_view_helper.h"
 
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "sg/render/renderer.h"
 #include "sg/render/scoped_render_offset.h"
 #include "sg/ui/skin.h"

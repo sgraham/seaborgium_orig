@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
+
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/time.h"
@@ -9,11 +11,11 @@
 #include "sg/main_loop.h"
 
 int RunMain(HINSTANCE instance) {
-  scoped_ptr<MainLoop> main_loop(new MainLoop);
+  std::unique_ptr<MainLoop> main_loop(new MainLoop);
   main_loop->Init();
   main_loop->MainMessageLoopStart();
   main_loop->CreateThreads();
-  scoped_ptr<Application> app(new Application);
+  std::unique_ptr<Application> app(new Application);
   main_loop->MainMessageLoopRun();
   main_loop->ShutdownThreadsAndCleanUp();
   app.reset();

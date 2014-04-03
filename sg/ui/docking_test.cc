@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
 #include <string>
 
 #include "base/string_util.h"
@@ -265,7 +266,7 @@ TEST_F(DockingTest, AddAndRelease) {
   EXPECT_EQ(root->right(), pane);
   EXPECT_EQ("502,0 498x1000", RectAsString(root->right()->GetScreenRect()));
 
-  scoped_ptr<Dockable> result(pane->parent()->ReleaseChild(pane));
+  std::unique_ptr<Dockable> result(pane->parent()->ReleaseChild(pane));
   EXPECT_EQ(NULL, result->parent());
   EXPECT_FALSE(workspace.GetRoot()->IsContainer());
   EXPECT_EQ(main, workspace.GetRoot());

@@ -6,6 +6,8 @@
 
 #include <ctype.h>
 
+#include <memory>
+
 #include "base/logging.h"
 #include "base/utf_string_conversions.h"
 #include "base/values.h"
@@ -52,7 +54,7 @@ GdbRecord* GdbMiParser::Parse(
   error_ = false;
   error_index_ = 0;
 
-  scoped_ptr<GdbRecord> record(DetermineTypeAndMakeRecord());
+  std::unique_ptr<GdbRecord> record(DetermineTypeAndMakeRecord());
   if (error_)
     return NULL;
 
@@ -268,7 +270,7 @@ std::string GdbMiParser::ConsumeIdentifier() {
 }
 
 GdbRecordResult* GdbMiParser::ConsumeResult() {
-  scoped_ptr<GdbRecordResult> result(new GdbRecordResult);
+  std::unique_ptr<GdbRecordResult> result(new GdbRecordResult);
   result->set_variable(ConsumeIdentifier());
   if (error_ || !CanConsume(1) || *pos_++ != '=') {
     ReportError();
@@ -303,13 +305,13 @@ base::DictionaryValue* GdbMiParser::ConsumeTuple() {
   DCHECK(CanConsume(1));
   DCHECK_EQ('{', *pos_);  // This is verified in ConsumeValue.
   pos_++;
-  scoped_ptr<base::DictionaryValue> result(new base::DictionaryValue);
+  std::unique_ptr<base::DictionaryValue> result(new base::DictionaryValue);
   while (CanConsume(1)) {
     if (*pos_ == '}') {
       ++pos_;
       return result.release();
     }
-    scoped_ptr<GdbRecordResult> sub_result(ConsumeResult());
+    std::unique_ptr<GdbRecordResult> sub_result(ConsumeResult());
     if (error_)
       break;
     result->SetWithoutPathExpansion(
@@ -324,7 +326,7 @@ base::ListValue* GdbMiParser::ConsumeList() {
   DCHECK(CanConsume(1));
   DCHECK_EQ('[', *pos_);  // This is verified in ConsumeValue.
   pos_++;
-  scoped_ptr<base::ListValue> result(new base::ListValue);
+  std::unique_ptr<base::ListValue> result(new base::ListValue);
   while (CanConsume(1)) {
     if (*pos_ == ']') {
       ++pos_;
@@ -335,14 +337,14 @@ base::ListValue* GdbMiParser::ConsumeList() {
     if (IsIdentifierChar(*pos_)) {
       // We know it must be an identifier, so it's the beginning of an
       // "identifier=value".
-      scoped_ptr<GdbRecordResult> sub_result(ConsumeResult());
+      std::unique_ptr<GdbRecordResult> sub_result(ConsumeResult());
       // TODO(scottmg): Possibly get rid of GdbRecordResult and make it an
       // untyped DictionaryValue?
-      scoped_ptr<base::DictionaryValue> converted(new base::DictionaryValue);
+      std::unique_ptr<base::DictionaryValue> converted(new base::DictionaryValue);
       converted->Set(sub_result->variable(), sub_result->release_value());
       result->Append(converted.release());
     } else {
-      scoped_ptr<Value> value(ConsumeValue());
+      std::unique_ptr<Value> value(ConsumeValue());
       if (error_)
         break;
       result->Append(value.release());
@@ -408,10 +410,10 @@ GdbOutput* GdbMiReader::Parse(
     // See test GdbMiParse.IncrementalWithMultibyteLineEnding.
     remaining = base::StringPiece(remaining.data() + 1, remaining.size() - 1);
   }
-  scoped_ptr<GdbOutput> result(new GdbOutput);
+  std::unique_ptr<GdbOutput> result(new GdbOutput);
   for (;;) {
     int consumed = 0;
-    scoped_ptr<GdbRecord> record(parser_.Parse(remaining, &consumed));
+    std::unique_ptr<GdbRecord> record(parser_.Parse(remaining, &consumed));
     if (!record.get()) {
       if (bytes_consumed)
         *bytes_consumed = 0;

@@ -6,11 +6,11 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "base/bind.h"
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/message_loop.h"
 #include "base/string_number_conversions.h"
 #include "base/string_util.h"
@@ -79,7 +79,7 @@ class ReaderWriter : public MessageLoopForIO::IOHandler {
     memset(read_state_.buffer, 0xcc, sizeof(read_state_.buffer));
 #endif
     int bytes_consumed;
-    scoped_ptr<GdbOutput> output(
+    std::unique_ptr<GdbOutput> output(
         gdb_mi_reader_.Parse(unused_read_data_, &bytes_consumed));
     if (output.get()) {
 #ifndef NDEBUG

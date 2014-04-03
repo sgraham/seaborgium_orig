@@ -5,7 +5,8 @@
 #ifndef SG_UI_DOCKING_SPLIT_CONTAINER_H_
 #define SG_UI_DOCKING_SPLIT_CONTAINER_H_
 
-#include "base/memory/scoped_ptr.h"
+#include <memory>
+
 #include "sg/ui/dockable.h"
 
 enum DockingSplitDirection {
@@ -67,8 +68,8 @@ class DockingSplitContainer : public Dockable {
 
   // Named left/right for simplicity, but "left" is also "top" if the split is
   // horizontal rather than vertical.
-  scoped_ptr<Dockable> left_;
-  scoped_ptr<Dockable> right_;
+  std::unique_ptr<Dockable> left_;
+  std::unique_ptr<Dockable> right_;
 };
 
 #endif  // SG_UI_DOCKING_SPLIT_CONTAINER_H_

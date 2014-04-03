@@ -6,6 +6,8 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+
 #include "sg/cpp_lexer.h"
 #include "sg/lexer_state.h"
 
@@ -64,7 +66,7 @@ TEST(Lexer, IniFile) {
 }
 
 TEST(Lexer, BasicCpp) {
-  scoped_ptr<Lexer> lexer(MakeCppLexer());
+  std::unique_ptr<Lexer> lexer(MakeCppLexer());
 
   std::vector<Token> tokens;
   lexer->GetTokensUnprocessed("int foo;", &tokens);
@@ -84,7 +86,7 @@ TEST(Lexer, BasicCpp) {
 }
 
 TEST(Lexer, CppIf0) {
-  scoped_ptr<Lexer> lexer(MakeCppLexer());
+  std::unique_ptr<Lexer> lexer(MakeCppLexer());
 
   std::vector<Token> tokens;
   lexer->GetTokensUnprocessed("#if 0\nthis is some stuff\n#endif\n", &tokens);
@@ -96,7 +98,7 @@ TEST(Lexer, CppIf0) {
 }
 
 TEST(Lexer, CppNumbers) {
-  scoped_ptr<Lexer> lexer(MakeCppLexer());
+  std::unique_ptr<Lexer> lexer(MakeCppLexer());
 
   std::vector<Token> tokens;
   lexer->GetTokensUnprocessed(

@@ -5,9 +5,9 @@
 #ifndef SG_BACKEND_PROCESS_NATIVE_WIN_H_
 #define SG_BACKEND_PROCESS_NATIVE_WIN_H_
 
+#include <memory>
 #include <vector>
 
-#include "base/memory/scoped_ptr.h"
 #include "sg/backend/backend.h"
 
 class DebugConnectionNativeWin;
@@ -38,7 +38,7 @@ class ProcessNativeWin : public Process {
   void DebugEventLoop();
 
  private:
-  scoped_ptr<base::Thread> event_loop_thread_;
+  std::unique_ptr<base::Thread> event_loop_thread_;
 };
 
 #endif  // SG_BACKEND_PROCESS_NATIVE_WIN_H_

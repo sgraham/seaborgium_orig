@@ -23,7 +23,7 @@ namespace {
 
 // TODO(scottmg): Losing last line if doesn't end in \n.
 void SyntaxHighlight(const std::string& input, std::vector<Line>* lines) {
-  scoped_ptr<Lexer> lexer(MakeCppLexer());
+  std::unique_ptr<Lexer> lexer(MakeCppLexer());
   std::vector<Token> tokens;
   lexer->GetTokensUnprocessed(input, &tokens);
   Line current_line;

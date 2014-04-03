@@ -5,8 +5,9 @@
 #ifndef SG_MAIN_LOOP_H_
 #define SG_MAIN_LOOP_H_
 
+#include <memory>
+
 #include "base/basictypes.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/message_loop.h"
 
 class AppThread;
@@ -24,15 +25,15 @@ class MainLoop {
   int GetResultCode();
 
  private:
-  scoped_ptr<MessageLoop> main_message_loop_;
-  scoped_ptr<AppThread> main_thread_;
+  std::unique_ptr<MessageLoop> main_message_loop_;
+  std::unique_ptr<AppThread> main_thread_;
 
   int result_code_;
 
   // Members initialized in |RunMainMessageLoopParts()|
-  scoped_ptr<AppThread> file_thread_;
-  scoped_ptr<AppThread> backend_thread_;
-  scoped_ptr<AppThread> aux_thread_;
+  std::unique_ptr<AppThread> file_thread_;
+  std::unique_ptr<AppThread> backend_thread_;
+  std::unique_ptr<AppThread> aux_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(MainLoop);
 };

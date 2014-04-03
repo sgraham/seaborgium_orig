@@ -5,6 +5,7 @@
 #ifndef SG_WORKSPACE_H_
 #define SG_WORKSPACE_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -75,7 +76,7 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
  private:
   void InvalidateImpl();
 
-  scoped_ptr<DockingWorkspace> main_area_;
+  std::unique_ptr<DockingWorkspace> main_area_;
   StatusBar* status_bar_;
 
   SourceView* source_view_;
@@ -94,7 +95,7 @@ class Workspace : public DebugPresenterDisplay, public InputHandler {
   ApplicationWindow* delegate_;
   DebugPresenterNotify* debug_presenter_notify_;
 
-  scoped_ptr<Draggable> draggable_;
+  std::unique_ptr<Draggable> draggable_;
 
   Point mouse_position_;
 };

@@ -6,8 +6,9 @@
 
 #include <windows.h>
 
+#include <memory>
+
 #include "base/logging.h"
-#include "base/memory/scoped_ptr.h"
 #include "sg/backend/backend_native_win.h"
 #include "sg/backend/process_native_win.h"
 #include "sg/base/string16.h"
@@ -27,7 +28,8 @@ void DebugCoreNativeWin::ProcessStart(
   DCHECK_EQ(0, environment.size()) << "todo;";
 
   // CreateProcessW can modify input buffer so we have to make a copy here.
-  scoped_ptr<char16[]> command_line_copy(new char16[command_line.size() + 1]);
+  std::unique_ptr<char16[]> command_line_copy(
+      new char16[command_line.size() + 1]);
   command_line.copy(command_line_copy.get(), command_line.size());
   command_line_copy[command_line.size()] = 0;
 

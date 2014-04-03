@@ -5,9 +5,9 @@
 #ifndef SG_UI_DOCKING_WORKSPACE_H_
 #define SG_UI_DOCKING_WORKSPACE_H_
 
+#include <memory>
 #include <vector>
 
-#include "base/memory/scoped_ptr.h"
 #include "sg/ui/dockable.h"
 #include "sg/ui/drag_direction.h"
 
@@ -38,7 +38,7 @@ class DockingWorkspace {
  private:
   void GetDockTargets(Dockable* root, std::vector<Dockable*>* into);
 
-  scoped_ptr<DockingSplitContainer> root_;
+  std::unique_ptr<DockingSplitContainer> root_;
 };
 
 #endif  // SG_UI_DOCKING_WORKSPACE_H_

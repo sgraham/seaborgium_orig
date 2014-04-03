@@ -4,6 +4,8 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+
 #include "base/at_exit.h"
 #include "base/run_loop.h"
 #include "base/synchronization/waitable_event.h"
@@ -34,7 +36,7 @@ class DebugCoreNativeWinTest : public testing::Test {
   }
 
   DebugCoreNativeWin* debug_core_;
-  scoped_ptr<base::Thread> debug_thread_;
+  std::unique_ptr<base::Thread> debug_thread_;
 };
 
 TEST_F(DebugCoreNativeWinTest, DISABLED_StartAndKillImmediately) {

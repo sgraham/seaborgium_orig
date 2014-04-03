@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "base/basictypes.h"
-#include "base/memory/scoped_ptr.h"
 #include "sg/lexer.h"
 #include "re2/re2.h"
 

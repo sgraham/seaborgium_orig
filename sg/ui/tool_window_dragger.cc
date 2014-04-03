@@ -188,7 +188,7 @@ void ToolWindowDragger::Render(Renderer* renderer) {
   // TODO(rendering): Not much practical reason to re-render this every frame
   // during drag. Investigate if it makes anything snappier if it's cached
   // after the first render.
-  scoped_ptr<RenderToTextureRenderer> render_to_texture_renderer(
+  std::unique_ptr<RenderToTextureRenderer> render_to_texture_renderer(
       renderer->CreateRenderToTextureRenderer(
           dragging_->GetScreenRect().w,
           dragging_->GetScreenRect().h));

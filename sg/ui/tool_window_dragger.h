@@ -5,9 +5,9 @@
 #ifndef SG_UI_TOOL_WINDOW_DRAGGER_H_
 #define SG_UI_TOOL_WINDOW_DRAGGER_H_
 
+#include <memory>
 #include <vector>
 
-#include "base/memory/scoped_ptr.h"
 #include "sg/base/compiler_specific.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/docking_split_container.h"
@@ -44,7 +44,7 @@ class ToolWindowDragger : public Draggable {
  private:
   void RefreshTargets();
 
-  scoped_ptr<DockingToolWindow> dragging_;
+  std::unique_ptr<DockingToolWindow> dragging_;
   Point pick_up_offset_;
   Point current_position_;
   Rect initial_screen_rect_;

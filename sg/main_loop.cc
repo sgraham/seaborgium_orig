@@ -4,6 +4,8 @@
 
 #include "sg/main_loop.h"
 
+#include <memory>
+
 #include "base/logging.h"
 #include "base/run_loop.h"
 #include "base/threading/thread_restrictions.h"
@@ -57,7 +59,7 @@ void MainLoop::CreateThreads() {
   for (size_t thread_id = AppThread::UI + 1;
        thread_id < AppThread::ID_COUNT;
        ++thread_id) {
-    scoped_ptr<AppThread>* thread_to_start = NULL;
+    std::unique_ptr<AppThread>* thread_to_start = NULL;
     base::Thread::Options* options = &default_options;
 
     switch (thread_id) {
@@ -118,7 +120,7 @@ void MainLoop::ShutdownThreadsAndCleanUp() {
     //
     // The destruction order is the reverse order of occurrence in the
     // AppThread::ID list.
-    scoped_ptr<AppThread>* thread_to_stop = NULL;
+    std::unique_ptr<AppThread>* thread_to_stop = NULL;
     switch (thread_id) {
       case AppThread::FILE:
         thread_to_stop = &file_thread_;

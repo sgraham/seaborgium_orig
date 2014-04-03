@@ -4,6 +4,8 @@
 
 #include "sg/ui/docking_split_container.h"
 
+#include <memory>
+
 #include "base/logging.h"
 #include "sg/render/renderer.h"
 #include "sg/render/scoped_render_offset.h"
@@ -37,7 +39,7 @@ DockingSplitContainer::~DockingSplitContainer() {
 
 void DockingSplitContainer::SplitChild(
     DockingSplitDirection direction, Dockable* left, Dockable* right) {
-  scoped_ptr<Dockable>* to_replace;
+  std::unique_ptr<Dockable>* to_replace;
   if (left_.get() == left || left_.get() == right) {
     to_replace = &left_;
   } else {

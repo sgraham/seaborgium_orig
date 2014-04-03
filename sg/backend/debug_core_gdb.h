@@ -5,6 +5,7 @@
 #ifndef SG_BACKEND_DEBUG_CORE_GDB_H_
 #define SG_BACKEND_DEBUG_CORE_GDB_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -89,7 +90,7 @@ class DebugCoreGdb : public base::NonThreadSafe,
 
   DebugNotification* debug_notification_;
   Subprocess gdb_;
-  scoped_ptr<ReaderWriter> reader_writer_;
+  std::unique_ptr<ReaderWriter> reader_writer_;
   int64 token_;
 
   DISALLOW_COPY_AND_ASSIGN(DebugCoreGdb);

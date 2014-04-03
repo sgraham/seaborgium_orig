@@ -5,8 +5,9 @@
 #ifndef SG_APPLICATION_H_
 #define SG_APPLICATION_H_
 
+#include <memory>
+
 #include "base/basictypes.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "sg/backend/backend.h"
 
@@ -25,10 +26,10 @@ class Application {
   virtual ~Application();
 
  private:
-  scoped_ptr<SourceFiles> source_files_;
-  scoped_ptr<ApplicationWindow> main_window_;
-  scoped_ptr<Workspace> workspace_;
-  scoped_ptr<DebugPresenter> presenter_;
+  std::unique_ptr<SourceFiles> source_files_;
+  std::unique_ptr<ApplicationWindow> main_window_;
+  std::unique_ptr<Workspace> workspace_;
+  std::unique_ptr<DebugPresenter> presenter_;
   base::WeakPtr<DebugCoreGdb> debug_core_;
 
   void ConnectDebugCore(base::WeakPtr<DebugCoreGdb> debug_core);
