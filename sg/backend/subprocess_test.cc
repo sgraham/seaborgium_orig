@@ -21,7 +21,6 @@
 #include "base/bind.h"
 #include "base/message_loop.h"
 #include "base/threading/thread.h"
-#include "base/time.h"
 
 TEST(SubprocessTest, SpawnSuccessfully) {
   Subprocess subproc;

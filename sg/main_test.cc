@@ -5,14 +5,12 @@
 #include "gtest/gtest.h"
 
 #include "base/at_exit.h"
-#include "base/time.h"
 
 GTEST_API_ int main(int argc, char **argv) {
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
   _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
 
   base::AtExitManager exit_manager;
-  base::Time::EnableHighResolutionTimer(true);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
