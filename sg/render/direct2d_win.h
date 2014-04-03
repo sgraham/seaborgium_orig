@@ -38,7 +38,7 @@
 #include <wincodec.h>
 #include <list>
 
-#include "base/compiler_specific.h"
+#include "sg/base/compiler_specific.h"
 #include "sg/base/string16.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/render/renderer.h"

@@ -6,7 +6,7 @@
 #define SG_UI_DOCKING_TOOL_WINDOW_H_
 
 #include "base/basictypes.h"
-#include "base/compiler_specific.h"
+#include "sg/base/compiler_specific.h"
 #include "sg/base/string16.h"
 #include "sg/ui/dockable.h"
 

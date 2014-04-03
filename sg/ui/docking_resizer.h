@@ -5,7 +5,7 @@
 #ifndef SG_UI_DOCKING_RESIZER_H_
 #define SG_UI_DOCKING_RESIZER_H_
 
-#include "base/compiler_specific.h"
+#include "sg/base/compiler_specific.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/draggable.h"
 
