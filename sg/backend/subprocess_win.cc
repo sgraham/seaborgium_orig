@@ -32,7 +32,7 @@ Subprocess::~Subprocess() {
   if (input_pipe_)
     CHECK(CloseHandle(input_pipe_)) << "CloseHandle input";
   if (output_pipe_)
-  CHECK(CloseHandle(output_pipe_)) << "CloseHandle output";
+    CHECK(CloseHandle(output_pipe_)) << "CloseHandle output";
   // Reap child if forgotten.
   if (child_)
     Finish();

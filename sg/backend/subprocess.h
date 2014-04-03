@@ -26,8 +26,8 @@
 #include <vector>
 #include <queue>
 
-#include "base/platform_file.h"
 #include "sg/backend/exit_status.h"
+#include "sg/base/platform_file.h"
 #include "sg/base/string16.h"
 
 // Subprocess wraps a single async subprocess.  It is entirely
@@ -65,7 +65,6 @@ class Subprocess {
   void Init();
 
 #ifdef _WIN32
-
   HANDLE child_;
   HANDLE input_pipe_;
   HANDLE output_pipe_;
