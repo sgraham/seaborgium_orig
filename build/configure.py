@@ -612,6 +612,7 @@ def main():
                'backend/gdb_to_generic_converter.cc',
                #'backend/process_native_win.cc',
                'backend/subprocess_win.cc',
+               'basex/message_loop.cc',
                'cpp_lexer.cc',
                'debug_presenter.cc',
                'debug_presenter_display.cc',
@@ -728,7 +729,8 @@ def main():
                'backend/debug_core_gdb_test.cc',
                'backend/gdb_mi_parse_test.cc',
                'backend/subprocess_test.cc',
-               'base/concurrent_queue_test.cc',
+               'basex/concurrent_queue_test.cc',
+               'basex/message_loop_test.cc',
                'ui/docking_test.cc',
               ]:
     test_objs += cxx(name, variables=[('cflags', test_cflags)])

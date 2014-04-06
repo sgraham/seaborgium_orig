@@ -11,7 +11,7 @@
 #include "base/logging.h"
 #include "sg/backend/backend_native_win.h"
 #include "sg/backend/process_native_win.h"
-#include "sg/base/string16.h"
+#include "sg/basex/string16.h"
 #include "sg/debug_presenter_notify.h"
 
 DebugCoreNativeWin::DebugCoreNativeWin() {

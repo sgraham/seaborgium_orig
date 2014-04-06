@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "sg/backend/backend.h"
-#include "sg/base/string16.h"
+#include "sg/basex/string16.h"
 #include "sg/debug_presenter_display.h"
 #include "sg/render/font.h"
 #include "sg/ui/dockable.h"

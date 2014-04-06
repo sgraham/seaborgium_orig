@@ -5,7 +5,7 @@
 #ifndef SG_STATUS_BAR_H_
 #define SG_STATUS_BAR_H_
 
-#include "sg/base/string16.h"
+#include "sg/basex/string16.h"
 
 class Renderer;
 class Skin;

@@ -9,7 +9,7 @@
 #include <mutex>
 #include <queue>
 
-#include "sg/base/macros.h"
+#include "sg/basex/macros.h"
 
 template <typename T>
 class ConcurrentQueue {

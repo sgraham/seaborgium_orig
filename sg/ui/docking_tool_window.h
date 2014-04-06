@@ -6,8 +6,8 @@
 #define SG_UI_DOCKING_TOOL_WINDOW_H_
 
 #include "base/basictypes.h"
-#include "sg/base/compiler_specific.h"
-#include "sg/base/string16.h"
+#include "sg/basex/compiler_specific.h"
+#include "sg/basex/string16.h"
 #include "sg/ui/dockable.h"
 
 // Renders window decoration, handles drag/re-dock interaction.

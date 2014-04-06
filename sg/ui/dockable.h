@@ -6,7 +6,7 @@
 #define SG_UI_DOCKABLE_H_
 
 #include "base/basictypes.h"
-#include "sg/base/compiler_specific.h"
+#include "sg/basex/compiler_specific.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/drag_setup.h"
 #include "sg/ui/input.h"

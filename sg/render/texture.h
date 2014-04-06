@@ -5,7 +5,7 @@
 #ifndef SG_RENDER_TEXTURE_H_
 #define SG_RENDER_TEXTURE_H_
 
-#include "sg/base/string16.h"
+#include "sg/basex/string16.h"
 
 class Renderer;
 

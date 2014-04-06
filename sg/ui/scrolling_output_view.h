@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "sg/base/string16.h"
+#include "sg/basex/string16.h"
 #include "sg/ui/dockable.h"
 #include "sg/ui/scroll_helper.h"
 

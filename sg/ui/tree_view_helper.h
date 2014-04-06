@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "sg/base/string16.h"
+#include "sg/basex/string16.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/input.h"
 class Font;

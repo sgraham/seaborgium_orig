@@ -9,7 +9,7 @@
 #include <string>
 
 #include "base/basictypes.h"
-#include "sg/base/string16.h"
+#include "sg/basex/string16.h"
 
 // Model for source code.
 class SourceFiles {

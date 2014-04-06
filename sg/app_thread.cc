@@ -11,7 +11,7 @@
 #include "base/message_loop.h"
 #include "base/message_loop_proxy.h"
 #include "base/threading/thread_restrictions.h"
-#include "sg/base/compiler_specific.h"
+#include "sg/basex/compiler_specific.h"
 
 namespace {
 

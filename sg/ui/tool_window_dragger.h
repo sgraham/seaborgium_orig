@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "sg/base/compiler_specific.h"
+#include "sg/basex/compiler_specific.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/ui/docking_split_container.h"
 #include "sg/ui/draggable.h"

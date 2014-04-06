@@ -5,7 +5,7 @@
 #ifndef SG_DISPLAY_UTIL_H_
 #define SG_DISPLAY_UTIL_H_
 
-#include "sg/base/string16.h"
+#include "sg/basex/string16.h"
 
 string16 TidyTypeName(const string16& type);
 string16 ToPlatformFileAndLine(const string16& filename, int line_number);

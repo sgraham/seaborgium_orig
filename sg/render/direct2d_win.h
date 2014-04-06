@@ -38,8 +38,8 @@
 #include <wincodec.h>
 #include <list>
 
-#include "sg/base/compiler_specific.h"
-#include "sg/base/string16.h"
+#include "sg/basex/compiler_specific.h"
+#include "sg/basex/string16.h"
 #include "sg/basic_geometric_types.h"
 #include "sg/render/renderer.h"
 

@@ -18,7 +18,7 @@
 #include "sg/app_thread.h"
 #include "sg/backend/gdb_mi_parse.h"
 #include "sg/backend/gdb_to_generic_converter.h"
-#include "sg/base/string16.h"
+#include "sg/basex/string16.h"
 
 #ifndef NDEBUG
 #if 0
